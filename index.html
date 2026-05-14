@@ -450,6 +450,7 @@
                 tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
                 tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
                 startCamera();
+                renderAdminPendingTickets();
             } else {
                 scannerSec.classList.add('hidden');
                 invSec.classList.remove('hidden');
@@ -463,13 +464,25 @@
         // --- MANAJEMEN KAMERA QR CODE ---
         const startCamera = () => {
             if (html5QrcodeScanner) return; 
-            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
-            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            
+            // Jeda 300ms agar animasi halaman selesai sebelum kamera menyala (mencegah error macet)
+            setTimeout(() => {
+                try {
+                    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+                } catch (e) {
+                    console.error("Gagal menyalakan scanner:", e);
+                }
+            }, 300);
         };
 
         const stopCamera = () => {
             if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(e => console.error(e));
+                try {
+                    html5QrcodeScanner.clear();
+                } catch(e) {
+                    console.error("Gagal mematikan scanner:", e);
+                }
                 html5QrcodeScanner = null;
             }
         };
@@ -691,11 +704,20 @@
                 currentUser = { role: 'admin', id: 'Admin Lab RES' };
                 document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
                 showScreen('adminDashboardScreen');
+                
+                // Pastikan fungsi ini dipanggil untuk memunculkan tabel dan tiket
+                renderAdminPendingTickets();
+                renderAdminInventory();
+                
                 showToast('Login berhasil sebagai Admin');
             } else {
                 currentUser = { role: 'student', id: nim };
                 document.getElementById('userNameDisplay').innerText = `Mahasiswa (${nim})`;
                 showScreen('dashboardScreen');
+                
+                // Pastikan fungsi ini dipanggil untuk memunculkan kotak alat
+                renderCatalog();
+                
                 showToast(`Selamat datang, ${nim}`);
             }
         };
