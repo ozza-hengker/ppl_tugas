@@ -32,9 +32,9 @@
             --bg-light: #EEF4FA;
             --glass: rgba(255,255,255,0.7);
         }
- 
+
         * { box-sizing: border-box; }
- 
+
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg-light);
@@ -43,25 +43,24 @@
                 radial-gradient(ellipse 60% 50% at 85% 110%, rgba(23, 107, 158, 0.10) 0%, transparent 55%);
             min-height: 100vh;
         }
- 
+
         h1, h2, h3 { font-family: 'Sora', sans-serif; }
- 
+
         /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 99px; }
- 
+
         /* ── ANIMATIONS ── */
         @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
         @keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(44,163,209,0.4); } 50% { box-shadow: 0 0 0 12px rgba(44,163,209,0); } }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
- 
+
         .fade-up { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.2) both; }
         .fade-in { animation: fadeIn 0.3s ease both; }
         .float-anim { animation: float 3.5s ease-in-out infinite; }
- 
+
         /* ── GLASSMORPHISM CARD ── */
         .glass-card {
             background: rgba(255,255,255,0.82);
@@ -70,37 +69,37 @@
             border: 1px solid rgba(255,255,255,0.6);
             box-shadow: 0 8px 40px rgba(23,107,158,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
         }
- 
+
         /* ── LOGIN SCREEN ── */
         #loginScreen { background: transparent; }
- 
+
         .login-card {
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(24px);
             border: 1.5px solid rgba(44,163,209,0.18);
             box-shadow: 0 24px 80px rgba(23,107,158,0.14), 0 2px 0 rgba(255,255,255,1) inset;
         }
- 
+
         .logo-glow {
             filter: drop-shadow(0 0 16px rgba(44,163,209,0.5));
         }
         .logo-container {
             animation: float 3.5s ease-in-out infinite;
         }
- 
+
         /* ── NAVBAR ── */
         .navbar-student {
             background: linear-gradient(135deg, #0e4267 0%, #176B9E 50%, #2CA3D1 100%);
             border-bottom: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 4px 24px rgba(14,66,103,0.25);
         }
- 
+
         .navbar-admin {
             background: #0a1628;
             border-bottom: 1px solid rgba(44,163,209,0.2);
             box-shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
- 
+
         /* ── CATALOG CARDS ── */
         .tool-card {
             background: rgba(255,255,255,0.92);
@@ -113,7 +112,7 @@
             box-shadow: 0 16px 40px rgba(23,107,158,0.16);
             border-color: rgba(44,163,209,0.3);
         }
- 
+
         /* ── GRADIENT TEXT ── */
         .text-gradient {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -121,7 +120,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
- 
+
         /* ── BADGE PILL ── */
         .badge-stock {
             background: linear-gradient(135deg, #d1fadf, #a7f3c4);
@@ -133,36 +132,42 @@
             color: #991b1b;
             border: 1px solid #fca5a5;
         }
- 
+
         /* ── ADMIN DARK CARD ── */
         .admin-card {
             background: #0f1e33;
             border: 1px solid rgba(44,163,209,0.15);
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
- 
+
         /* ── BUTTON STYLES ── */
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             box-shadow: 0 4px 16px rgba(44,163,209,0.35);
             transition: all 0.25s;
         }
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             box-shadow: 0 6px 24px rgba(44,163,209,0.5);
             transform: translateY(-1px);
         }
- 
+        .btn-primary:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
         .btn-outline {
             border: 2px solid var(--primary);
             color: var(--primary);
             transition: all 0.25s;
         }
-        .btn-outline:hover {
+        .btn-outline:hover:not(:disabled) {
             background: var(--primary);
             color: white;
             box-shadow: 0 4px 16px rgba(23,107,158,0.3);
         }
- 
+
         /* ── LOADING SCREEN ── */
         #loadingOverlay {
             background: linear-gradient(135deg, #0e4267, #176B9E, #1a8cc2);
@@ -173,19 +178,19 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
- 
+
         /* ── QR READER ── */
         #reader { border: none !important; width: 100%; border-radius: 1rem; overflow: hidden; background: #000; }
-        #reader button { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 0.5rem 1.2rem; border-radius: 0.6rem; margin: 0.5rem; cursor: pointer; font-weight: 700; border: none; font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.02em; }
+        #reader button { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 0.5rem 1.2rem; border-radius: 0.6rem; margin: 0.5rem; cursor: pointer; font-weight: 700; border: none; font-family: 'Space Grotesk', sans-serif; }
         #reader button:hover { filter: brightness(1.1); }
         #reader select { padding: 0.5rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: black; outline: none; }
         #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
         #reader__dashboard_section_swaplink { color: var(--accent) !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
         #reader video { border-radius: 1rem; object-fit: cover; }
- 
+
         /* ── MODAL ── */
         .modal-backdrop { background: rgba(8,18,36,0.65); backdrop-filter: blur(8px); }
- 
+
         /* ── ADMIN TICKET ITEM ── */
         .ticket-item {
             background: rgba(44,163,209,0.06);
@@ -196,7 +201,7 @@
             background: rgba(44,163,209,0.12);
             border-color: rgba(44,163,209,0.4);
         }
- 
+
         /* ── INPUT ── */
         .input-field {
             background: rgba(240,247,255,0.8);
@@ -208,7 +213,7 @@
             border-color: var(--secondary);
             box-shadow: 0 0 0 3px rgba(44,163,209,0.12);
         }
- 
+
         /* ── DECORATIVE BG CIRCLES ── */
         .bg-blob {
             position: fixed;
@@ -217,7 +222,7 @@
             pointer-events: none;
             z-index: 0;
         }
- 
+
         /* ── LOGO BADGE ── */
         .logo-badge {
             background: white;
@@ -225,7 +230,7 @@
             padding: 6px;
             box-shadow: 0 2px 12px rgba(23,107,158,0.2);
         }
- 
+
         /* Tab active */
         .tab-active { background: linear-gradient(135deg, var(--primary), var(--secondary)) !important; color: white !important; box-shadow: 0 4px 12px rgba(44,163,209,0.35); }
         .tab-inactive { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.6) !important; }
@@ -233,16 +238,15 @@
     </style>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col relative overflow-x-hidden">
- 
-    <!-- Decorative blobs -->
+
     <div class="bg-blob w-96 h-96 bg-blue-200 opacity-30 -top-20 -left-20"></div>
     <div class="bg-blob w-80 h-80 bg-cyan-200 opacity-20 top-1/2 -right-32"></div>
- 
+
     <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4">
         <div class="flex flex-col items-center gap-6">
             <div class="logo-container">
-                <img src="logo_res.png" alt="Lab RES Logo" class="w-20 h-20 logo-glow">
+                <i class="fa-solid fa-robot text-5xl text-white logo-glow"></i>
             </div>
             <div class="spinner-ring w-12 h-12 rounded-full"></div>
             <div class="text-center">
@@ -251,27 +255,25 @@
             </div>
         </div>
     </div>
- 
+
     <!-- TOAST -->
-    <div id="toastNotification" class="fixed bottom-6 right-6 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-50 transform transition-all duration-300 translate-y-28 flex items-center gap-3 text-sm font-semibold">
+    <div id="toastNotification" class="fixed bottom-6 right-6 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-[110] transform transition-all duration-300 translate-y-28 flex items-center gap-3 text-sm font-semibold">
         <i id="toastIcon" class="fa-solid fa-circle-check text-lg"></i>
         <span id="toastMessage">Notifikasi</span>
     </div>
- 
+
     <!-- ======================== SCREEN 1: LOGIN ======================== -->
     <div id="loginScreen" class="hidden flex-1 flex items-center justify-center fade-in relative z-10 min-h-screen px-4 py-12">
         <div class="login-card rounded-3xl w-full max-w-md overflow-hidden fade-up">
-            
-            <!-- Top accent bar -->
             <div class="h-1.5 w-full" style="background: linear-gradient(90deg, #0e4267, #176B9E, #2CA3D1, #00D4FF);"></div>
-            
             <div class="p-8 sm:p-10">
-                <!-- Header with Logo -->
                 <div class="text-center mb-8">
                     <div class="flex justify-center mb-5">
                         <div class="relative">
                             <div class="absolute inset-0 rounded-2xl" style="background: linear-gradient(135deg, rgba(44,163,209,0.2), rgba(23,107,158,0.1)); filter: blur(12px); transform: scale(1.2);"></div>
-                            <img src="logo_res.png" alt="Lab RES" class="relative w-20 h-20 logo-container logo-glow">
+                            <div class="bg-gradient-to-br from-primary to-secondary text-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto text-4xl shadow-lg transform rotate-3 logo-container">
+                                <i class="fa-solid fa-robot -rotate-3"></i>
+                            </div>
                         </div>
                     </div>
                     <h1 class="text-4xl font-extrabold tracking-tight" style="font-family:'Sora',sans-serif;">
@@ -284,15 +286,13 @@
                         <span class="w-8 h-px bg-gradient-to-l from-transparent to-secondary"></span>
                     </div>
                 </div>
- 
-                <!-- Info Box -->
+
                 <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 mb-6 text-center leading-relaxed">
                     <p class="font-bold mb-1 text-blue-900">💡 Info Akun Demo</p>
                     Mahasiswa: Gunakan NIM & password bebas<br>
                     Admin: Username <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
                 </div>
- 
-                <!-- Form -->
+
                 <form onsubmit="window.handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM / Username</label>
@@ -319,15 +319,9 @@
                     </div>
                 </form>
             </div>
- 
-            <!-- Bottom brand strip -->
-            <div class="px-8 py-3 border-t border-gray-100 flex items-center justify-center gap-2">
-                <img src="logo_res.png" alt="" class="w-5 h-5 opacity-40">
-                <span class="text-xs text-gray-400 font-medium">Robotics & Embedded Systems Laboratory</span>
-            </div>
         </div>
     </div>
- 
+
     <!-- ======================== SCREEN 2: DASHBOARD MAHASISWA ======================== -->
     <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in relative z-10">
         <nav class="navbar-student text-white z-20 sticky top-0">
@@ -335,7 +329,7 @@
                 <div class="flex justify-between h-16 items-center">
                     <div class="flex items-center gap-3">
                         <div class="logo-badge">
-                            <img src="logo_res.png" alt="RES" class="w-8 h-8">
+                            <i class="fa-solid fa-robot text-primary text-xl px-1"></i>
                         </div>
                         <div>
                             <span class="font-bold text-lg tracking-wide" style="font-family:'Sora',sans-serif;">CARES</span>
@@ -354,7 +348,7 @@
                 </div>
             </div>
         </nav>
- 
+
         <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
@@ -370,22 +364,22 @@
             <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
         </main>
     </div>
- 
+
     <!-- ======================== SCREEN 3: ADMIN DASHBOARD ======================== -->
     <div id="adminDashboardScreen" class="hidden flex-1 flex flex-col fade-in" style="background:#080f1e; min-height:100vh;">
         <nav class="navbar-admin text-white z-20 sticky top-0">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16 items-center gap-3">
                     <div class="flex items-center gap-3">
-                        <div class="bg-gray-800 rounded-xl p-1.5 border border-secondary/30">
-                            <img src="logo_res.png" alt="RES" class="w-8 h-8">
+                        <div class="bg-gray-800 rounded-xl p-1.5 border border-secondary/30 text-secondary">
+                            <i class="fa-solid fa-qrcode text-xl px-1"></i>
                         </div>
                         <div class="hidden sm:block">
                             <span class="font-bold text-lg tracking-wide" style="font-family:'Sora',sans-serif;">CARES</span>
                             <span class="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full ml-2 border border-secondary/30 font-semibold">Admin Panel</span>
                         </div>
                     </div>
- 
+
                     <!-- Tabs -->
                     <div class="flex gap-2 flex-1 justify-center sm:justify-start max-w-xs">
                         <button onclick="window.switchAdminView('scanner')" id="tabScanner"
@@ -397,7 +391,7 @@
                             <i class="fa-solid fa-boxes-stacked text-xs"></i> Inventaris
                         </button>
                     </div>
- 
+
                     <div class="flex items-center gap-3">
                         <span class="text-xs text-gray-400 hidden md:block bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
                             <i class="fa-solid fa-user-shield mr-1 text-secondary"></i>
@@ -411,9 +405,9 @@
                 </div>
             </div>
         </nav>
- 
+
         <main class="flex-1 flex flex-col items-center justify-start p-5 sm:p-8 overflow-y-auto w-full">
- 
+
             <!-- SECTION A: SCANNER -->
             <div id="adminScannerSection" class="w-full flex flex-col items-center">
                 <div class="text-center mb-8 mt-2">
@@ -422,7 +416,7 @@
                     </h2>
                     <p class="text-gray-500 mt-2 text-sm">Arahkan kamera ke QR Code tiket mahasiswa untuk proses check-out.</p>
                 </div>
- 
+
                 <!-- Scanner Box -->
                 <div class="relative p-5 rounded-3xl border border-secondary/20 shadow-2xl max-w-md w-full mb-8" style="background:#0f1e33;">
                     <div id="reader-wrapper" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center" style="background:#000;">
@@ -438,19 +432,19 @@
                             <p class="text-xs text-gray-600 mt-4 text-center px-6">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
                         </div>
                     </div>
- 
+
                     <div class="mt-5">
                         <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
                             <input type="text" id="adminSearchInput"
                                 class="flex-1 bg-white/5 border border-white/10 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase text-sm placeholder-gray-600 font-mono"
                                 placeholder="Input Manual: TKT-XXXX">
-                            <button type="submit" class="btn-primary text-white px-5 rounded-xl font-bold text-sm">
-                                <i class="fa-solid fa-search"></i>
+                            <button type="submit" class="btn-primary text-white px-5 rounded-xl font-bold text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-search"></i> Cari
                             </button>
                         </form>
                     </div>
                 </div>
- 
+
                 <!-- Pending Queue -->
                 <div class="w-full max-w-2xl admin-card rounded-2xl p-5 mb-10">
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
@@ -459,7 +453,7 @@
                     <div id="pendingTicketsList" class="flex flex-col gap-3"></div>
                 </div>
             </div>
- 
+
             <!-- SECTION B: INVENTARIS -->
             <div id="adminInventorySection" class="hidden w-full max-w-5xl">
                 <div class="flex justify-between items-center mb-6 mt-2">
@@ -471,7 +465,7 @@
                         <i class="fa-solid fa-plus"></i> Tambah Alat
                     </button>
                 </div>
- 
+
                 <div class="admin-card rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-white">
@@ -490,9 +484,9 @@
             </div>
         </main>
     </div>
- 
+
     <!-- ======================== MODALS ======================== -->
- 
+
     <!-- MODAL: BOOKING MAHASISWA -->
     <div id="bookingModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
@@ -535,7 +529,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- MODAL: TIKET SUKSES -->
     <div id="ticketModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden text-center">
@@ -564,7 +558,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- MODAL ADMIN: VERIFIKASI ALAT -->
     <div id="adminVerifyModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-secondary/30" style="background:#0f1e33;">
@@ -605,7 +599,7 @@
             </div>
         </div>
     </div>
- 
+
     <!-- MODAL ADMIN: FORM KELOLA ALAT -->
     <div id="adminToolModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10" style="background:#0f1e33;">
@@ -660,13 +654,13 @@
             </div>
         </div>
     </div>
- 
+
     <!-- ======================== FIREBASE & LOGIC ======================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
- 
+
         let app, auth, db, toolsPath, bookingsPath;
         let currentUser = null;
         let selectedToolForBooking = null;
@@ -674,7 +668,8 @@
         let allTools = [];
         let allBookings = [];
         let html5QrcodeScanner = null;
- 
+        let isSubmitting = false; // Flag untuk race condition
+
         // UI Helpers
         const showToast = (message, type = 'success') => {
             const toast = document.getElementById('toastNotification');
@@ -686,7 +681,7 @@
             toast.classList.remove('translate-y-28');
             setTimeout(() => { toast.classList.add('translate-y-28'); }, 3500);
         };
- 
+
         const showScreen = (screenId) => {
             ['loginScreen', 'dashboardScreen', 'adminDashboardScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -698,17 +693,17 @@
                 stopCamera();
             }
         };
- 
+
         window.closeModal = (modalId) => {
             document.getElementById(modalId).classList.add('hidden');
         };
- 
+
         window.switchAdminView = (view) => {
             const scannerSec = document.getElementById('adminScannerSection');
             const invSec = document.getElementById('adminInventorySection');
             const tabScan = document.getElementById('tabScanner');
             const tabInv = document.getElementById('tabInventory');
- 
+
             if (view === 'scanner') {
                 scannerSec.classList.remove('hidden');
                 invSec.classList.add('hidden');
@@ -724,13 +719,13 @@
                 renderAdminInventory();
             }
         };
- 
+
         window.activateScanner = () => {
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.add('hidden');
             startCamera();
         };
- 
+
         const startCamera = () => {
             if (html5QrcodeScanner) return;
             try {
@@ -741,7 +736,7 @@
                 showToast("Gagal menyalakan kamera. Coba izinkan akses kamera di browser.", "error");
             }
         };
- 
+
         const stopCamera = () => {
             if (html5QrcodeScanner) {
                 try { html5QrcodeScanner.clear(); } catch (e) { console.error(e); }
@@ -750,14 +745,14 @@
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.remove('hidden');
         };
- 
+
         function onScanSuccess(decodedText) {
             stopCamera();
             try { navigator.vibrate && navigator.vibrate(200); } catch (e) {}
             window.verifyTicket(decodedText.trim().toUpperCase());
         }
         function onScanFailure() {}
- 
+
         // FIREBASE INIT
         const initFirebase = async () => {
             try {
@@ -801,7 +796,7 @@
                     </div>`;
             }
         };
- 
+
         const seedDataIfEmpty = async () => {
             const toolsCol = collection(db, toolsPath);
             const snapshot = await getDocs(toolsCol);
@@ -816,20 +811,20 @@
                 for (const tool of initialTools) { await addDoc(toolsCol, tool); }
             }
         };
- 
+
         const setupRealtimeListeners = () => {
             onSnapshot(collection(db, toolsPath), (snapshot) => {
                 allTools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (currentUser?.role === 'student') renderCatalog();
                 if (currentUser?.role === 'admin' && !document.getElementById('adminInventorySection').classList.contains('hidden')) renderAdminInventory();
             }, (error) => console.error(error));
- 
+
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (currentUser?.role === 'admin') renderAdminPendingTickets();
             }, (error) => console.error(error));
         };
- 
+
         // RENDER STUDENT CATALOG
         const renderCatalog = () => {
             const grid = document.getElementById('catalogGrid');
@@ -867,7 +862,7 @@
                 grid.appendChild(card);
             });
         };
- 
+
         // RENDER ADMIN INVENTORY
         const renderAdminInventory = () => {
             const tbody = document.getElementById('adminInventoryTableBody');
@@ -902,13 +897,18 @@
                 tbody.appendChild(tr);
             });
         };
- 
+
         // RENDER ADMIN PENDING TICKETS
         const renderAdminPendingTickets = () => {
             const list = document.getElementById('pendingTicketsList');
             if (!list) return;
             list.innerHTML = '';
-            const pendingBookings = allBookings.filter(b => b.status === 'pending');
+            
+            // Urutkan tiket terbaru ke atas agar admin mudah melihatnya
+            const pendingBookings = allBookings
+                .filter(b => b.status === 'pending')
+                .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
             if (pendingBookings.length === 0) {
                 list.innerHTML = '<p class="text-gray-600 text-sm italic text-center py-4">Tidak ada tiket yang mengantre.</p>';
                 return;
@@ -932,13 +932,15 @@
                 list.appendChild(item);
             });
         };
- 
+
         // AUTH HANDLERS
         window.handleLogin = (e) => {
             e.preventDefault();
             try {
-                const nim = document.getElementById('nimInput').value.trim();
+                // Sanitasi input basic
+                const nim = document.getElementById('nimInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const pass = document.getElementById('passwordInput').value.trim();
+                
                 if (nim === 'admin' && pass === '123') {
                     currentUser = { role: 'admin', id: 'Admin Lab RES' };
                     document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
@@ -958,17 +960,19 @@
                 showToast("Terjadi error sistem: " + err.message, "error");
             }
         };
- 
+
         window.handleLogout = () => {
             currentUser = null;
             document.getElementById('nimInput').value = '';
             document.getElementById('passwordInput').value = '';
             showScreen('loginScreen');
         };
- 
+
         window.initiateBooking = (toolId) => {
             const tool = allTools.find(t => t.id === toolId);
             if (!tool || tool.stock <= 0) return;
+            
+            // Validasi Sisi UI Pertama (Akan divalidasi lagi pas submit)
             const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
             const isAlreadyBooked = myPendingBookings.some(b => b.toolId === toolId);
             if (isAlreadyBooked) {
@@ -979,6 +983,7 @@
                 showToast("Batas maksimal 3 alat! Tunggu admin verifikasi tiket lainnya.", "error");
                 return;
             }
+            
             selectedToolForBooking = tool;
             document.getElementById('modalToolName').innerText = tool.name;
             document.getElementById('modalIcon').className = `fa-solid ${tool.icon}`;
@@ -986,25 +991,65 @@
             document.getElementById('formTujuan').value = '';
             document.getElementById('bookingModal').classList.remove('hidden');
         };
- 
+
         window.submitBooking = async (e) => {
             e.preventDefault();
-            if (!auth.currentUser) return;
+            
+            // Pengaman 1: Pastikan user valid, alat terpilih, dan tidak dobel klik
+            if (!auth.currentUser || !selectedToolForBooking || isSubmitting) return;
+            
             const btn = document.getElementById('btnConfirmBooking');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
-            const tujuan = document.getElementById('formTujuan').value;
-            const ticketNum = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
+            isSubmitting = true; // Lock agar tidak ter-submit 2x dari console/UI
+
+            // ==========================================
+            // 🛡️ PENGAMAN GANDA (DOUBLE VALIDATION) 🛡️
+            // Mengecek ulang data secara real-time tepat sebelum menulis ke Firestore
+            // ==========================================
+            const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
+
+            // Cek Duplikat Alat
+            if (myPendingBookings.some(b => b.toolId === selectedToolForBooking.id)) {
+                showToast(`Peringatan Keamanan: Anda tidak bisa nge-spam meminjam ${selectedToolForBooking.name}!`, "error");
+                window.closeModal('bookingModal');
+                btn.innerHTML = 'Konfirmasi Booking';
+                btn.disabled = false;
+                isSubmitting = false;
+                return;
+            }
+
+            // Cek Limit Maksimal
+            if (myPendingBookings.length >= 3) {
+                showToast("Peringatan Keamanan: Limit 3 alat Anda sudah habis!", "error");
+                window.closeModal('bookingModal');
+                btn.innerHTML = 'Konfirmasi Booking';
+                btn.disabled = false;
+                isSubmitting = false;
+                return;
+            }
+            // ==========================================
+
+            const rawTujuan = document.getElementById('formTujuan').value;
+            // Sanitasi agar aman dari input tag script berbahaya di Console
+            const cleanTujuan = rawTujuan.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            // Randomize Ticket (Sedikit diperpanjang biar sulit ditebak)
+            const ticketNum = `TKT-${Math.floor(10000 + Math.random() * 90000)}`;
+
             try {
                 const bookingData = {
                     studentId: currentUser.id,
                     toolId: selectedToolForBooking.id,
                     toolName: selectedToolForBooking.name,
-                    tujuan, ticketNum,
+                    tujuan: cleanTujuan,
+                    ticketNum: ticketNum,
                     status: 'pending',
                     createdAt: new Date().toISOString()
                 };
+                
                 await addDoc(collection(db, bookingsPath), bookingData);
+                
                 document.getElementById('ticketNumberDisplay').innerText = ticketNum;
                 document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticketNum}`;
                 window.closeModal('bookingModal');
@@ -1015,15 +1060,16 @@
             } finally {
                 btn.innerHTML = 'Konfirmasi Booking';
                 btn.disabled = false;
+                isSubmitting = false; // Buka kuncian
             }
         };
- 
+
         window.handleManualSearch = (e) => {
             e.preventDefault();
             const input = document.getElementById('adminSearchInput').value.trim().toUpperCase();
             if (input) window.verifyTicket(input);
         };
- 
+
         window.verifyTicket = (ticketNum) => {
             stopCamera();
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
@@ -1038,21 +1084,28 @@
             document.getElementById('verifToolName').innerText = booking.toolName;
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
- 
+
         window.confirmAdminCheckOut = async () => {
-            if (!auth.currentUser || !selectedBookingForCheckout) return;
+            if (!auth.currentUser || !selectedBookingForCheckout || isSubmitting) return;
+            
             const btn = document.getElementById('btnConfirmCheckout');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
+            isSubmitting = true;
+
             try {
                 const toolId = selectedBookingForCheckout.toolId;
                 const tool = allTools.find(t => t.id === toolId);
+                
+                // Cek Validasi Stok
                 if (!tool || tool.stock <= 0) {
                     showToast("Stok alat fisik habis di database!", "error");
                     return;
                 }
+                
                 await updateDoc(doc(db, bookingsPath, selectedBookingForCheckout.id), { status: 'checked-out' });
                 await updateDoc(doc(db, toolsPath, toolId), { stock: tool.stock - 1 });
+                
                 window.closeModal('adminVerifyModal');
                 showToast(`Check-out Sukses! Stok ${tool.name} berkurang.`);
                 document.getElementById('adminSearchInput').value = '';
@@ -1063,9 +1116,10 @@
                 btn.innerHTML = 'Konfirmasi Check-out';
                 btn.disabled = false;
                 selectedBookingForCheckout = null;
+                isSubmitting = false;
             }
         };
- 
+
         window.openToolModal = (toolId = null) => {
             if (toolId) {
                 const tool = allTools.find(t => t.id === toolId);
@@ -1085,17 +1139,22 @@
             }
             document.getElementById('adminToolModal').classList.remove('hidden');
         };
- 
+
         window.submitTool = async (e) => {
             e.preventDefault();
+            if(isSubmitting) return;
+            
             const btn = document.getElementById('btnSaveTool');
             btn.disabled = true;
             btn.innerText = 'Menyimpan...';
+            isSubmitting = true;
+
             const id = document.getElementById('formToolId').value;
-            const name = document.getElementById('formToolName').value;
-            const category = document.getElementById('formToolCategory').value;
+            const name = document.getElementById('formToolName').value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const category = document.getElementById('formToolCategory').value.replace(/</g, "&lt;").replace(/>/g, "&gt;");
             const stock = parseInt(document.getElementById('formToolStock').value);
             const icon = document.getElementById('formToolIcon').value;
+            
             try {
                 if (id) {
                     await updateDoc(doc(db, toolsPath, id), { name, category, stock, icon });
@@ -1111,9 +1170,10 @@
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Simpan';
+                isSubmitting = false;
             }
         };
- 
+
         window.deleteTool = async (toolId) => {
             if (!confirm("Anda yakin ingin menghapus alat ini secara permanen dari inventaris?")) return;
             try {
@@ -1124,7 +1184,7 @@
                 showToast("Gagal menghapus alat.", "error");
             }
         };
- 
+
         window.quickUpdateStock = async (toolId, changeAmount) => {
             const tool = allTools.find(t => t.id === toolId);
             if (!tool) return;
@@ -1137,9 +1197,8 @@
                 showToast("Gagal update stok.", "error");
             }
         };
- 
+
         window.onload = initFirebase;
     </script>
 </body>
 </html>
- 
