@@ -32,9 +32,9 @@
             --bg-light: #EEF4FA;
             --glass: rgba(255,255,255,0.7);
         }
-
+ 
         * { box-sizing: border-box; }
-
+ 
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg-light);
@@ -43,25 +43,25 @@
                 radial-gradient(ellipse 60% 50% at 85% 110%, rgba(23, 107, 158, 0.10) 0%, transparent 55%);
             min-height: 100vh;
         }
-
+ 
         h1, h2, h3 { font-family: 'Sora', sans-serif; }
-
+ 
         /* ── SCROLLBAR ── */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 99px; }
-
+ 
         /* ── ANIMATIONS ── */
         @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
         @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
         @keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(44,163,209,0.4); } 50% { box-shadow: 0 0 0 12px rgba(44,163,209,0); } }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
-
+ 
         .fade-up { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.2) both; }
         .fade-in { animation: fadeIn 0.3s ease both; }
         .float-anim { animation: float 3.5s ease-in-out infinite; }
-
+ 
         /* ── GLASSMORPHISM CARD ── */
         .glass-card {
             background: rgba(255,255,255,0.82);
@@ -70,37 +70,37 @@
             border: 1px solid rgba(255,255,255,0.6);
             box-shadow: 0 8px 40px rgba(23,107,158,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
         }
-
+ 
         /* ── LOGIN SCREEN ── */
         #loginScreen { background: transparent; }
-
+ 
         .login-card {
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(24px);
             border: 1.5px solid rgba(44,163,209,0.18);
             box-shadow: 0 24px 80px rgba(23,107,158,0.14), 0 2px 0 rgba(255,255,255,1) inset;
         }
-
+ 
         .logo-glow {
             filter: drop-shadow(0 0 16px rgba(44,163,209,0.5));
         }
         .logo-container {
             animation: float 3.5s ease-in-out infinite;
         }
-
+ 
         /* ── NAVBAR ── */
         .navbar-student {
             background: linear-gradient(135deg, #0e4267 0%, #176B9E 50%, #2CA3D1 100%);
             border-bottom: 1px solid rgba(255,255,255,0.15);
             box-shadow: 0 4px 24px rgba(14,66,103,0.25);
         }
-
+ 
         .navbar-admin {
             background: #0a1628;
             border-bottom: 1px solid rgba(44,163,209,0.2);
             box-shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
-
+ 
         /* ── CATALOG CARDS ── */
         .tool-card {
             background: rgba(255,255,255,0.92);
@@ -113,7 +113,7 @@
             box-shadow: 0 16px 40px rgba(23,107,158,0.16);
             border-color: rgba(44,163,209,0.3);
         }
-
+ 
         /* ── GRADIENT TEXT ── */
         .text-gradient {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -121,7 +121,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-
+ 
         /* ── BADGE PILL ── */
         .badge-stock {
             background: linear-gradient(135deg, #d1fadf, #a7f3c4);
@@ -133,14 +133,14 @@
             color: #991b1b;
             border: 1px solid #fca5a5;
         }
-
+ 
         /* ── ADMIN DARK CARD ── */
         .admin-card {
             background: #0f1e33;
             border: 1px solid rgba(44,163,209,0.15);
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
-
+ 
         /* ── BUTTON STYLES ── */
         .btn-primary {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -151,7 +151,7 @@
             box-shadow: 0 6px 24px rgba(44,163,209,0.5);
             transform: translateY(-1px);
         }
-
+ 
         .btn-outline {
             border: 2px solid var(--primary);
             color: var(--primary);
@@ -162,7 +162,7 @@
             color: white;
             box-shadow: 0 4px 16px rgba(23,107,158,0.3);
         }
-
+ 
         /* ── LOADING SCREEN ── */
         #loadingOverlay {
             background: linear-gradient(135deg, #0e4267, #176B9E, #1a8cc2);
@@ -173,7 +173,7 @@
             animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
+ 
         /* ── QR READER ── */
         #reader { border: none !important; width: 100%; border-radius: 1rem; overflow: hidden; background: #000; }
         #reader button { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 0.5rem 1.2rem; border-radius: 0.6rem; margin: 0.5rem; cursor: pointer; font-weight: 700; border: none; font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.02em; }
@@ -182,10 +182,10 @@
         #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
         #reader__dashboard_section_swaplink { color: var(--accent) !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
         #reader video { border-radius: 1rem; object-fit: cover; }
-
+ 
         /* ── MODAL ── */
         .modal-backdrop { background: rgba(8,18,36,0.65); backdrop-filter: blur(8px); }
-
+ 
         /* ── ADMIN TICKET ITEM ── */
         .ticket-item {
             background: rgba(44,163,209,0.06);
@@ -196,7 +196,7 @@
             background: rgba(44,163,209,0.12);
             border-color: rgba(44,163,209,0.4);
         }
-
+ 
         /* ── INPUT ── */
         .input-field {
             background: rgba(240,247,255,0.8);
@@ -208,7 +208,7 @@
             border-color: var(--secondary);
             box-shadow: 0 0 0 3px rgba(44,163,209,0.12);
         }
-
+ 
         /* ── DECORATIVE BG CIRCLES ── */
         .bg-blob {
             position: fixed;
@@ -217,7 +217,7 @@
             pointer-events: none;
             z-index: 0;
         }
-
+ 
         /* ── LOGO BADGE ── */
         .logo-badge {
             background: white;
@@ -225,7 +225,7 @@
             padding: 6px;
             box-shadow: 0 2px 12px rgba(23,107,158,0.2);
         }
-
+ 
         /* Tab active */
         .tab-active { background: linear-gradient(135deg, var(--primary), var(--secondary)) !important; color: white !important; box-shadow: 0 4px 12px rgba(44,163,209,0.35); }
         .tab-inactive { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.6) !important; }
@@ -233,11 +233,11 @@
     </style>
 </head>
 <body class="text-gray-800 min-h-screen flex flex-col relative overflow-x-hidden">
-
+ 
     <!-- Decorative blobs -->
     <div class="bg-blob w-96 h-96 bg-blue-200 opacity-30 -top-20 -left-20"></div>
     <div class="bg-blob w-80 h-80 bg-cyan-200 opacity-20 top-1/2 -right-32"></div>
-
+ 
     <!-- LOADING OVERLAY -->
     <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4">
         <div class="flex flex-col items-center gap-6">
@@ -251,13 +251,13 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- TOAST -->
     <div id="toastNotification" class="fixed bottom-6 right-6 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-50 transform transition-all duration-300 translate-y-28 flex items-center gap-3 text-sm font-semibold">
         <i id="toastIcon" class="fa-solid fa-circle-check text-lg"></i>
         <span id="toastMessage">Notifikasi</span>
     </div>
-
+ 
     <!-- ======================== SCREEN 1: LOGIN ======================== -->
     <div id="loginScreen" class="hidden flex-1 flex items-center justify-center fade-in relative z-10 min-h-screen px-4 py-12">
         <div class="login-card rounded-3xl w-full max-w-md overflow-hidden fade-up">
@@ -284,14 +284,14 @@
                         <span class="w-8 h-px bg-gradient-to-l from-transparent to-secondary"></span>
                     </div>
                 </div>
-
+ 
                 <!-- Info Box -->
                 <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 mb-6 text-center leading-relaxed">
                     <p class="font-bold mb-1 text-blue-900">💡 Info Akun Demo</p>
                     Mahasiswa: Gunakan NIM & password bebas<br>
                     Admin: Username <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
                 </div>
-
+ 
                 <!-- Form -->
                 <form onsubmit="window.handleLogin(event)" class="space-y-4">
                     <div>
@@ -319,7 +319,7 @@
                     </div>
                 </form>
             </div>
-
+ 
             <!-- Bottom brand strip -->
             <div class="px-8 py-3 border-t border-gray-100 flex items-center justify-center gap-2">
                 <img src="logo_res.png" alt="" class="w-5 h-5 opacity-40">
@@ -327,7 +327,7 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- ======================== SCREEN 2: DASHBOARD MAHASISWA ======================== -->
     <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in relative z-10">
         <nav class="navbar-student text-white z-20 sticky top-0">
@@ -354,7 +354,7 @@
                 </div>
             </div>
         </nav>
-
+ 
         <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
             <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
@@ -370,7 +370,7 @@
             <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
         </main>
     </div>
-
+ 
     <!-- ======================== SCREEN 3: ADMIN DASHBOARD ======================== -->
     <div id="adminDashboardScreen" class="hidden flex-1 flex flex-col fade-in" style="background:#080f1e; min-height:100vh;">
         <nav class="navbar-admin text-white z-20 sticky top-0">
@@ -385,7 +385,7 @@
                             <span class="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full ml-2 border border-secondary/30 font-semibold">Admin Panel</span>
                         </div>
                     </div>
-
+ 
                     <!-- Tabs -->
                     <div class="flex gap-2 flex-1 justify-center sm:justify-start max-w-xs">
                         <button onclick="window.switchAdminView('scanner')" id="tabScanner"
@@ -397,7 +397,7 @@
                             <i class="fa-solid fa-boxes-stacked text-xs"></i> Inventaris
                         </button>
                     </div>
-
+ 
                     <div class="flex items-center gap-3">
                         <span class="text-xs text-gray-400 hidden md:block bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
                             <i class="fa-solid fa-user-shield mr-1 text-secondary"></i>
@@ -411,9 +411,9 @@
                 </div>
             </div>
         </nav>
-
+ 
         <main class="flex-1 flex flex-col items-center justify-start p-5 sm:p-8 overflow-y-auto w-full">
-
+ 
             <!-- SECTION A: SCANNER -->
             <div id="adminScannerSection" class="w-full flex flex-col items-center">
                 <div class="text-center mb-8 mt-2">
@@ -422,7 +422,7 @@
                     </h2>
                     <p class="text-gray-500 mt-2 text-sm">Arahkan kamera ke QR Code tiket mahasiswa untuk proses check-out.</p>
                 </div>
-
+ 
                 <!-- Scanner Box -->
                 <div class="relative p-5 rounded-3xl border border-secondary/20 shadow-2xl max-w-md w-full mb-8" style="background:#0f1e33;">
                     <div id="reader-wrapper" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center" style="background:#000;">
@@ -438,7 +438,7 @@
                             <p class="text-xs text-gray-600 mt-4 text-center px-6">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
                         </div>
                     </div>
-
+ 
                     <div class="mt-5">
                         <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
                             <input type="text" id="adminSearchInput"
@@ -450,7 +450,7 @@
                         </form>
                     </div>
                 </div>
-
+ 
                 <!-- Pending Queue -->
                 <div class="w-full max-w-2xl admin-card rounded-2xl p-5 mb-10">
                     <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
@@ -459,7 +459,7 @@
                     <div id="pendingTicketsList" class="flex flex-col gap-3"></div>
                 </div>
             </div>
-
+ 
             <!-- SECTION B: INVENTARIS -->
             <div id="adminInventorySection" class="hidden w-full max-w-5xl">
                 <div class="flex justify-between items-center mb-6 mt-2">
@@ -471,7 +471,7 @@
                         <i class="fa-solid fa-plus"></i> Tambah Alat
                     </button>
                 </div>
-
+ 
                 <div class="admin-card rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-white">
@@ -490,9 +490,9 @@
             </div>
         </main>
     </div>
-
+ 
     <!-- ======================== MODALS ======================== -->
-
+ 
     <!-- MODAL: BOOKING MAHASISWA -->
     <div id="bookingModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
@@ -535,7 +535,7 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- MODAL: TIKET SUKSES -->
     <div id="ticketModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden text-center">
@@ -564,7 +564,7 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- MODAL ADMIN: VERIFIKASI ALAT -->
     <div id="adminVerifyModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-secondary/30" style="background:#0f1e33;">
@@ -605,7 +605,7 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- MODAL ADMIN: FORM KELOLA ALAT -->
     <div id="adminToolModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10" style="background:#0f1e33;">
@@ -660,13 +660,13 @@
             </div>
         </div>
     </div>
-
+ 
     <!-- ======================== FIREBASE & LOGIC ======================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+ 
         let app, auth, db, toolsPath, bookingsPath;
         let currentUser = null;
         let selectedToolForBooking = null;
@@ -674,7 +674,7 @@
         let allTools = [];
         let allBookings = [];
         let html5QrcodeScanner = null;
-
+ 
         // UI Helpers
         const showToast = (message, type = 'success') => {
             const toast = document.getElementById('toastNotification');
@@ -686,7 +686,7 @@
             toast.classList.remove('translate-y-28');
             setTimeout(() => { toast.classList.add('translate-y-28'); }, 3500);
         };
-
+ 
         const showScreen = (screenId) => {
             ['loginScreen', 'dashboardScreen', 'adminDashboardScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
@@ -698,17 +698,17 @@
                 stopCamera();
             }
         };
-
+ 
         window.closeModal = (modalId) => {
             document.getElementById(modalId).classList.add('hidden');
         };
-
+ 
         window.switchAdminView = (view) => {
             const scannerSec = document.getElementById('adminScannerSection');
             const invSec = document.getElementById('adminInventorySection');
             const tabScan = document.getElementById('tabScanner');
             const tabInv = document.getElementById('tabInventory');
-
+ 
             if (view === 'scanner') {
                 scannerSec.classList.remove('hidden');
                 invSec.classList.add('hidden');
@@ -724,13 +724,13 @@
                 renderAdminInventory();
             }
         };
-
+ 
         window.activateScanner = () => {
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.add('hidden');
             startCamera();
         };
-
+ 
         const startCamera = () => {
             if (html5QrcodeScanner) return;
             try {
@@ -741,7 +741,7 @@
                 showToast("Gagal menyalakan kamera. Coba izinkan akses kamera di browser.", "error");
             }
         };
-
+ 
         const stopCamera = () => {
             if (html5QrcodeScanner) {
                 try { html5QrcodeScanner.clear(); } catch (e) { console.error(e); }
@@ -750,14 +750,14 @@
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.remove('hidden');
         };
-
+ 
         function onScanSuccess(decodedText) {
             stopCamera();
             try { navigator.vibrate && navigator.vibrate(200); } catch (e) {}
             window.verifyTicket(decodedText.trim().toUpperCase());
         }
         function onScanFailure() {}
-
+ 
         // FIREBASE INIT
         const initFirebase = async () => {
             try {
@@ -801,7 +801,7 @@
                     </div>`;
             }
         };
-
+ 
         const seedDataIfEmpty = async () => {
             const toolsCol = collection(db, toolsPath);
             const snapshot = await getDocs(toolsCol);
@@ -816,20 +816,20 @@
                 for (const tool of initialTools) { await addDoc(toolsCol, tool); }
             }
         };
-
+ 
         const setupRealtimeListeners = () => {
             onSnapshot(collection(db, toolsPath), (snapshot) => {
                 allTools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (currentUser?.role === 'student') renderCatalog();
                 if (currentUser?.role === 'admin' && !document.getElementById('adminInventorySection').classList.contains('hidden')) renderAdminInventory();
             }, (error) => console.error(error));
-
+ 
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (currentUser?.role === 'admin') renderAdminPendingTickets();
             }, (error) => console.error(error));
         };
-
+ 
         // RENDER STUDENT CATALOG
         const renderCatalog = () => {
             const grid = document.getElementById('catalogGrid');
@@ -867,7 +867,7 @@
                 grid.appendChild(card);
             });
         };
-
+ 
         // RENDER ADMIN INVENTORY
         const renderAdminInventory = () => {
             const tbody = document.getElementById('adminInventoryTableBody');
@@ -902,7 +902,7 @@
                 tbody.appendChild(tr);
             });
         };
-
+ 
         // RENDER ADMIN PENDING TICKETS
         const renderAdminPendingTickets = () => {
             const list = document.getElementById('pendingTicketsList');
@@ -932,7 +932,7 @@
                 list.appendChild(item);
             });
         };
-
+ 
         // AUTH HANDLERS
         window.handleLogin = (e) => {
             e.preventDefault();
@@ -958,14 +958,14 @@
                 showToast("Terjadi error sistem: " + err.message, "error");
             }
         };
-
+ 
         window.handleLogout = () => {
             currentUser = null;
             document.getElementById('nimInput').value = '';
             document.getElementById('passwordInput').value = '';
             showScreen('loginScreen');
         };
-
+ 
         window.initiateBooking = (toolId) => {
             const tool = allTools.find(t => t.id === toolId);
             if (!tool || tool.stock <= 0) return;
@@ -986,7 +986,7 @@
             document.getElementById('formTujuan').value = '';
             document.getElementById('bookingModal').classList.remove('hidden');
         };
-
+ 
         window.submitBooking = async (e) => {
             e.preventDefault();
             if (!auth.currentUser) return;
@@ -1017,13 +1017,13 @@
                 btn.disabled = false;
             }
         };
-
+ 
         window.handleManualSearch = (e) => {
             e.preventDefault();
             const input = document.getElementById('adminSearchInput').value.trim().toUpperCase();
             if (input) window.verifyTicket(input);
         };
-
+ 
         window.verifyTicket = (ticketNum) => {
             stopCamera();
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
@@ -1038,7 +1038,7 @@
             document.getElementById('verifToolName').innerText = booking.toolName;
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
-
+ 
         window.confirmAdminCheckOut = async () => {
             if (!auth.currentUser || !selectedBookingForCheckout) return;
             const btn = document.getElementById('btnConfirmCheckout');
@@ -1065,7 +1065,7 @@
                 selectedBookingForCheckout = null;
             }
         };
-
+ 
         window.openToolModal = (toolId = null) => {
             if (toolId) {
                 const tool = allTools.find(t => t.id === toolId);
@@ -1085,7 +1085,7 @@
             }
             document.getElementById('adminToolModal').classList.remove('hidden');
         };
-
+ 
         window.submitTool = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSaveTool');
@@ -1113,7 +1113,7 @@
                 btn.innerText = 'Simpan';
             }
         };
-
+ 
         window.deleteTool = async (toolId) => {
             if (!confirm("Anda yakin ingin menghapus alat ini secara permanen dari inventaris?")) return;
             try {
@@ -1124,7 +1124,7 @@
                 showToast("Gagal menghapus alat.", "error");
             }
         };
-
+ 
         window.quickUpdateStock = async (toolId, changeAmount) => {
             const tool = allTools.find(t => t.id === toolId);
             if (!tool) return;
@@ -1137,8 +1137,9 @@
                 showToast("Gagal update stok.", "error");
             }
         };
-
+ 
         window.onload = initFirebase;
     </script>
 </body>
 </html>
+ 
