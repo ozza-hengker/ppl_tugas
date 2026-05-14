@@ -13,8 +13,9 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1e40af', // UB Blue
-                        secondary: '#f59e0b', // Accent
+                        primary: '#176B9E', // Biru Tua (Sisi Kiri Logo)
+                        secondary: '#2CA3D1', // Biru Muda / Cyan (Sisi Kanan Jalur Sirkuit Logo)
+                        darker: '#11547D', // Warna gelap untuk efek hover
                     }
                 }
             }
@@ -22,59 +23,94 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Custom scrollbar untuk kesan futuristik */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #2CA3D1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #176B9E; }
+
+        /* Animasi Laser Scanner QR */
+        @keyframes scanline {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: #2CA3D1;
+            box-shadow: 0 0 10px #2CA3D1, 0 0 20px #2CA3D1;
+            animation: scanline 2.5s infinite linear;
+        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col">
 
     <!-- SCREEN 1: LOGIN (Sesuai UC-01) -->
     <div id="loginScreen" class="flex-1 flex items-center justify-center fade-in">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-primary">
-            <div class="text-center mb-8">
-                <div class="bg-primary text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
-                    <i class="fa-solid fa-microchip"></i>
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-primary relative overflow-hidden">
+            <!-- Ornamen sirkuit tipis di background login -->
+            <i class="fa-solid fa-network-wired absolute -top-10 -right-10 text-9xl text-gray-50 opacity-50"></i>
+            
+            <div class="text-center mb-8 relative z-10">
+                <div class="bg-gradient-to-br from-primary to-secondary text-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg transform rotate-3">
+                    <i class="fa-solid fa-robot -rotate-3"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-800">CARES</h1>
-                <p class="text-sm text-gray-500 mt-1">Robotics & Embedded Systems Lab</p>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">CARES</h1>
+                <p class="text-sm text-secondary font-semibold mt-1">Sistem Login Laboratorium</p>
             </div>
             
-            <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-800 mb-6 relative z-10 text-center">
+                <strong>Info Login:</strong><br>
+                Mahasiswa: Gunakan NIM & Password sembarang<br>
+                Admin: Username <b>admin</b> | Password <b>123</b>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="relative z-10">
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIM / Email UB</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NIM / Username</label>
                     <div class="relative">
-                        <i class="fa-regular fa-user absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="nimInput" required class="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="Masukkan NIM">
+                        <i class="fa-regular fa-user absolute left-3 top-3.5 text-gray-400"></i>
+                        <input type="text" id="nimInput" required class="pl-10 w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition bg-gray-50 focus:bg-white" placeholder="Masukkan ID Anda">
                     </div>
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
                     <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3 top-3 text-gray-400"></i>
-                        <input type="password" required class="pl-10 w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition" placeholder="••••••••">
+                        <i class="fa-solid fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                        <input type="password" id="passwordInput" required class="pl-10 w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition bg-gray-50 focus:bg-white" placeholder="••••••••">
                     </div>
                 </div>
-                <button type="submit" class="w-full bg-primary hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg transition shadow-md flex justify-center items-center gap-2">
+                <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-darker hover:to-primary text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
                     Masuk ke Sistem <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- SCREEN 2: DASHBOARD & KATALOG (Sesuai UC-02 & UC-03) -->
+    <!-- SCREEN 2: DASHBOARD MAHASISWA (Sesuai UC-02 & UC-03) -->
     <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in">
-        <!-- Navbar -->
-        <nav class="bg-primary text-white shadow-md">
+        <!-- Navbar Mahasiswa -->
+        <nav class="bg-gradient-to-r from-primary to-secondary text-white shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-microchip text-2xl"></i>
-                        <span class="font-bold text-xl tracking-wider">CARES</span>
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white text-primary p-1.5 rounded-lg">
+                            <i class="fa-solid fa-robot text-xl"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-wider">CARES <span class="text-xs font-normal bg-white/20 px-2 py-0.5 rounded ml-1">Student</span></span>
                     </div>
                     <div class="flex items-center gap-4">
-                        <span class="text-sm hidden sm:block"><i class="fa-regular fa-user mr-1"></i> <span id="userNameDisplay">Mahasiswa</span></span>
-                        <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-sm font-medium transition shadow">
+                        <span class="text-sm hidden sm:block bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
+                            <i class="fa-regular fa-user mr-1"></i> <span id="userNameDisplay">Mahasiswa</span>
+                        </span>
+                        <button onclick="handleLogout()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm font-medium transition backdrop-blur-sm border border-white/20">
                             <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
                         </button>
                     </div>
@@ -82,16 +118,16 @@
             </div>
         </nav>
 
-        <!-- Konten Utama -->
+        <!-- Konten Utama Mahasiswa -->
         <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-            <div class="flex justify-between items-end mb-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Katalog Alat Lab</h2>
-                    <p class="text-sm text-gray-500">Pilih komponen yang ingin Anda reservasi.</p>
+                    <h2 class="text-2xl font-bold text-gray-800">Katalog Inventaris</h2>
+                    <p class="text-sm text-gray-500 mt-1">Pilih komponen yang ingin Anda reservasi untuk praktikum atau proyek.</p>
                 </div>
-                <div class="relative hidden sm:block">
-                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
-                    <input type="text" class="pl-10 p-2 border border-gray-300 rounded-lg w-64 text-sm outline-none focus:border-primary" placeholder="Cari alat...">
+                <div class="relative w-full sm:w-auto">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" class="pl-10 p-2.5 border border-gray-200 rounded-xl w-full sm:w-72 text-sm outline-none focus:border-secondary focus:ring-1 focus:ring-secondary shadow-sm" placeholder="Cari alat, sensor, atau board...">
                 </div>
             </div>
 
@@ -102,115 +138,235 @@
         </main>
     </div>
 
-    <!-- MODAL: FORM RESERVASI -->
-    <div id="bookingModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div class="bg-primary p-4 text-white flex justify-between items-center">
-                <h3 class="font-bold text-lg">Form Reservasi Alat</h3>
-                <button onclick="closeModal('bookingModal')" class="text-white hover:text-gray-200"><i class="fa-solid fa-times text-xl"></i></button>
+    <!-- SCREEN 3: DASHBOARD ADMIN / ASISTEN LAB (Sesuai UC-05) -->
+    <div id="adminDashboardScreen" class="hidden flex-1 flex flex-col fade-in bg-gray-900">
+        <!-- Navbar Admin -->
+        <nav class="bg-gray-800 text-white shadow-lg border-b border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-secondary text-white p-1.5 rounded-lg">
+                            <i class="fa-solid fa-qrcode text-xl"></i>
+                        </div>
+                        <span class="font-bold text-xl tracking-wider text-gray-100">CARES <span class="text-xs font-normal bg-secondary px-2 py-0.5 rounded ml-1 text-white">Admin</span></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm hidden sm:block bg-gray-700 px-3 py-1.5 rounded-full border border-gray-600">
+                            <i class="fa-solid fa-shield-halved text-secondary mr-1"></i> <span id="adminUserNameDisplay">Asisten Lab</span>
+                        </span>
+                        <button onclick="handleLogout()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition border border-red-500/50">
+                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Konten Utama Admin (Pemindai QR) -->
+        <main class="flex-1 flex flex-col items-center justify-center p-6">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-white tracking-wide">Pemindai QR Code</h2>
+                <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code alat fisik atau tiket mahasiswa</p>
+            </div>
+
+            <!-- Scanner Mockup -->
+            <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full">
+                <!-- Bingkai Kamera -->
+                <div class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden border-4 border-gray-900 flex items-center justify-center">
+                    
+                    <!-- Sudut-sudut Scanner -->
+                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 border-secondary rounded-tl-lg"></div>
+                    <div class="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 border-secondary rounded-tr-lg"></div>
+                    <div class="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-secondary rounded-bl-lg"></div>
+                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-secondary rounded-br-lg"></div>
+
+                    <!-- Garis Laser Animasi -->
+                    <div class="scanner-line"></div>
+
+                    <div class="text-gray-600 flex flex-col items-center">
+                        <i class="fa-solid fa-camera text-4xl mb-2"></i>
+                        <span class="text-sm">Kamera Aktif</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-col gap-3">
+                    <button onclick="simulateAdminScan()" class="w-full bg-secondary hover:bg-blue-400 text-gray-900 font-bold py-4 rounded-xl transition-all shadow-[0_0_15px_rgba(44,163,209,0.5)] hover:shadow-[0_0_25px_rgba(44,163,209,0.8)] text-lg flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-expand"></i> Simulasikan Scan QR
+                    </button>
+                    
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-600"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-gray-800 text-gray-400">atau input manual</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <input type="text" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary" placeholder="TKT-XXXX">
+                        <button class="bg-gray-600 hover:bg-gray-500 text-white px-6 rounded-xl font-bold transition">Cari</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL MAHASISWA: FORM RESERVASI -->
+    <div id="bookingModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
+            <div class="bg-gradient-to-r from-primary to-secondary p-5 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</h3>
+                <button onclick="closeModal('bookingModal')" class="text-white hover:text-gray-200 transition bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="p-6">
-                <div class="flex gap-4 items-center mb-6 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                    <div class="text-3xl text-primary"><i id="modalIcon" class="fa-solid fa-microchip"></i></div>
+                <div class="flex gap-4 items-center mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100/50">
+                    <div class="text-3xl text-secondary bg-white w-12 h-12 rounded-lg flex items-center justify-center shadow-sm">
+                        <i id="modalIcon" class="fa-solid fa-microchip"></i>
+                    </div>
                     <div>
-                        <p class="text-sm text-gray-500">Alat yang dipilih:</p>
-                        <p id="modalToolName" class="font-bold text-gray-800">Nama Alat</p>
+                        <p class="text-xs font-semibold text-primary uppercase tracking-wider mb-0.5">Komponen Terpilih</p>
+                        <p id="modalToolName" class="font-bold text-gray-800 text-lg leading-tight">Nama Alat</p>
                     </div>
                 </div>
                 
                 <form id="bookingForm" onsubmit="submitBooking(event)">
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tujuan Peminjaman</label>
-                        <select required class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:border-primary">
+                    <div class="mb-5">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Peminjaman</label>
+                        <select required class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary bg-gray-50 focus:bg-white transition">
                             <option value="">-- Pilih Tujuan --</option>
                             <option value="Praktikum">Praktikum / Tugas Kelas</option>
                             <option value="Proyek Akhir">Proyek Akhir / Skripsi</option>
                             <option value="Lomba">Persiapan Lomba/Kompetisi</option>
+                            <option value="Penelitian">Penelitian Lab</option>
                         </select>
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Rencana Tanggal Pengembalian</label>
-                        <input type="date" required class="w-full p-2 border border-gray-300 rounded-lg outline-none focus:border-primary">
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Rencana Tanggal Pengembalian</label>
+                        <input type="date" required class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary bg-gray-50 focus:bg-white transition">
                     </div>
                     <div class="flex gap-3">
-                        <button type="button" onclick="closeModal('bookingModal')" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg transition">Batal</button>
-                        <button type="submit" class="flex-1 bg-secondary hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition">Konfirmasi</button>
+                        <button type="button" onclick="closeModal('bookingModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl transition">Batal</button>
+                        <button type="submit" class="flex-1 bg-secondary hover:bg-[#238bb3] text-white font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg">Konfirmasi</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- MODAL: TIKET SUKSES -->
-    <div id="ticketModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full overflow-hidden text-center">
-            <div class="bg-green-500 p-6 text-white">
-                <i class="fa-solid fa-circle-check text-5xl mb-2"></i>
-                <h3 class="font-bold text-xl">Reservasi Berhasil!</h3>
+    <!-- MODAL MAHASISWA: TIKET SUKSES -->
+    <div id="ticketModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden text-center border border-gray-100">
+            <div class="bg-green-500 p-8 text-white relative overflow-hidden">
+                <i class="fa-solid fa-check absolute -right-4 -bottom-4 text-7xl text-white opacity-20"></i>
+                <div class="relative z-10">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
+                        <i class="fa-solid fa-check text-3xl text-green-500"></i>
+                    </div>
+                    <h3 class="font-bold text-2xl">Reservasi Berhasil!</h3>
+                </div>
             </div>
             <div class="p-6">
-                <p class="text-gray-600 text-sm mb-4">Tunjukkan kode tiket ini kepada Asisten Lab untuk mengambil komponen.</p>
+                <p class="text-gray-600 text-sm mb-5">Tunjukkan kode tiket dan QR Code ini kepada Asisten Lab RES untuk validasi pengambilan.</p>
                 
-                <!-- Mockup QR Code -->
-                <div class="border-2 border-dashed border-gray-300 p-4 rounded-lg inline-block mb-4">
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CARES-TKT-9981" alt="QR Code" class="mx-auto w-32 h-32">
+                <div class="border-2 border-dashed border-secondary p-3 rounded-xl inline-block mb-5 bg-gray-50">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CARES-TKT-9981" alt="QR Code" class="mx-auto w-32 h-32 rounded">
                 </div>
                 
-                <div class="bg-gray-100 p-2 rounded text-lg font-mono font-bold tracking-widest text-gray-800 mb-6">
+                <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl text-xl font-mono font-bold tracking-widest text-primary mb-6">
                     TKT-<span id="ticketNumber">9981</span>
                 </div>
                 
-                <button onclick="finishBooking()" class="w-full bg-primary hover:bg-blue-800 text-white font-bold py-2 px-4 rounded-lg transition">Selesai & Kembali ke Katalog</button>
+                <button onclick="finishBooking()" class="w-full bg-primary hover:bg-darker text-white font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg">Selesai & Kembali</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN: VERIFIKASI ALAT -->
+    <div id="adminVerifyModal" class="hidden fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-600">
+            <div class="bg-secondary p-5 text-gray-900 flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-clipboard-check"></i> Verifikasi Pengambilan</h3>
+                <button onclick="closeModal('adminVerifyModal')" class="text-gray-900 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+            </div>
+            <div class="p-6 text-gray-200">
+                <div class="flex justify-center mb-4">
+                    <div class="bg-green-500/20 text-green-400 px-4 py-2 rounded-full border border-green-500/50 flex items-center gap-2 text-sm font-bold">
+                        <i class="fa-solid fa-check-circle"></i> Data Cocok
+                    </div>
+                </div>
+                
+                <div class="space-y-4 bg-gray-900 p-4 rounded-xl border border-gray-700">
+                    <div>
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">Tiket Mahasiswa</p>
+                        <p class="font-mono text-lg text-secondary font-bold">TKT-9981</p>
+                    </div>
+                    <div class="border-t border-gray-700 pt-3">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">Identitas Peminjam</p>
+                        <p class="font-bold">Lutfi Maulana</p>
+                        <p class="text-sm text-gray-400">NIM: 245150301111021</p>
+                    </div>
+                    <div class="border-t border-gray-700 pt-3">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">Alat Fisik Ter-Scan</p>
+                        <p class="font-bold text-blue-400"><i class="fa-solid fa-microchip mr-1"></i> Arduino Uno R3</p>
+                        <p class="text-sm text-gray-400">ID Inventaris: #ARD-001</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex gap-3">
+                    <button onclick="closeModal('adminVerifyModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition border border-gray-600">Batal</button>
+                    <button onclick="confirmAdminCheckOut()" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition shadow-[0_0_15px_rgba(34,197,94,0.3)]">Konfirmasi Check-out</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // Data Simulasi Alat Lab (Database Mockup)
+        // Data Simulasi Alat Lab
         const toolsData = [
             { id: 1, name: "Arduino Uno R3", category: "Mikrokontroler", stock: 12, icon: "fa-microchip" },
             { id: 2, name: "NodeMCU ESP8266", category: "IoT Board", stock: 5, icon: "fa-wifi" },
-            { id: 3, name: "Raspberry Pi 4 Model B", category: "SBC", stock: 0, icon: "fa-server" }, // Stok kosong untuk simulasi
+            { id: 3, name: "Raspberry Pi 4 Model B", category: "Single Board Computer", stock: 0, icon: "fa-server" }, 
             { id: 4, name: "Sensor Ultrasonik HC-SR04", category: "Sensor", stock: 20, icon: "fa-satellite-dish" },
             { id: 5, name: "Motor Servo SG90", category: "Aktuator", stock: 8, icon: "fa-gear" },
             { id: 6, name: "Kabel Jumper Male-Female", category: "Aksesoris", stock: 50, icon: "fa-plug" },
+            { id: 7, name: "Modul Kamera OV7670", category: "Modul", stock: 3, icon: "fa-camera" },
+            { id: 8, name: "Breadboard 400 Tie-Points", category: "Aksesoris", stock: 15, icon: "fa-border-all" }
         ];
 
         let selectedToolId = null;
 
-        // Fungsi Render Katalog
+        // Render Katalog Mahasiswa
         function renderCatalog() {
             const grid = document.getElementById('catalogGrid');
             grid.innerHTML = '';
 
             toolsData.forEach(tool => {
                 const isOutOfStock = tool.stock === 0;
-                
-                // Card HTML
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-xl shadow border border-gray-100 overflow-hidden flex flex-col transition hover:shadow-lg ${isOutOfStock ? 'opacity-75' : ''}`;
+                card.className = `bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${isOutOfStock ? 'opacity-80 grayscale-[30%]' : ''}`;
                 
                 card.innerHTML = `
-                    <div class="p-6 flex-1">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 rounded-lg bg-blue-50 text-primary flex items-center justify-center text-2xl">
+                    <div class="p-6 flex-1 relative">
+                        <div class="flex justify-between items-start mb-5">
+                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-primary flex items-center justify-center text-3xl shadow-inner border border-blue-200/50">
                                 <i class="fa-solid ${tool.icon}"></i>
                             </div>
-                            <span class="text-xs font-bold px-2 py-1 rounded-full ${isOutOfStock ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}">
-                                ${isOutOfStock ? 'Stok Habis' : 'Tersedia: ' + tool.stock}
+                            <span class="text-xs font-bold px-2.5 py-1.5 rounded-lg ${isOutOfStock ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-green-100 text-green-700 border border-green-200'}">
+                                ${isOutOfStock ? 'Stok Kosong' : '<i class="fa-solid fa-box mr-1"></i> Sisa ' + tool.stock}
                             </span>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-800 mb-1">${tool.name}</h3>
-                        <p class="text-sm text-gray-500">${tool.category}</p>
+                        <h3 class="font-bold text-lg text-gray-800 mb-1 leading-tight">${tool.name}</h3>
+                        <p class="text-sm text-secondary font-medium">${tool.category}</p>
                     </div>
                     <div class="px-6 pb-6 mt-auto">
                         <button 
                             onclick="openBookingModal(${tool.id})" 
-                            class="w-full py-2 rounded-lg font-bold transition flex justify-center items-center gap-2
-                            ${isOutOfStock ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-blue-800 text-white'}"
+                            class="w-full py-2.5 rounded-xl font-bold transition duration-200 flex justify-center items-center gap-2
+                            ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white shadow-sm'}"
                             ${isOutOfStock ? 'disabled' : ''}>
-                            <i class="fa-regular fa-calendar-check"></i> Reservasi
+                            <i class="fa-solid fa-bookmark"></i> Booking Alat
                         </button>
                     </div>
                 `;
@@ -218,65 +374,82 @@
             });
         }
 
-        // --- Alur UC-01: Autentikasi ---
+        // --- Logika Role-Based Login ---
         function handleLogin(event) {
-            event.preventDefault(); // Mencegah halaman refresh
+            event.preventDefault();
             const nim = document.getElementById('nimInput').value;
+            const password = document.getElementById('passwordInput').value;
             
-            // Set nama user (simulasi)
-            document.getElementById('userNameDisplay').innerText = "Mahasiswa (" + nim + ")";
-            
-            // Pindah layar
             document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('dashboardScreen').classList.remove('hidden');
-            
-            renderCatalog();
+
+            if (nim === 'admin' && password === '123') {
+                // LOGIN SEBAGAI ADMIN / ASISTEN LAB
+                document.getElementById('adminUserNameDisplay').innerText = "Admin Lab RES";
+                document.getElementById('adminDashboardScreen').classList.remove('hidden');
+            } else {
+                // LOGIN SEBAGAI MAHASISWA
+                document.getElementById('userNameDisplay').innerText = "Mahasiswa (" + nim + ")";
+                document.getElementById('dashboardScreen').classList.remove('hidden');
+                renderCatalog();
+            }
         }
 
         function handleLogout() {
             document.getElementById('dashboardScreen').classList.add('hidden');
+            document.getElementById('adminDashboardScreen').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             document.getElementById('loginForm').reset();
         }
 
-        // --- Alur UC-03: Reservasi ---
+        // --- Alur Mahasiswa: Reservasi ---
         function openBookingModal(toolId) {
             const tool = toolsData.find(t => t.id === toolId);
             if (!tool) return;
-            
             selectedToolId = toolId;
             document.getElementById('modalToolName').innerText = tool.name;
             document.getElementById('modalIcon').className = `fa-solid ${tool.icon}`;
-            
             document.getElementById('bookingModal').classList.remove('hidden');
         }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-
         function submitBooking(event) {
-            event.preventDefault(); // Mencegah halaman refresh
-            
-            // Generate nomor tiket random
+            event.preventDefault(); 
             const ticketNum = Math.floor(1000 + Math.random() * 9000);
             document.getElementById('ticketNumber').innerText = ticketNum;
-            
-            // Tutup modal form, buka modal tiket
             closeModal('bookingModal');
             document.getElementById('ticketModal').classList.remove('hidden');
             
-            // Simulasi kurangi stok (Berdasarkan skenario)
+            // Kurangi stok di memory (mockup)
             const toolIndex = toolsData.findIndex(t => t.id === selectedToolId);
-            if(toolIndex !== -1) {
-                toolsData[toolIndex].stock -= 1;
-            }
+            if(toolIndex !== -1) { toolsData[toolIndex].stock -= 1; }
         }
 
         function finishBooking() {
             closeModal('ticketModal');
             document.getElementById('bookingForm').reset();
-            renderCatalog(); // Refresh stok di layar
+            renderCatalog(); 
+        }
+
+        // --- Alur Admin: Scan & Verifikasi (UC-05) ---
+        function simulateAdminScan() {
+            // Memunculkan loading sebentar lalu membuka modal verifikasi
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memindai...';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                document.getElementById('adminVerifyModal').classList.remove('hidden');
+            }, 800);
+        }
+
+        function confirmAdminCheckOut() {
+            closeModal('adminVerifyModal');
+            alert('Sukses! Sistem telah mengurangi stok alat pada inventaris secara permanen dan mencatat waktu check-out.');
+        }
+
+        // --- Utility ---
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
         }
     </script>
 </body>
