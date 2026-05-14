@@ -554,12 +554,7 @@
                 </div>
                 <button onclick="window.closeModal('ticketModal')" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-xl text-sm">
                     Selesai & Kembali
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL ADMIN: VERIFIKASI ALAT -->
+        <!-- MODAL ADMIN: VERIFIKASI ALAT -->
     <div id="adminVerifyModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-secondary/30" style="background:#0f1e33;">
             <div class="p-5 text-gray-900 flex justify-between items-center" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
@@ -590,11 +585,16 @@
                         <p class="text-xs text-yellow-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Konfirmasi akan mengurangi stok di Database</p>
                     </div>
                 </div>
-                <div class="mt-6 flex gap-3">
-                    <button onclick="window.closeModal('adminVerifyModal')" class="flex-1 bg-white/8 hover:bg-white/15 text-white font-bold py-3 px-4 rounded-xl transition border border-white/10 text-sm">Batal</button>
-                    <button id="btnConfirmCheckout" onclick="window.confirmAdminCheckOut()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/30 flex justify-center items-center text-sm">
-                        Konfirmasi Check-out
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button id="btnRejectCheckout" onclick="window.rejectAdminCheckOut()" class="flex-1 bg-red-500/10 hover:bg-red-500/25 text-red-500 font-bold py-3 px-4 rounded-xl transition border border-red-500/30 text-sm">
+                         Tolak Peminjaman
                     </button>
+                    <div class="flex flex-1 gap-3">
+                        <button onclick="window.closeModal('adminVerifyModal')" class="flex-1 bg-white/8 hover:bg-white/15 text-white font-bold py-3 px-4 rounded-xl transition border border-white/10 text-sm">Batal</button>
+                        <button id="btnConfirmCheckout" onclick="window.confirmAdminCheckOut()" class="flex-[1.5] bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/30 flex justify-center items-center text-sm">
+                            Konfirmasi Check-out
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1114,6 +1114,34 @@
                 showToast("Gagal memproses check-out.", "error");
             } finally {
                 btn.innerHTML = 'Konfirmasi Check-out';
+                btn.disabled = false;
+                selectedBookingForCheckout = null;
+                isSubmitting = false;
+            }
+        };
+
+        window.rejectAdminCheckOut = async () => {
+            if (!auth.currentUser || !selectedBookingForCheckout || isSubmitting) return;
+
+            const confirmReject = confirm("Apakah Anda yakin ingin menolak peminjaman ini?");
+            if (!confirmReject) return;
+
+            const btn = document.getElementById('btnRejectCheckout');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btn.disabled = true;
+            isSubmitting = true;
+
+            try {
+                await updateDoc(doc(db, bookingsPath, selectedBookingForCheckout.id), { status: 'rejected' });
+                window.closeModal('adminVerifyModal');
+                showToast(`Peminjaman ${selectedBookingForCheckout.ticketNum} ditolak.`, "error");
+                document.getElementById('adminSearchInput').value = '';
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal memproses penolakan.", "error");
+            } finally {
+                btn.innerHTML = originalText;
                 btn.disabled = false;
                 selectedBookingForCheckout = null;
                 isSubmitting = false;
