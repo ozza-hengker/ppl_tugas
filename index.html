@@ -287,42 +287,37 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 mb-6 text-center leading-relaxed">
-                    <p class="font-bold mb-1 text-blue-900">💡 Info Akun Demo</p>
-                    Mahasiswa: Isi Nama, NIM, No. Telepon & password bebas<br>
-                    Admin: NIM <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
+                <!-- INFO ADMIN -->
+                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-3 text-xs text-blue-800 mb-5 text-center leading-relaxed">
+                    <p class="font-bold mb-0.5 text-blue-900">💡 Akses Admin</p>
+                    NIM <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
                 </div>
 
-                <form onsubmit="window.handleLogin(event)" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="text" id="namaInput" required
-                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
-                                placeholder="Nama lengkap Anda">
-                        </div>
-                    </div>
+                <!-- TAB SWITCHER -->
+                <div class="flex bg-gray-100 rounded-2xl p-1 mb-6">
+                    <button id="tabLoginBtn" onclick="window.switchAuthTab('login')"
+                        class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-white text-primary shadow-sm">
+                        <i class="fa-solid fa-right-to-bracket mr-1.5"></i> Masuk
+                    </button>
+                    <button id="tabRegisterBtn" onclick="window.switchAuthTab('register')"
+                        class="flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-gray-500">
+                        <i class="fa-solid fa-user-plus mr-1.5"></i> Daftar
+                    </button>
+                </div>
+
+                <!-- FORM LOGIN -->
+                <form id="formLogin" onsubmit="window.handleLogin(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <i class="fa-regular fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="nimInput" required
                                 class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
                                 placeholder="Masukkan NIM Anda">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">No. Telepon <span class="text-red-500">*</span></label>
-                        <div class="relative">
-                            <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                            <input type="tel" id="teleponInput" required
-                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
-                                placeholder="Contoh: 08123456789">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kata Sandi</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kata Sandi <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="password" id="passwordInput" required
@@ -331,11 +326,62 @@
                         </div>
                     </div>
                     <div class="pt-2">
-                        <button type="submit" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2">
+                        <button type="submit" id="btnLogin" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2">
                             Masuk ke Sistem <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
+                    <p class="text-center text-xs text-gray-500 pt-1">Belum punya akun? <button type="button" onclick="window.switchAuthTab('register')" class="text-primary font-semibold hover:underline">Daftar sekarang</button></p>
                 </form>
+
+                <!-- FORM REGISTER -->
+                <form id="formRegister" onsubmit="window.handleRegister(event)" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="regNamaInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Nama lengkap Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">No. Telepon <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="tel" id="regTeleponInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Contoh: 08123456789">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-regular fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="regNimInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Masukkan NIM Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kata Sandi <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="password" id="regPasswordInput" required minlength="6"
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Min. 6 karakter">
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" id="btnRegister" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2">
+                            Buat Akun <i class="fa-solid fa-user-plus"></i>
+                        </button>
+                    </div>
+                    <p class="text-center text-xs text-gray-500 pt-1">Sudah punya akun? <button type="button" onclick="window.switchAuthTab('login')" class="text-primary font-semibold hover:underline">Masuk di sini</button></p>
+                </form>
+
+                <!-- Hidden inputs untuk kompatibilitas kode lama -->
+                <input type="hidden" id="namaInput">
+                <input type="hidden" id="teleponInput">
             </div>
         </div>
     </div>
@@ -807,7 +853,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, toolsPath, bookingsPath;
         let currentUser = null;
@@ -1100,15 +1146,122 @@
             });
         };
 
-        // AUTH HANDLERS
-        window.handleLogin = (e) => {
+        // =============================================
+        // AUTH HELPERS
+        // =============================================
+        const usersPath = () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'cares-local-app';
+            return `artifacts/${appId}/public/data/users`;
+        };
+
+        // Simple hash untuk password (tidak untuk produksi skala besar, tapi cukup untuk proteksi dasar)
+        const simpleHash = async (str) => {
+            const msgBuffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        };
+
+        // Tab switcher
+        window.switchAuthTab = (tab) => {
+            const loginForm = document.getElementById('formLogin');
+            const registerForm = document.getElementById('formRegister');
+            const loginBtn = document.getElementById('tabLoginBtn');
+            const registerBtn = document.getElementById('tabRegisterBtn');
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                loginBtn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-white text-primary shadow-sm';
+                registerBtn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-gray-500';
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                registerBtn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 bg-white text-primary shadow-sm';
+                loginBtn.className = 'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 text-gray-500';
+            }
+        };
+
+        // =============================================
+        // REGISTER
+        // =============================================
+        window.handleRegister = async (e) => {
             e.preventDefault();
+            const btn = document.getElementById('btnRegister');
+            const originalText = btn.innerHTML;
             try {
-                const nama = document.getElementById('namaInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const nama = document.getElementById('regNamaInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const telepon = document.getElementById('regTeleponInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const nim = document.getElementById('regNimInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const pass = document.getElementById('regPasswordInput').value;
+
+                if (!nama || !telepon || !nim || !pass) {
+                    showToast("Semua kolom wajib diisi!", "error");
+                    return;
+                }
+                if (nim.toLowerCase() === 'admin') {
+                    showToast("NIM tidak boleh 'admin'!", "error");
+                    return;
+                }
+                if (pass.length < 6) {
+                    showToast("Kata sandi minimal 6 karakter!", "error");
+                    return;
+                }
+
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mendaftarkan...';
+                btn.disabled = true;
+
+                // Cek apakah NIM sudah terdaftar
+                const userRef = doc(db, usersPath(), nim);
+                const userSnap = await getDoc(userRef);
+                if (userSnap.exists()) {
+                    showToast("NIM ini sudah terdaftar! Silakan login.", "error");
+                    return;
+                }
+
+                const hashedPass = await simpleHash(pass);
+                await setDoc(userRef, {
+                    nama,
+                    telepon,
+                    nim,
+                    password: hashedPass,
+                    createdAt: new Date().toISOString()
+                });
+
+                showToast(`Akun berhasil dibuat! Silakan login, ${nama}.`);
+                // Reset form & pindah ke tab login
+                document.getElementById('regNamaInput').value = '';
+                document.getElementById('regTeleponInput').value = '';
+                document.getElementById('regNimInput').value = '';
+                document.getElementById('regPasswordInput').value = '';
+                window.switchAuthTab('login');
+                document.getElementById('nimInput').value = nim;
+
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal mendaftar: " + err.message, "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
+        // =============================================
+        // LOGIN
+        // =============================================
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnLogin');
+            const originalText = btn.innerHTML;
+            try {
                 const nim = document.getElementById('nimInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                const telepon = document.getElementById('teleponInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const pass = document.getElementById('passwordInput').value.trim();
-                
+
+                if (!nim || !pass) {
+                    showToast("NIM dan kata sandi wajib diisi!", "error");
+                    return;
+                }
+
+                // Cek admin
                 if (nim === 'admin' && pass === '123') {
                     currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-' };
                     document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
@@ -1116,29 +1269,54 @@
                     renderAdminPendingTickets();
                     renderAdminInventory();
                     showToast('Login berhasil sebagai Admin');
-                } else {
-                    if (!nama || !nim || !telepon) {
-                        showToast("Lengkapi Nama, NIM, dan No. Telepon!", "error");
-                        return;
-                    }
-                    currentUser = { role: 'student', id: nim, nama: nama, telepon: telepon };
-                    document.getElementById('userNameDisplay').innerText = `${nama} (${nim})`;
-                    showScreen('dashboardScreen');
-                    renderCatalog();
-                    showToast(`Selamat datang, ${nama}`);
+                    return;
                 }
+
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memeriksa...';
+                btn.disabled = true;
+
+                const userRef = doc(db, usersPath(), nim);
+                const userSnap = await getDoc(userRef);
+
+                if (!userSnap.exists()) {
+                    showToast("NIM tidak ditemukan. Silakan daftar terlebih dahulu!", "error");
+                    return;
+                }
+
+                const userData = userSnap.data();
+                const hashedPass = await simpleHash(pass);
+                if (userData.password !== hashedPass) {
+                    showToast("Kata sandi salah!", "error");
+                    return;
+                }
+
+                // Login sukses
+                // Update hidden inputs for backward compatibility
+                document.getElementById('namaInput').value = userData.nama;
+                document.getElementById('teleponInput').value = userData.telepon;
+
+                currentUser = { role: 'student', id: nim, nama: userData.nama, telepon: userData.telepon };
+                document.getElementById('userNameDisplay').innerText = `${userData.nama} (${nim})`;
+                showScreen('dashboardScreen');
+                renderCatalog();
+                showToast(`Selamat datang, ${userData.nama}!`);
+
             } catch (err) {
                 console.error(err);
                 showToast("Terjadi error sistem: " + err.message, "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         };
 
         window.handleLogout = () => {
             currentUser = null;
-            document.getElementById('namaInput').value = '';
             document.getElementById('nimInput').value = '';
-            document.getElementById('teleponInput').value = '';
             document.getElementById('passwordInput').value = '';
+            document.getElementById('namaInput').value = '';
+            document.getElementById('teleponInput').value = '';
+            window.switchAuthTab('login');
             showScreen('loginScreen');
         };
 
