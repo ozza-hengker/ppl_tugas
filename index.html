@@ -6,7 +6,6 @@
     <title>CARES - Component Allocation for Robotics & Embedded Systems</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Library Asli untuk Scan QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         tailwind.config = {
@@ -31,7 +30,6 @@
         ::-webkit-scrollbar-thumb { background: #2CA3D1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #176B9E; }
 
-        /* Kustomisasi UI bawaan html5-qrcode agar lebih cantik dan nyambung dengan tema gelap */
         #reader { border: 2px solid #374151 !important; border-radius: 1rem; overflow: hidden; background: #000; }
         #reader button { background-color: #2CA3D1; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin: 0.5rem; cursor: pointer; font-weight: bold; border: none; }
         #reader button:hover { background-color: #176B9E; }
@@ -39,6 +37,21 @@
         #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
         #reader__dashboard_section_swaplink { color: #2CA3D1 !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
         #reader video { border-radius: 1rem; object-fit: cover; }
+
+        @keyframes scanline {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 3px;
+            background: #2CA3D1;
+            box-shadow: 0 0 10px #2CA3D1, 0 0 20px #2CA3D1;
+            animation: scanline 2.5s infinite linear;
+        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col relative overflow-x-hidden">
@@ -50,8 +63,8 @@
     </div>
 
     <!-- TOAST NOTIFICATION -->
-    <div id="toastNotification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-y-24 flex items-center gap-3">
-        <i class="fa-solid fa-circle-check text-xl"></i>
+    <div id="toastNotification" class="fixed bottom-4 right-4 text-white px-6 py-3 rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-y-24 flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-xl"></i>
         <span id="toastMessage" class="font-medium">Notifikasi</span>
     </div>
 
@@ -139,12 +152,16 @@
                 <div class="flex justify-between h-16">
                     <div class="flex items-center gap-3">
                         <div class="bg-secondary text-white p-1.5 rounded-lg"><i class="fa-solid fa-qrcode text-xl"></i></div>
-                        <span class="font-bold text-xl tracking-wider text-gray-100">CARES <span class="text-xs font-normal bg-secondary px-2 py-0.5 rounded ml-1 text-white">Admin</span></span>
+                        <span class="font-bold text-xl tracking-wider text-gray-100 hidden sm:inline-block">CARES <span class="text-xs font-normal bg-secondary px-2 py-0.5 rounded ml-1 text-white">Admin</span></span>
                     </div>
+                    
+                    <!-- ADMIN TABS -->
+                    <div class="flex gap-2">
+                        <button onclick="window.switchAdminView('scanner')" id="tabScanner" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition">Scanner</button>
+                        <button onclick="window.switchAdminView('inventory')" id="tabInventory" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition">Inventaris</button>
+                    </div>
+
                     <div class="flex items-center gap-4">
-                        <span class="text-sm hidden sm:block bg-gray-700 px-3 py-1.5 rounded-full border border-gray-600">
-                            <i class="fa-solid fa-shield-halved text-secondary mr-1"></i> <span id="adminUserNameDisplay">Asisten Lab</span>
-                        </span>
                         <button onclick="window.handleLogout()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition border border-red-500/50">
                             <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
                         </button>
@@ -153,36 +170,65 @@
             </div>
         </nav>
 
-        <main class="flex-1 flex flex-col items-center justify-start p-6 overflow-y-auto">
-            <div class="text-center mb-6 mt-4">
-                <h2 class="text-3xl font-bold text-white tracking-wide">Pemindai & Validasi</h2>
-                <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code tiket mahasiswa.</p>
-            </div>
+        <main class="flex-1 flex flex-col items-center justify-start p-6 overflow-y-auto w-full">
+            
+            <!-- SECTION A: SCANNER -->
+            <div id="adminScannerSection" class="w-full flex flex-col items-center">
+                <div class="text-center mb-6 mt-4">
+                    <h2 class="text-3xl font-bold text-white tracking-wide">Pemindai & Validasi</h2>
+                    <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code tiket mahasiswa.</p>
+                </div>
 
-            <!-- Area Scanner Kamera Asli -->
-            <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full mb-8">
-                <!-- Elemen div ini akan digantikan oleh kamera dari html5-qrcode -->
-                <div id="reader" width="100%" class="bg-black"></div>
+                <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full mb-8">
+                    <div id="reader" width="100%" class="bg-black"></div>
 
-                <div class="mt-6 flex flex-col gap-4">
-                    <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
-                        <input type="text" id="adminSearchInput" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase" placeholder="Input Manual: TKT-XXXX">
-                        <button type="submit" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 rounded-xl font-bold transition shadow-[0_0_10px_rgba(44,163,209,0.3)]">Cari</button>
-                    </form>
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-600"></div></div>
-                        <div class="relative flex justify-center text-sm"><span class="px-2 bg-gray-800 text-gray-400">Atau lihat tiket yang mengantre</span></div>
+                    <div class="mt-6 flex flex-col gap-4">
+                        <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
+                            <input type="text" id="adminSearchInput" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase" placeholder="Input Manual: TKT-XXXX">
+                            <button type="submit" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 rounded-xl font-bold transition shadow-[0_0_10px_rgba(44,163,209,0.3)]">Cari</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="w-full max-w-2xl bg-gray-800 rounded-2xl border border-gray-700 p-5 mb-10">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)</h3>
+                    <div id="pendingTicketsList" class="flex flex-col gap-3">
+                        <!-- Di-render oleh JavaScript -->
                     </div>
                 </div>
             </div>
 
-            <!-- Daftar Tiket Pending -->
-            <div class="w-full max-w-2xl bg-gray-800 rounded-2xl border border-gray-700 p-5 mb-10">
-                <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)</h3>
-                <div id="pendingTicketsList" class="flex flex-col gap-3">
-                    <!-- Di-render oleh JavaScript -->
+            <!-- SECTION B: KELOLA INVENTARIS -->
+            <div id="adminInventorySection" class="hidden w-full max-w-5xl">
+                <div class="flex justify-between items-center mb-6 mt-4">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white tracking-wide">Kelola Inventaris</h2>
+                        <p class="text-gray-400 mt-1">Tambah, edit, atau hapus ketersediaan komponen lab.</p>
+                    </div>
+                    <button onclick="window.openToolModal()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-plus"></i> Tambah Alat
+                    </button>
+                </div>
+
+                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden shadow-2xl">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-white">
+                            <thead class="bg-gray-900 border-b border-gray-700 text-gray-400 uppercase text-xs">
+                                <tr>
+                                    <th class="px-6 py-4">Alat</th>
+                                    <th class="px-6 py-4">Kategori</th>
+                                    <th class="px-6 py-4 text-center">Stok Real-time</th>
+                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminInventoryTableBody" class="divide-y divide-gray-700">
+                                <!-- Di-render oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+
         </main>
     </div>
 
@@ -245,7 +291,6 @@
                     <span id="ticketNumberDisplay">TKT-0000</span>
                 </div>
                 
-                <!-- QR CODE NYATA (Di-generate otomatis dari nomor tiket) -->
                 <div class="border-2 border-dashed border-secondary p-3 rounded-xl inline-block mb-5 bg-gray-50">
                     <img id="qrCodeImage" src="" alt="QR Code Tiket" class="mx-auto w-32 h-32 rounded">
                 </div>
@@ -296,27 +341,77 @@
         </div>
     </div>
 
+    <!-- MODAL ADMIN: FORM KELOLA ALAT -->
+    <div id="adminToolModal" class="hidden fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-600">
+            <div class="bg-gray-900 p-5 border-b border-gray-700 text-white flex justify-between items-center">
+                <h3 id="toolModalTitle" class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-box-open text-secondary"></i> Tambah Alat</h3>
+                <button onclick="window.closeModal('adminToolModal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            <div class="p-6">
+                <form onsubmit="window.submitTool(event)">
+                    <input type="hidden" id="formToolId">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-300 mb-2">Nama Alat</label>
+                        <input type="text" id="formToolName" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition" placeholder="Cth: Arduino Uno R3">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-300 mb-2">Kategori</label>
+                        <input type="text" id="formToolCategory" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition" placeholder="Cth: Mikrokontroler">
+                    </div>
+                    <div class="flex gap-4 mb-6">
+                        <div class="flex-1">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Jumlah Stok</label>
+                            <input type="number" id="formToolStock" required min="0" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">Pilih Ikon</label>
+                            <select id="formToolIcon" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition">
+                                <option value="fa-microchip">Microchip</option>
+                                <option value="fa-wifi">WiFi / NodeMCU</option>
+                                <option value="fa-server">Server / Pi</option>
+                                <option value="fa-satellite-dish">Sensor</option>
+                                <option value="fa-gear">Aktuator / Motor</option>
+                                <option value="fa-plug">Kabel / Aksesoris</option>
+                                <option value="fa-camera">Kamera</option>
+                                <option value="fa-border-all">Breadboard</option>
+                                <option value="fa-screwdriver-wrench">Peralatan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="window.closeModal('adminToolModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition border border-gray-600">Batal</button>
+                        <button type="submit" id="btnSaveTool" class="flex-1 bg-secondary hover:bg-blue-400 text-gray-900 font-bold py-3 px-4 rounded-xl transition shadow-lg">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- ================= FIREBASE & LOGIC ================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global State & Config
         let app, auth, db, toolsPath, bookingsPath;
-        let currentUser = null; // { id, role }
+        let currentUser = null; 
         let selectedToolForBooking = null;
         let selectedBookingForCheckout = null; 
         
         let allTools = [];
         let allBookings = [];
 
-        // Scanner State
         let html5QrcodeScanner = null;
 
         // UI Helpers
-        const showToast = (message) => {
+        const showToast = (message, type = 'success') => {
             const toast = document.getElementById('toastNotification');
+            const icon = document.getElementById('toastIcon');
+            
+            toast.className = `fixed bottom-4 right-4 text-white px-6 py-3 rounded-xl shadow-lg z-[110] transform transition-transform duration-300 flex items-center gap-3 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
+            icon.className = type === 'error' ? 'fa-solid fa-circle-exclamation text-xl' : 'fa-solid fa-circle-check text-xl';
+            
             document.getElementById('toastMessage').innerText = message;
             toast.classList.remove('translate-y-24');
             setTimeout(() => { toast.classList.add('translate-y-24'); }, 3500);
@@ -328,9 +423,8 @@
             });
             document.getElementById(screenId).classList.remove('hidden');
 
-            // Manajemen Kamera: Nyalakan hanya saat di Dashboard Admin
             if (screenId === 'adminDashboardScreen') {
-                startCamera();
+                window.switchAdminView('scanner'); // Default view
             } else {
                 stopCamera();
             }
@@ -338,51 +432,55 @@
 
         window.closeModal = (modalId) => { 
             document.getElementById(modalId).classList.add('hidden'); 
-            // Jika admin menutup modal verifikasi (batal), nyalakan kameranya lagi
-            if (modalId === 'adminVerifyModal' && currentUser?.role === 'admin') {
+            if (modalId === 'adminVerifyModal' && currentUser?.role === 'admin' && !document.getElementById('adminScannerSection').classList.contains('hidden')) {
                 startCamera();
+            }
+        };
+
+        // --- MANAJEMEN TAB ADMIN ---
+        window.switchAdminView = (view) => {
+            const scannerSec = document.getElementById('adminScannerSection');
+            const invSec = document.getElementById('adminInventorySection');
+            const tabScan = document.getElementById('tabScanner');
+            const tabInv = document.getElementById('tabInventory');
+
+            if (view === 'scanner') {
+                scannerSec.classList.remove('hidden');
+                invSec.classList.add('hidden');
+                tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
+                tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
+                startCamera();
+            } else {
+                scannerSec.classList.add('hidden');
+                invSec.classList.remove('hidden');
+                tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
+                tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
+                stopCamera();
+                renderAdminInventory();
             }
         };
 
         // --- MANAJEMEN KAMERA QR CODE ---
         const startCamera = () => {
-            if (html5QrcodeScanner) return; // Jika sudah nyala, biarkan
-            
-            // Konfigurasi Scanner
-            html5QrcodeScanner = new Html5QrcodeScanner(
-                "reader", 
-                { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, 
-                /* verbose= */ false
-            );
-            
-            // Memulai Scanner
+            if (html5QrcodeScanner) return; 
+            html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
             html5QrcodeScanner.render(onScanSuccess, onScanFailure);
         };
 
         const stopCamera = () => {
             if (html5QrcodeScanner) {
-                html5QrcodeScanner.clear().catch(error => {
-                    console.error("Gagal mematikan scanner.", error);
-                });
+                html5QrcodeScanner.clear().catch(e => console.error(e));
                 html5QrcodeScanner = null;
             }
         };
 
-        // Jika kamera berhasil membaca kode QR
         function onScanSuccess(decodedText, decodedResult) {
-            // Matikan kamera sementara agar tidak terscan berulang-ulang
             stopCamera(); 
-            // Bunyikan suara beep kecil jika didukung browser
             try { navigator.vibrate && navigator.vibrate(200); } catch(e){}
-            
-            // Proses teks QR code (Harusnya berisi TKT-XXXX)
             window.verifyTicket(decodedText.trim().toUpperCase());
         }
 
-        // Jika kamera belum menemukan QR Code
-        function onScanFailure(error) {
-            // Biarkan saja, terus mencari
-        }
+        function onScanFailure(error) {}
 
 
         // INITIALIZE FIREBASE
@@ -436,7 +534,6 @@
                     <div class='text-center bg-white p-6 rounded-2xl shadow-xl max-w-md mx-4'>
                         <i class='fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4'></i>
                         <p class='text-red-600 font-bold text-lg mb-2'>Gagal Terhubung ke Database!</p>
-                        <p class='text-sm text-gray-600 mb-4'>Pesan Error Asli dari Firebase:</p>
                         <div class='bg-red-50 p-3 rounded-lg text-xs text-left text-red-800 break-words font-mono mb-4 border border-red-200'>
                             ${error.message}
                         </div>
@@ -445,7 +542,6 @@
             }
         };
 
-        // SEED DATA JIKA KOSONG (Katalog Alat Awal)
         const seedDataIfEmpty = async () => {
             const toolsCol = collection(db, toolsPath);
             const snapshot = await getDocs(toolsCol);
@@ -463,25 +559,24 @@
             }
         };
 
-        // SETUP REALTIME LISTENERS
         const setupRealtimeListeners = () => {
             onSnapshot(collection(db, toolsPath), (snapshot) => {
                 allTools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCatalog();
-            }, (error) => console.error("Snapshot error:", error));
+                if(currentUser?.role === 'student') renderCatalog();
+                if(currentUser?.role === 'admin' && !document.getElementById('adminInventorySection').classList.contains('hidden')) renderAdminInventory();
+            }, (error) => console.error(error));
 
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderAdminPendingTickets();
-            }, (error) => console.error("Snapshot error:", error));
+                if(currentUser?.role === 'admin') renderAdminPendingTickets();
+            }, (error) => console.error(error));
         };
 
-        // RENDER UI: KATALOG MAHASISWA
+        // --- RENDER MAHASISWA ---
         const renderCatalog = () => {
             const grid = document.getElementById('catalogGrid');
             if(!grid) return;
             grid.innerHTML = '';
-
             const sortedTools = [...allTools].sort((a,b) => a.name.localeCompare(b.name));
 
             sortedTools.forEach(tool => {
@@ -515,7 +610,44 @@
             });
         };
 
-        // RENDER UI: TIKET ADMIN
+        // --- RENDER ADMIN INVENTORY (CRUD) ---
+        const renderAdminInventory = () => {
+            const tbody = document.getElementById('adminInventoryTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            const sortedTools = [...allTools].sort((a,b) => a.name.localeCompare(b.name));
+
+            sortedTools.forEach(tool => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-700/50 transition";
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-secondary">
+                                <i class="fa-solid ${tool.icon}"></i>
+                            </div>
+                            <span class="font-bold text-gray-100">${tool.name}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">${tool.category}</td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="window.quickUpdateStock('${tool.id}', -1)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <span class="font-bold text-lg w-8">${tool.stock}</span>
+                            <button onclick="window.quickUpdateStock('${tool.id}', 1)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-green-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-plus text-xs"></i></button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="window.openToolModal('${tool.id}')" class="text-blue-400 hover:text-blue-300 mr-3 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button onclick="window.deleteTool('${tool.id}')" class="text-red-500 hover:text-red-400 transition"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        // --- RENDER ADMIN TICKETS ---
         const renderAdminPendingTickets = () => {
             const list = document.getElementById('pendingTicketsList');
             if(!list) return;
@@ -575,10 +707,26 @@
             showScreen('loginScreen');
         };
 
-        // [MAHASISWA] Mulai Booking
+        // --- SISTEM ANTI-SPAM (RATE LIMIT) MAHASISWA ---
         window.initiateBooking = (toolId) => {
             const tool = allTools.find(t => t.id === toolId);
             if(!tool || tool.stock <= 0) return;
+
+            // CEK 1: Ambil semua booking si user ini yang masih pending
+            const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
+            
+            // CEK 2: Cegah booking jika alat yang JELAS SAMA masih pending (Sesuai ide Evan)
+            const isAlreadyBooked = myPendingBookings.some(b => b.toolId === toolId);
+            if (isAlreadyBooked) {
+                showToast(`Gagal! Anda masih memiliki tiket pending untuk ${tool.name}. Tidak bisa spam!`, "error");
+                return;
+            }
+
+            // CEK 3: Batas pinjam maksimal 3 alat bersamaan
+            if (myPendingBookings.length >= 3) {
+                showToast("Batas maksimal 3 alat! Tunggu admin verifikasi tiket lainnya.", "error");
+                return;
+            }
 
             selectedToolForBooking = tool;
             document.getElementById('modalToolName').innerText = tool.name;
@@ -588,7 +736,6 @@
             document.getElementById('bookingModal').classList.remove('hidden');
         };
 
-        // [MAHASISWA] Submit Booking -> Tulis ke Firestore
         window.submitBooking = async (e) => {
             e.preventDefault();
             if(!auth.currentUser) return;
@@ -614,7 +761,6 @@
                 await addDoc(collection(db, bookingsPath), bookingData);
 
                 document.getElementById('ticketNumberDisplay').innerText = ticketNum;
-                // Generate QR Code Asli berdasarkan nomor tiket ke gambar
                 document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticketNum}`;
                 
                 window.closeModal('bookingModal');
@@ -622,29 +768,26 @@
                 
             } catch (err) {
                 console.error(err);
-                alert("Gagal membuat booking.");
+                showToast("Gagal membuat tiket reservasi.", "error");
             } finally {
                 btn.innerHTML = 'Konfirmasi Booking';
                 btn.disabled = false;
             }
         };
 
-        // [ADMIN] Pencarian Manual
+        // --- LOGIKA ADMIN SCANNER ---
         window.handleManualSearch = (e) => {
             e.preventDefault();
             const input = document.getElementById('adminSearchInput').value.trim().toUpperCase();
             if(input) window.verifyTicket(input);
         };
 
-        // [ADMIN] Buka Modal Verifikasi
         window.verifyTicket = (ticketNum) => {
-            // Hentikan kamera agar modal tidak ketutupan proses scan
             stopCamera();
 
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
             if(!booking) {
-                showToast("Tiket tidak ditemukan atau sudah selesai.");
-                // Nyalakan kamera lagi karena gagal nemu tiket
+                showToast("Tiket tidak ditemukan atau sudah diproses.", "error");
                 startCamera();
                 return;
             }
@@ -658,7 +801,6 @@
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
 
-        // [ADMIN] Konfirmasi Check-Out
         window.confirmAdminCheckOut = async () => {
             if(!auth.currentUser || !selectedBookingForCheckout) return;
 
@@ -671,7 +813,7 @@
                 const tool = allTools.find(t => t.id === toolId);
 
                 if(!tool || tool.stock <= 0) {
-                    alert("Error: Stok alat fisik habis atau data tidak sinkron!");
+                    showToast("Stok alat fisik habis di database!", "error");
                     return;
                 }
 
@@ -682,22 +824,99 @@
                 await updateDoc(toolRef, { stock: tool.stock - 1 });
 
                 window.closeModal('adminVerifyModal');
-                showToast(`Check-out Sukses! Stok ${tool.name} dikurangi.`);
+                showToast(`Check-out Sukses! Stok ${tool.name} berkurang.`);
                 document.getElementById('adminSearchInput').value = '';
 
             } catch (err) {
                 console.error(err);
-                alert("Gagal memproses check-out.");
+                showToast("Gagal memproses check-out.", "error");
             } finally {
                 btn.innerHTML = 'Konfirmasi Check-out';
                 btn.disabled = false;
                 selectedBookingForCheckout = null;
-                // Nyalakan kamera lagi untuk scan orang berikutnya
                 startCamera();
             }
         };
 
-        // Jalankan Firebase saat script load
+        // --- LOGIKA ADMIN INVENTARIS (CRUD) ---
+        window.openToolModal = (toolId = null) => {
+            if (toolId) {
+                // Mode Edit
+                const tool = allTools.find(t => t.id === toolId);
+                document.getElementById('toolModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-secondary"></i> Edit Alat`;
+                document.getElementById('formToolId').value = tool.id;
+                document.getElementById('formToolName').value = tool.name;
+                document.getElementById('formToolCategory').value = tool.category;
+                document.getElementById('formToolStock').value = tool.stock;
+                document.getElementById('formToolIcon').value = tool.icon;
+            } else {
+                // Mode Tambah Baru
+                document.getElementById('toolModalTitle').innerHTML = `<i class="fa-solid fa-box-open text-secondary"></i> Tambah Alat Baru`;
+                document.getElementById('formToolId').value = '';
+                document.getElementById('formToolName').value = '';
+                document.getElementById('formToolCategory').value = '';
+                document.getElementById('formToolStock').value = '0';
+                document.getElementById('formToolIcon').value = 'fa-microchip';
+            }
+            document.getElementById('adminToolModal').classList.remove('hidden');
+        };
+
+        window.submitTool = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveTool');
+            btn.disabled = true;
+            btn.innerText = 'Menyimpan...';
+
+            const id = document.getElementById('formToolId').value;
+            const name = document.getElementById('formToolName').value;
+            const category = document.getElementById('formToolCategory').value;
+            const stock = parseInt(document.getElementById('formToolStock').value);
+            const icon = document.getElementById('formToolIcon').value;
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, toolsPath, id), { name, category, stock, icon });
+                    showToast("Alat berhasil diperbarui!");
+                } else {
+                    await addDoc(collection(db, toolsPath), { name, category, stock, icon });
+                    showToast("Alat baru berhasil ditambahkan!");
+                }
+                window.closeModal('adminToolModal');
+            } catch(err) {
+                console.error(err);
+                showToast("Gagal menyimpan data alat.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Simpan';
+            }
+        };
+
+        window.deleteTool = async (toolId) => {
+            if(!confirm("Anda yakin ingin menghapus alat ini secara permanen dari inventaris?")) return;
+            try {
+                await deleteDoc(doc(db, toolsPath, toolId));
+                showToast("Alat berhasil dihapus!");
+            } catch(err) {
+                console.error(err);
+                showToast("Gagal menghapus alat.", "error");
+            }
+        };
+
+        window.quickUpdateStock = async (toolId, changeAmount) => {
+            const tool = allTools.find(t => t.id === toolId);
+            if(!tool) return;
+            const newStock = tool.stock + changeAmount;
+            if(newStock < 0) return; // Tidak boleh minus
+            
+            try {
+                await updateDoc(doc(db, toolsPath, toolId), { stock: newStock });
+            } catch(err) {
+                console.error(err);
+                showToast("Gagal update stok.", "error");
+            }
+        };
+
+        // Mulai aplikasi
         window.onload = initFirebase;
 
     </script>
