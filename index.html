@@ -573,15 +573,21 @@
                 </div>
 
                 <!-- Filter tabs -->
-                <div class="flex gap-2 mb-5">
-                    <button onclick="window.filterReturns('all')" id="returnFilterAll"
-                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-secondary/30 bg-secondary/20 text-secondary">Semua</button>
-                    <button onclick="window.filterReturns('checked-out')" id="returnFilterOut"
-                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Belum Dikembalikan</button>
-                    <button onclick="window.filterReturns('returned')" id="returnFilterDone"
-                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Sudah Dikembalikan</button>
-                    <button onclick="window.filterReturns('rejected')" id="returnFilterRejected"
-                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Ditolak</button>
+                <div class="flex flex-wrap gap-2 mb-5 items-center justify-between">
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="window.filterReturns('all')" id="returnFilterAll"
+                            class="px-4 py-2 rounded-xl text-sm font-bold transition border border-secondary/30 bg-secondary/20 text-secondary">Semua</button>
+                        <button onclick="window.filterReturns('checked-out')" id="returnFilterOut"
+                            class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Belum Dikembalikan</button>
+                        <button onclick="window.filterReturns('returned')" id="returnFilterDone"
+                            class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Sudah Dikembalikan</button>
+                        <button onclick="window.filterReturns('rejected')" id="returnFilterRejected"
+                            class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Ditolak</button>
+                    </div>
+                    <button onclick="window.deleteAllRejected()"
+                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trash"></i> Hapus Semua Ditolak
+                    </button>
                 </div>
 
                 <div class="admin-card rounded-2xl overflow-hidden">
@@ -1910,6 +1916,23 @@
             } catch (err) {
                 console.error(err);
                 showToast("Gagal menghapus history.", "error");
+            }
+        };
+
+        window.deleteAllRejected = async () => {
+            const rejectedList = allBookings.filter(b => b.status === 'rejected');
+            if (rejectedList.length === 0) {
+                showToast("Tidak ada history penolakan untuk dihapus.", "error");
+                return;
+            }
+            if (!confirm(`Hapus semua ${rejectedList.length} history penolakan secara permanen?`)) return;
+            try {
+                await Promise.all(rejectedList.map(b => deleteDoc(doc(db, bookingsPath, b.id))));
+                showToast(`${rejectedList.length} history penolakan berhasil dihapus.`);
+                renderAdminReturns(window.currentReturnFilter || 'all');
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal menghapus sebagian atau semua history.", "error");
             }
         };
 
