@@ -6,6 +6,8 @@
     <title>CARES - Component Allocation for Robotics & Embedded Systems</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Library Asli untuk Scan QR Code -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -29,20 +31,14 @@
         ::-webkit-scrollbar-thumb { background: #2CA3D1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #176B9E; }
 
-        @keyframes scanline {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-        .scanner-line {
-            position: absolute;
-            width: 100%;
-            height: 3px;
-            background: #2CA3D1;
-            box-shadow: 0 0 10px #2CA3D1, 0 0 20px #2CA3D1;
-            animation: scanline 2.5s infinite linear;
-        }
+        /* Kustomisasi UI bawaan html5-qrcode agar lebih cantik dan nyambung dengan tema gelap */
+        #reader { border: 2px solid #374151 !important; border-radius: 1rem; overflow: hidden; background: #000; }
+        #reader button { background-color: #2CA3D1; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin: 0.5rem; cursor: pointer; font-weight: bold; border: none; }
+        #reader button:hover { background-color: #176B9E; }
+        #reader select { padding: 0.5rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: black; outline: none; }
+        #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
+        #reader__dashboard_section_swaplink { color: #2CA3D1 !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
+        #reader video { border-radius: 1rem; object-fit: cover; }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col relative overflow-x-hidden">
@@ -53,7 +49,7 @@
         <p class="text-primary font-bold animate-pulse text-center">Menghubungkan ke Database CARES...</p>
     </div>
 
-    <!-- TOAST NOTIFICATION (Pengganti Alert) -->
+    <!-- TOAST NOTIFICATION -->
     <div id="toastNotification" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-y-24 flex items-center gap-3">
         <i class="fa-solid fa-circle-check text-xl"></i>
         <span id="toastMessage" class="font-medium">Notifikasi</span>
@@ -160,26 +156,17 @@
         <main class="flex-1 flex flex-col items-center justify-start p-6 overflow-y-auto">
             <div class="text-center mb-6 mt-4">
                 <h2 class="text-3xl font-bold text-white tracking-wide">Pemindai & Validasi</h2>
-                <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code alat atau input kode tiket manual.</p>
+                <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code tiket mahasiswa.</p>
             </div>
 
-            <!-- Area Scanner -->
+            <!-- Area Scanner Kamera Asli -->
             <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full mb-8">
-                <div class="relative w-full aspect-video sm:aspect-square bg-black rounded-2xl overflow-hidden border-4 border-gray-900 flex items-center justify-center">
-                    <div class="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 border-secondary rounded-tl-lg"></div>
-                    <div class="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 border-secondary rounded-tr-lg"></div>
-                    <div class="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-secondary rounded-bl-lg"></div>
-                    <div class="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-secondary rounded-br-lg"></div>
-                    <div class="scanner-line"></div>
-                    <div class="text-gray-600 flex flex-col items-center">
-                        <i class="fa-solid fa-camera text-4xl mb-2"></i>
-                        <span class="text-sm">Kamera Aktif</span>
-                    </div>
-                </div>
+                <!-- Elemen div ini akan digantikan oleh kamera dari html5-qrcode -->
+                <div id="reader" width="100%" class="bg-black"></div>
 
                 <div class="mt-6 flex flex-col gap-4">
                     <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
-                        <input type="text" id="adminSearchInput" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase" placeholder="TKT-XXXX">
+                        <input type="text" id="adminSearchInput" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase" placeholder="Input Manual: TKT-XXXX">
                         <button type="submit" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 rounded-xl font-bold transition shadow-[0_0_10px_rgba(44,163,209,0.3)]">Cari</button>
                     </form>
                     <div class="relative">
@@ -190,7 +177,7 @@
             </div>
 
             <!-- Daftar Tiket Pending -->
-            <div class="w-full max-w-2xl bg-gray-800 rounded-2xl border border-gray-700 p-5">
+            <div class="w-full max-w-2xl bg-gray-800 rounded-2xl border border-gray-700 p-5 mb-10">
                 <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)</h3>
                 <div id="pendingTicketsList" class="flex flex-col gap-3">
                     <!-- Di-render oleh JavaScript -->
@@ -257,6 +244,12 @@
                 <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl text-2xl font-mono font-bold tracking-widest text-primary mb-6">
                     <span id="ticketNumberDisplay">TKT-0000</span>
                 </div>
+                
+                <!-- QR CODE NYATA (Di-generate otomatis dari nomor tiket) -->
+                <div class="border-2 border-dashed border-secondary p-3 rounded-xl inline-block mb-5 bg-gray-50">
+                    <img id="qrCodeImage" src="" alt="QR Code Tiket" class="mx-auto w-32 h-32 rounded">
+                </div>
+
                 <button onclick="window.closeModal('ticketModal')" class="w-full bg-primary hover:bg-darker text-white font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg">Selesai & Kembali</button>
             </div>
         </div>
@@ -313,10 +306,13 @@
         let app, auth, db, toolsPath, bookingsPath;
         let currentUser = null; // { id, role }
         let selectedToolForBooking = null;
-        let selectedBookingForCheckout = null; // Data tiket yang sedang di-verify admin
+        let selectedBookingForCheckout = null; 
         
         let allTools = [];
         let allBookings = [];
+
+        // Scanner State
+        let html5QrcodeScanner = null;
 
         // UI Helpers
         const showToast = (message) => {
@@ -331,16 +327,70 @@
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
+
+            // Manajemen Kamera: Nyalakan hanya saat di Dashboard Admin
+            if (screenId === 'adminDashboardScreen') {
+                startCamera();
+            } else {
+                stopCamera();
+            }
         };
 
-        window.closeModal = (modalId) => { document.getElementById(modalId).classList.add('hidden'); };
+        window.closeModal = (modalId) => { 
+            document.getElementById(modalId).classList.add('hidden'); 
+            // Jika admin menutup modal verifikasi (batal), nyalakan kameranya lagi
+            if (modalId === 'adminVerifyModal' && currentUser?.role === 'admin') {
+                startCamera();
+            }
+        };
+
+        // --- MANAJEMEN KAMERA QR CODE ---
+        const startCamera = () => {
+            if (html5QrcodeScanner) return; // Jika sudah nyala, biarkan
+            
+            // Konfigurasi Scanner
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", 
+                { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, 
+                /* verbose= */ false
+            );
+            
+            // Memulai Scanner
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        };
+
+        const stopCamera = () => {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear().catch(error => {
+                    console.error("Gagal mematikan scanner.", error);
+                });
+                html5QrcodeScanner = null;
+            }
+        };
+
+        // Jika kamera berhasil membaca kode QR
+        function onScanSuccess(decodedText, decodedResult) {
+            // Matikan kamera sementara agar tidak terscan berulang-ulang
+            stopCamera(); 
+            // Bunyikan suara beep kecil jika didukung browser
+            try { navigator.vibrate && navigator.vibrate(200); } catch(e){}
+            
+            // Proses teks QR code (Harusnya berisi TKT-XXXX)
+            window.verifyTicket(decodedText.trim().toUpperCase());
+        }
+
+        // Jika kamera belum menemukan QR Code
+        function onScanFailure(error) {
+            // Biarkan saja, terus mencari
+        }
+
 
         // INITIALIZE FIREBASE
         const initFirebase = async () => {
             try {
                 // =========================================================================
-                // FALLBACK CONFIG: UNTUK MENJALANKAN DI LAPTOP LOKAL (DILUAR CANVAS)
-                // SILAKAN ISI DATA DI BAWAH INI SESUAI FIREBASE PROJECT KAMU (cares-64aba)
+                // CONFIG FIREBASE MILIKMU
+                // PASTIKAN KAMU MENEMPEL KODE CONFIG-MU DI SINI SEBELUM UPLOAD KE GITHUB!
                 // =========================================================================
                 const fallbackConfig = {
                     apiKey: "AIzaSyDnRBNveKktlHQiuSJ7HpU8FjFbo6rBO24",
@@ -355,7 +405,7 @@
 
                 const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
                                         ? JSON.parse(__firebase_config) 
-                                        : fallbackConfig; // <-- Akan pakai data kamu jika di laptop lokal
+                                        : fallbackConfig; 
 
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
@@ -382,8 +432,6 @@
 
             } catch (error) {
                 console.error("Firebase Init Error:", error);
-                
-                // Menampilkan error asli dari Firebase ke layar agar mudah di-debug
                 document.getElementById('loadingOverlay').innerHTML = `
                     <div class='text-center bg-white p-6 rounded-2xl shadow-xl max-w-md mx-4'>
                         <i class='fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4'></i>
@@ -392,11 +440,6 @@
                         <div class='bg-red-50 p-3 rounded-lg text-xs text-left text-red-800 break-words font-mono mb-4 border border-red-200'>
                             ${error.message}
                         </div>
-                        <p class='text-sm text-gray-500 text-left mb-2'><i class="fa-solid fa-circle-info text-blue-500 mr-1"></i> <b>Cek 2 hal ini di Firebase Console:</b></p>
-                        <ul class="text-xs text-gray-500 text-left list-disc pl-5 mb-4 space-y-1">
-                            <li>Masuk ke menu <b>Build > Authentication > Sign-in method</b>, pastikan <b>Anonymous</b> sudah di-Enable.</li>
-                            <li>Pastikan Anda sudah klik <b>Create database</b> di menu <b>Firestore Database</b>.</li>
-                        </ul>
                     </div>
                 `;
             }
@@ -487,7 +530,7 @@
 
             pendingBookings.forEach(booking => {
                 const item = document.createElement('div');
-                item.className = "bg-gray-700 p-4 rounded-xl flex justify-between items-center border border-gray-600";
+                item.className = "bg-gray-700 p-4 rounded-xl flex justify-between items-center border border-gray-600 mb-3";
                 item.innerHTML = `
                     <div>
                         <div class="flex items-center gap-2 mb-1">
@@ -571,6 +614,9 @@
                 await addDoc(collection(db, bookingsPath), bookingData);
 
                 document.getElementById('ticketNumberDisplay').innerText = ticketNum;
+                // Generate QR Code Asli berdasarkan nomor tiket ke gambar
+                document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticketNum}`;
+                
                 window.closeModal('bookingModal');
                 document.getElementById('ticketModal').classList.remove('hidden');
                 
@@ -592,9 +638,14 @@
 
         // [ADMIN] Buka Modal Verifikasi
         window.verifyTicket = (ticketNum) => {
+            // Hentikan kamera agar modal tidak ketutupan proses scan
+            stopCamera();
+
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
             if(!booking) {
                 showToast("Tiket tidak ditemukan atau sudah selesai.");
+                // Nyalakan kamera lagi karena gagal nemu tiket
+                startCamera();
                 return;
             }
 
@@ -641,6 +692,8 @@
                 btn.innerHTML = 'Konfirmasi Check-out';
                 btn.disabled = false;
                 selectedBookingForCheckout = null;
+                // Nyalakan kamera lagi untuk scan orang berikutnya
+                startCamera();
             }
         };
 
