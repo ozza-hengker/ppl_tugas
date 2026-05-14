@@ -1874,6 +1874,10 @@
                         <button onclick="window.markAsReturned('${booking.id}', '${booking.toolId}')"
                             class="bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-500/30 transition">
                             <i class="fa-solid fa-rotate-left mr-1"></i> Tandai Kembali
+                        </button>` : booking.status === 'rejected' ? `
+                        <button onclick="window.deleteRejected('${booking.id}')"
+                            class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-red-500/30 transition">
+                            <i class="fa-solid fa-trash mr-1"></i> Hapus
                         </button>` : '<span class="text-gray-600 text-xs">—</span>'}
                     </td>
                 `;
@@ -1894,6 +1898,18 @@
             } catch (err) {
                 console.error(err);
                 showToast("Gagal menandai pengembalian.", "error");
+            }
+        };
+
+        window.deleteRejected = async (bookingId) => {
+            if (!confirm("Hapus history penolakan ini secara permanen?")) return;
+            try {
+                await deleteDoc(doc(db, bookingsPath, bookingId));
+                showToast("History berhasil dihapus.");
+                renderAdminReturns(window.currentReturnFilter || 'all');
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal menghapus history.", "error");
             }
         };
 
