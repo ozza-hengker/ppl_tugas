@@ -289,18 +289,36 @@
 
                 <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 mb-6 text-center leading-relaxed">
                     <p class="font-bold mb-1 text-blue-900">💡 Info Akun Demo</p>
-                    Mahasiswa: Gunakan NIM & password bebas<br>
-                    Admin: Username <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
+                    Mahasiswa: Isi Nama, NIM, No. Telepon & password bebas<br>
+                    Admin: NIM <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
                 </div>
 
                 <form onsubmit="window.handleLogin(event)" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM / Username</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nama Lengkap <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-id-card absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="namaInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Nama lengkap Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="nimInput" required
                                 class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
-                                placeholder="Masukkan ID Anda">
+                                placeholder="Masukkan NIM Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">No. Telepon <span class="text-red-500">*</span></label>
+                        <div class="relative">
+                            <i class="fa-solid fa-phone absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="tel" id="teleponInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Contoh: 08123456789">
                         </div>
                     </div>
                     <div>
@@ -381,7 +399,7 @@
                     </div>
 
                     <!-- Tabs -->
-                    <div class="flex gap-2 flex-1 justify-center sm:justify-start max-w-xs">
+                    <div class="flex gap-2 flex-1 justify-center sm:justify-start max-w-sm">
                         <button onclick="window.switchAdminView('scanner')" id="tabScanner"
                             class="tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
                             <i class="fa-solid fa-qrcode text-xs"></i> Scanner
@@ -389,6 +407,10 @@
                         <button onclick="window.switchAdminView('inventory')" id="tabInventory"
                             class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
                             <i class="fa-solid fa-boxes-stacked text-xs"></i> Inventaris
+                        </button>
+                        <button onclick="window.switchAdminView('returns')" id="tabReturns"
+                            class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate-left text-xs"></i> Return
                         </button>
                     </div>
 
@@ -482,6 +504,44 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SECTION C: RETURN TRACKING -->
+            <div id="adminReturnsSection" class="hidden w-full max-w-5xl">
+                <div class="mb-6 mt-2">
+                    <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">Return Tracking</h2>
+                    <p class="text-gray-500 mt-1 text-sm">Pantau status pengembalian alat yang sedang dipinjam mahasiswa.</p>
+                </div>
+
+                <!-- Filter tabs -->
+                <div class="flex gap-2 mb-5">
+                    <button onclick="window.filterReturns('all')" id="returnFilterAll"
+                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-secondary/30 bg-secondary/20 text-secondary">Semua</button>
+                    <button onclick="window.filterReturns('checked-out')" id="returnFilterOut"
+                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Belum Dikembalikan</button>
+                    <button onclick="window.filterReturns('returned')" id="returnFilterDone"
+                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Sudah Dikembalikan</button>
+                    <button onclick="window.filterReturns('rejected')" id="returnFilterRejected"
+                        class="px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white">Ditolak</button>
+                </div>
+
+                <div class="admin-card rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-white text-sm">
+                            <thead class="border-b border-white/5 text-gray-500 uppercase text-xs">
+                                <tr>
+                                    <th class="px-5 py-4 tracking-wider">Peminjam</th>
+                                    <th class="px-5 py-4 tracking-wider">Alat</th>
+                                    <th class="px-5 py-4 tracking-wider">Tgl Peminjaman</th>
+                                    <th class="px-5 py-4 tracking-wider">Sesi</th>
+                                    <th class="px-5 py-4 text-center tracking-wider">Status</th>
+                                    <th class="px-5 py-4 text-center tracking-wider">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminReturnsTableBody" class="divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -489,17 +549,18 @@
 
     <!-- MODAL: BOOKING MAHASISWA -->
     <div id="bookingModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div class="p-5 text-white flex justify-between items-center" style="background: linear-gradient(135deg, var(--darker), var(--secondary));">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden" style="max-height:90vh; overflow-y:auto;">
+            <div class="p-5 text-white flex justify-between items-center sticky top-0 z-10" style="background: linear-gradient(135deg, var(--darker), var(--secondary));">
                 <h3 class="font-bold text-lg flex items-center gap-2" style="font-family:'Sora',sans-serif;">
-                    <i class="fa-regular fa-calendar-check"></i> Form Reservasi
+                    <i class="fa-regular fa-calendar-check"></i> Form Reservasi Alat
                 </h3>
                 <button onclick="window.closeModal('bookingModal')" class="bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full flex items-center justify-center transition">
                     <i class="fa-solid fa-times"></i>
                 </button>
             </div>
             <div class="p-6">
-                <div class="flex gap-4 items-center mb-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                <!-- Alat info -->
+                <div class="flex gap-4 items-center mb-5 p-4 bg-blue-50 rounded-2xl border border-blue-100">
                     <div class="text-3xl text-secondary bg-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-md border border-blue-100">
                         <i id="modalIcon" class="fa-solid fa-microchip"></i>
                     </div>
@@ -508,9 +569,81 @@
                         <p id="modalToolName" class="font-bold text-gray-800 text-lg leading-tight">Nama Alat</p>
                     </div>
                 </div>
-                <form onsubmit="window.submitBooking(event)">
-                    <div class="mb-5">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Peminjaman</label>
+
+                <!-- Jadwal Praktikum -->
+                <div class="mb-5 p-4 rounded-2xl border border-yellow-200 bg-yellow-50">
+                    <p class="text-xs font-bold text-yellow-800 mb-3 flex items-center gap-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Waktu yang DILARANG karena sedang digunakan untuk kelas:</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead>
+                                <tr style="background:#176B9E; color:white;">
+                                    <th class="px-2 py-2 text-center font-bold rounded-tl-lg">Jam</th>
+                                    <th class="px-2 py-2 text-center font-bold">Senin</th>
+                                    <th class="px-2 py-2 text-center font-bold">Selasa</th>
+                                    <th class="px-2 py-2 text-center font-bold">Rabu</th>
+                                    <th class="px-2 py-2 text-center font-bold">Kamis</th>
+                                    <th class="px-2 py-2 text-center font-bold rounded-tr-lg">Jumat</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-gray-700">
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">07.00–08.40</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">Emb. Sys B</span></td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td></tr>
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">08.45–10.25</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td></tr>
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">10.30–12.10</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">Emb. Sys D</span></td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td></tr>
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">12.30–14.10</td><td class="px-2 py-1.5 text-center"><span class="bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold">MI Lanjut C</span></td><td class="px-2 py-1.5 text-center"><span class="bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold">MI Lanjut B</span></td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold">MI Lanjut D</span></td></tr>
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">14.15–15.55</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold">MI Lanjut C</span></td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-yellow-500 text-white px-1.5 py-0.5 rounded font-bold">MI Lanjut A</span></td></tr>
+                                <tr class="border-b border-yellow-200"><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200">15.20–17.00</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">Emb. Sys C</span></td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td></tr>
+                                <tr><td class="px-2 py-1.5 font-medium text-center bg-yellow-100 border-r border-yellow-200 rounded-bl-lg">16.00–17.40</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center">—</td><td class="px-2 py-1.5 text-center"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">Emb. Sys A</span></td><td class="px-2 py-1.5 text-center rounded-br-lg"><span class="bg-blue-500 text-white px-1.5 py-0.5 rounded font-bold">Emb. Sys E</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <form onsubmit="window.submitBooking(event)" class="space-y-4">
+                    <!-- Identitas (auto-filled, readonly) -->
+                    <div class="p-4 rounded-2xl border border-blue-100 bg-blue-50/60 space-y-3">
+                        <p class="text-xs font-bold text-primary uppercase tracking-wide">Identitas Peminjam (dari profil login)</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Lengkap</label>
+                                <input type="text" id="formNama" readonly
+                                    class="w-full p-2.5 border border-gray-200 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">NIM</label>
+                                <input type="text" id="formNIM" readonly
+                                    class="w-full p-2.5 border border-gray-200 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium cursor-not-allowed">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">No. Telepon</label>
+                            <input type="text" id="formTelepon" readonly
+                                class="w-full p-2.5 border border-gray-200 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <!-- Tanggal & Sesi -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Peminjaman <span class="text-red-500">*</span></label>
+                            <input type="date" id="formTanggal" required
+                                class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 bg-gray-50 focus:bg-white transition text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Sesi Peminjaman <span class="text-red-500">*</span></label>
+                            <select required id="formSesi"
+                                class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 bg-gray-50 focus:bg-white transition text-sm font-medium">
+                                <option value="">— Pilih Sesi —</option>
+                                <option value="08.40 - 10.35">08.40 - 10.35</option>
+                                <option value="10.35 - 12.30">10.35 - 12.30</option>
+                                <option value="13.35 - 15.30">13.35 - 15.30</option>
+                                <option value="15.30 - 17.25">15.30 - 17.25</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tujuan -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Peminjaman <span class="text-red-500">*</span></label>
                         <select required id="formTujuan"
                             class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 bg-gray-50 focus:bg-white transition text-sm font-medium">
                             <option value="">— Pilih Tujuan —</option>
@@ -519,6 +652,7 @@
                             <option value="Penelitian">Penelitian Lab</option>
                         </select>
                     </div>
+
                     <div class="flex gap-3 mt-6">
                         <button type="button" onclick="window.closeModal('bookingModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm">Batal</button>
                         <button type="submit" id="btnConfirmBooking" class="btn-primary flex-1 text-white font-bold py-3 px-4 rounded-xl flex justify-center items-center text-sm">
@@ -576,8 +710,15 @@
                     </div>
                     <div class="border-t border-white/8 pt-3">
                         <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Identitas Peminjam</p>
-                        <p id="verifStudentId" class="font-bold text-lg text-white">Nama Mahasiswa</p>
-                        <p id="verifTujuan" class="text-sm text-gray-500">Tujuan: -</p>
+                        <p id="verifNama" class="font-bold text-lg text-white">Nama Mahasiswa</p>
+                        <p id="verifStudentId" class="text-sm text-gray-400">NIM: -</p>
+                        <p id="verifTelepon" class="text-sm text-gray-400"><i class="fa-solid fa-phone mr-1"></i>-</p>
+                    </div>
+                    <div class="border-t border-white/8 pt-3">
+                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Detail Peminjaman</p>
+                        <p id="verifTujuan" class="text-sm text-gray-300">Tujuan: -</p>
+                        <p id="verifTanggal" class="text-sm text-gray-300"><i class="fa-regular fa-calendar mr-1"></i>-</p>
+                        <p id="verifSesi" class="text-sm text-gray-300"><i class="fa-regular fa-clock mr-1"></i>-</p>
                     </div>
                     <div class="border-t border-white/8 pt-3">
                         <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Alat Fisik Ter-Scan</p>
@@ -701,22 +842,36 @@
         window.switchAdminView = (view) => {
             const scannerSec = document.getElementById('adminScannerSection');
             const invSec = document.getElementById('adminInventorySection');
+            const returnsSec = document.getElementById('adminReturnsSection');
             const tabScan = document.getElementById('tabScanner');
             const tabInv = document.getElementById('tabInventory');
+            const tabRet = document.getElementById('tabReturns');
+
+            scannerSec.classList.add('hidden');
+            invSec.classList.add('hidden');
+            returnsSec.classList.add('hidden');
+
+            const activeClass = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+            const inactiveClass = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+            tabScan.className = inactiveClass;
+            tabInv.className = inactiveClass;
+            tabRet.className = inactiveClass;
 
             if (view === 'scanner') {
                 scannerSec.classList.remove('hidden');
-                invSec.classList.add('hidden');
-                tabScan.className = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
-                tabInv.className = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+                tabScan.className = activeClass;
                 renderAdminPendingTickets();
-            } else {
-                scannerSec.classList.add('hidden');
+            } else if (view === 'inventory') {
                 invSec.classList.remove('hidden');
-                tabScan.className = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
-                tabInv.className = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+                tabInv.className = activeClass;
                 stopCamera();
                 renderAdminInventory();
+            } else if (view === 'returns') {
+                returnsSec.classList.remove('hidden');
+                tabRet.className = activeClass;
+                stopCamera();
+                window.currentReturnFilter = 'all';
+                renderAdminReturns('all');
             }
         };
 
@@ -821,7 +976,12 @@
 
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if (currentUser?.role === 'admin') renderAdminPendingTickets();
+                if (currentUser?.role === 'admin') {
+                    renderAdminPendingTickets();
+                    if (!document.getElementById('adminReturnsSection').classList.contains('hidden')) {
+                        renderAdminReturns(window.currentReturnFilter || 'all');
+                    }
+                }
             }, (error) => console.error(error));
         };
 
@@ -937,23 +1097,28 @@
         window.handleLogin = (e) => {
             e.preventDefault();
             try {
-                // Sanitasi input basic
+                const nama = document.getElementById('namaInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const nim = document.getElementById('nimInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const telepon = document.getElementById('teleponInput').value.trim().replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 const pass = document.getElementById('passwordInput').value.trim();
                 
                 if (nim === 'admin' && pass === '123') {
-                    currentUser = { role: 'admin', id: 'Admin Lab RES' };
+                    currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-' };
                     document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
                     showScreen('adminDashboardScreen');
                     renderAdminPendingTickets();
                     renderAdminInventory();
                     showToast('Login berhasil sebagai Admin');
                 } else {
-                    currentUser = { role: 'student', id: nim };
-                    document.getElementById('userNameDisplay').innerText = `Mahasiswa (${nim})`;
+                    if (!nama || !nim || !telepon) {
+                        showToast("Lengkapi Nama, NIM, dan No. Telepon!", "error");
+                        return;
+                    }
+                    currentUser = { role: 'student', id: nim, nama: nama, telepon: telepon };
+                    document.getElementById('userNameDisplay').innerText = `${nama} (${nim})`;
                     showScreen('dashboardScreen');
                     renderCatalog();
-                    showToast(`Selamat datang, ${nim}`);
+                    showToast(`Selamat datang, ${nama}`);
                 }
             } catch (err) {
                 console.error(err);
@@ -963,7 +1128,9 @@
 
         window.handleLogout = () => {
             currentUser = null;
+            document.getElementById('namaInput').value = '';
             document.getElementById('nimInput').value = '';
+            document.getElementById('teleponInput').value = '';
             document.getElementById('passwordInput').value = '';
             showScreen('loginScreen');
         };
@@ -972,7 +1139,6 @@
             const tool = allTools.find(t => t.id === toolId);
             if (!tool || tool.stock <= 0) return;
             
-            // Validasi Sisi UI Pertama (Akan divalidasi lagi pas submit)
             const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
             const isAlreadyBooked = myPendingBookings.some(b => b.toolId === toolId);
             if (isAlreadyBooked) {
@@ -989,6 +1155,12 @@
             document.getElementById('modalIcon').className = `fa-solid ${tool.icon}`;
             document.getElementById('modalToolStock').innerText = tool.stock;
             document.getElementById('formTujuan').value = '';
+            document.getElementById('formSesi').value = '';
+            document.getElementById('formTanggal').value = '';
+            // Auto-fill identitas dari profil login
+            document.getElementById('formNama').value = currentUser.nama || currentUser.id;
+            document.getElementById('formNIM').value = currentUser.id;
+            document.getElementById('formTelepon').value = currentUser.telepon || '-';
             document.getElementById('bookingModal').classList.remove('hidden');
         };
 
@@ -1031,8 +1203,9 @@
             // ==========================================
 
             const rawTujuan = document.getElementById('formTujuan').value;
-            // Sanitasi agar aman dari input tag script berbahaya di Console
             const cleanTujuan = rawTujuan.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            const tanggal = document.getElementById('formTanggal').value;
+            const sesi = document.getElementById('formSesi').value;
             
             // Randomize Ticket (Sedikit diperpanjang biar sulit ditebak)
             const ticketNum = `TKT-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -1040,9 +1213,13 @@
             try {
                 const bookingData = {
                     studentId: currentUser.id,
+                    studentNama: currentUser.nama || currentUser.id,
+                    studentTelepon: currentUser.telepon || '-',
                     toolId: selectedToolForBooking.id,
                     toolName: selectedToolForBooking.name,
                     tujuan: cleanTujuan,
+                    tanggal: tanggal,
+                    sesi: sesi,
                     ticketNum: ticketNum,
                     status: 'pending',
                     createdAt: new Date().toISOString()
@@ -1079,8 +1256,12 @@
             }
             selectedBookingForCheckout = booking;
             document.getElementById('verifTicketNum').innerText = booking.ticketNum;
-            document.getElementById('verifStudentId').innerText = booking.studentId;
+            document.getElementById('verifNama').innerText = booking.studentNama || booking.studentId;
+            document.getElementById('verifStudentId').innerText = `NIM: ${booking.studentId}`;
+            document.getElementById('verifTelepon').innerText = booking.studentTelepon || '-';
             document.getElementById('verifTujuan').innerText = `Tujuan: ${booking.tujuan}`;
+            document.getElementById('verifTanggal').innerText = booking.tanggal ? `Tanggal: ${booking.tanggal}` : 'Tanggal: -';
+            document.getElementById('verifSesi').innerText = booking.sesi ? `Sesi: ${booking.sesi}` : 'Sesi: -';
             document.getElementById('verifToolName').innerText = booking.toolName;
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
@@ -1223,6 +1404,98 @@
             } catch (err) {
                 console.error(err);
                 showToast("Gagal update stok.", "error");
+            }
+        };
+
+        window.currentReturnFilter = 'all';
+
+        window.filterReturns = (filter) => {
+            window.currentReturnFilter = filter;
+            const ids = ['returnFilterAll','returnFilterOut','returnFilterDone','returnFilterRejected'];
+            const vals = ['all','checked-out','returned','rejected'];
+            ids.forEach((id, i) => {
+                const btn = document.getElementById(id);
+                if (vals[i] === filter) {
+                    btn.className = 'px-4 py-2 rounded-xl text-sm font-bold transition border border-secondary/30 bg-secondary/20 text-secondary';
+                } else {
+                    btn.className = 'px-4 py-2 rounded-xl text-sm font-bold transition border border-white/10 bg-white/5 text-gray-400 hover:text-white';
+                }
+            });
+            renderAdminReturns(filter);
+        };
+
+        const renderAdminReturns = (filter = 'all') => {
+            const tbody = document.getElementById('adminReturnsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let bookings = [...allBookings]
+                .filter(b => ['checked-out','returned','rejected','pending'].includes(b.status))
+                .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (filter !== 'all') {
+                bookings = bookings.filter(b => b.status === filter);
+            } else {
+                // exclude pure pending that haven't been checked-out yet from return tab 
+                bookings = bookings.filter(b => b.status !== 'pending');
+            }
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-8 italic text-sm">Tidak ada data untuk filter ini.</td></tr>`;
+                return;
+            }
+
+            bookings.forEach(booking => {
+                const statusMap = {
+                    'checked-out': { label: 'Dipinjam', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
+                    'returned': { label: 'Dikembalikan', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+                    'rejected': { label: 'Ditolak', cls: 'bg-red-500/15 text-red-400 border-red-500/30' },
+                };
+                const s = statusMap[booking.status] || { label: booking.status, cls: 'bg-gray-500/15 text-gray-400 border-gray-500/30' };
+                const canReturn = booking.status === 'checked-out';
+                
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-white/3 transition';
+                tr.innerHTML = `
+                    <td class="px-5 py-4">
+                        <p class="font-semibold text-white text-sm">${booking.studentNama || booking.studentId}</p>
+                        <p class="text-xs text-gray-500">NIM: ${booking.studentId}</p>
+                        <p class="text-xs text-gray-500"><i class="fa-solid fa-phone mr-1"></i>${booking.studentTelepon || '-'}</p>
+                    </td>
+                    <td class="px-5 py-4">
+                        <p class="text-sm text-gray-200 font-medium">${booking.toolName}</p>
+                        <p class="text-xs text-gray-500 font-mono">${booking.ticketNum}</p>
+                    </td>
+                    <td class="px-5 py-4 text-sm text-gray-400">${booking.tanggal || '-'}</td>
+                    <td class="px-5 py-4 text-sm text-gray-400">${booking.sesi || '-'}</td>
+                    <td class="px-5 py-4 text-center">
+                        <span class="text-xs font-bold px-3 py-1 rounded-full border ${s.cls}">${s.label}</span>
+                    </td>
+                    <td class="px-5 py-4 text-center">
+                        ${canReturn ? `
+                        <button onclick="window.markAsReturned('${booking.id}', '${booking.toolId}')"
+                            class="bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-emerald-500/30 transition">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Tandai Kembali
+                        </button>` : '<span class="text-gray-600 text-xs">—</span>'}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        };
+
+        window.markAsReturned = async (bookingId, toolId) => {
+            if (!confirm("Tandai alat ini sudah dikembalikan?")) return;
+            try {
+                const tool = allTools.find(t => t.id === toolId);
+                await updateDoc(doc(db, bookingsPath, bookingId), { status: 'returned', returnedAt: new Date().toISOString() });
+                if (tool) {
+                    await updateDoc(doc(db, toolsPath, toolId), { stock: tool.stock + 1 });
+                }
+                showToast("Alat berhasil ditandai dikembalikan. Stok bertambah!");
+                renderAdminReturns(window.currentReturnFilter || 'all');
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal menandai pengembalian.", "error");
             }
         };
 
