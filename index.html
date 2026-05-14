@@ -431,48 +431,50 @@
         <main class="flex-1 flex flex-col items-center justify-start p-5 sm:p-8 overflow-y-auto w-full">
 
             <!-- SECTION A: SCANNER -->
-            <div id="adminScannerSection" class="w-full flex flex-col items-center">
-                <div class="text-center mb-8 mt-2">
+            <div id="adminScannerSection" class="w-full max-w-5xl">
+                <div class="text-center mb-6 mt-2">
                     <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">
                         Pemindai <span style="color: var(--accent);">&</span> Validasi
                     </h2>
                     <p class="text-gray-500 mt-2 text-sm">Arahkan kamera ke QR Code tiket mahasiswa untuk proses check-out.</p>
                 </div>
 
-                <!-- Scanner Box -->
-                <div class="relative p-5 rounded-3xl border border-secondary/20 shadow-2xl max-w-md w-full mb-8" style="background:#0f1e33;">
-                    <div id="reader-wrapper" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center" style="background:#000;">
-                        <div id="reader" class="w-full h-full bg-black"></div>
-                        <div id="scannerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-95">
-                            <div class="w-16 h-16 rounded-2xl border-2 border-secondary/40 flex items-center justify-center mb-4" style="background:rgba(44,163,209,0.08);">
-                                <i class="fa-solid fa-camera text-3xl text-secondary/60"></i>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                    <!-- Scanner Box -->
+                    <div class="relative p-5 rounded-3xl border border-secondary/20 shadow-2xl w-full" style="background:#0f1e33;">
+                        <div id="reader-wrapper" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center" style="background:#000;">
+                            <div id="reader" class="w-full h-full bg-black"></div>
+                            <div id="scannerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-95">
+                                <div class="w-16 h-16 rounded-2xl border-2 border-secondary/40 flex items-center justify-center mb-4" style="background:rgba(44,163,209,0.08);">
+                                    <i class="fa-solid fa-camera text-3xl text-secondary/60"></i>
+                                </div>
+                                <button onclick="window.activateScanner()"
+                                    class="btn-primary text-white px-7 py-3 rounded-2xl font-bold flex items-center gap-2 text-sm">
+                                    <i class="fa-solid fa-power-off"></i> Aktifkan Scanner
+                                </button>
+                                <p class="text-xs text-gray-600 mt-4 text-center px-6">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
                             </div>
-                            <button onclick="window.activateScanner()"
-                                class="btn-primary text-white px-7 py-3 rounded-2xl font-bold flex items-center gap-2 text-sm">
-                                <i class="fa-solid fa-power-off"></i> Aktifkan Scanner
-                            </button>
-                            <p class="text-xs text-gray-600 mt-4 text-center px-6">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
+                        </div>
+
+                        <div class="mt-5">
+                            <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
+                                <input type="text" id="adminSearchInput"
+                                    class="flex-1 bg-white/5 border border-white/10 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase text-sm placeholder-gray-600 font-mono"
+                                    placeholder="Input Manual: TKT-XXXX">
+                                <button type="submit" class="btn-primary text-white px-5 rounded-xl font-bold text-sm flex items-center gap-2">
+                                    <i class="fa-solid fa-search"></i> Cari
+                                </button>
+                            </form>
                         </div>
                     </div>
 
-                    <div class="mt-5">
-                        <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
-                            <input type="text" id="adminSearchInput"
-                                class="flex-1 bg-white/5 border border-white/10 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase text-sm placeholder-gray-600 font-mono"
-                                placeholder="Input Manual: TKT-XXXX">
-                            <button type="submit" class="btn-primary text-white px-5 rounded-xl font-bold text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-search"></i> Cari
-                            </button>
-                        </form>
+                    <!-- Pending Queue -->
+                    <div class="admin-card rounded-2xl p-5 w-full">
+                        <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                            <i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)
+                        </h3>
+                        <div id="pendingTicketsList" class="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1"></div>
                     </div>
-                </div>
-
-                <!-- Pending Queue -->
-                <div class="w-full max-w-2xl admin-card rounded-2xl p-5 mb-10">
-                    <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                        <i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)
-                    </h3>
-                    <div id="pendingTicketsList" class="flex flex-col gap-3"></div>
                 </div>
             </div>
 
@@ -688,7 +690,12 @@
                 </div>
                 <button onclick="window.closeModal('ticketModal')" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-xl text-sm">
                     Selesai & Kembali
-        <!-- MODAL ADMIN: VERIFIKASI ALAT -->
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN: VERIFIKASI ALAT -->
     <div id="adminVerifyModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
         <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-secondary/30" style="background:#0f1e33;">
             <div class="p-5 text-gray-900 flex justify-between items-center" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
@@ -705,23 +712,23 @@
                 </div>
                 <div class="space-y-4 p-4 rounded-2xl border border-white/8" style="background:rgba(0,0,0,0.25);">
                     <div>
-                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Tiket Mahasiswa</p>
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Tiket Mahasiswa</p>
                         <p id="verifTicketNum" class="font-mono text-xl text-secondary font-bold">TKT-XXXX</p>
                     </div>
-                    <div class="border-t border-white/8 pt-3">
-                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Identitas Peminjam</p>
+                    <div class="border-t border-white/10 pt-3">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Identitas Peminjam</p>
                         <p id="verifNama" class="font-bold text-lg text-white">Nama Mahasiswa</p>
-                        <p id="verifStudentId" class="text-sm text-gray-400">NIM: -</p>
-                        <p id="verifTelepon" class="text-sm text-gray-400"><i class="fa-solid fa-phone mr-1"></i>-</p>
+                        <p id="verifStudentId" class="text-sm text-gray-300">NIM: -</p>
+                        <p id="verifTelepon" class="text-sm text-gray-300"><i class="fa-solid fa-phone mr-1"></i>-</p>
                     </div>
-                    <div class="border-t border-white/8 pt-3">
-                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Detail Peminjaman</p>
-                        <p id="verifTujuan" class="text-sm text-gray-300">Tujuan: -</p>
-                        <p id="verifTanggal" class="text-sm text-gray-300"><i class="fa-regular fa-calendar mr-1"></i>-</p>
-                        <p id="verifSesi" class="text-sm text-gray-300"><i class="fa-regular fa-clock mr-1"></i>-</p>
+                    <div class="border-t border-white/10 pt-3">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Detail Peminjaman</p>
+                        <p id="verifTujuan" class="text-sm text-gray-200">Tujuan: -</p>
+                        <p id="verifTanggal" class="text-sm text-gray-200"><i class="fa-regular fa-calendar mr-1"></i>-</p>
+                        <p id="verifSesi" class="text-sm text-gray-200"><i class="fa-regular fa-clock mr-1"></i>-</p>
                     </div>
-                    <div class="border-t border-white/8 pt-3">
-                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Alat Fisik Ter-Scan</p>
+                    <div class="border-t border-white/10 pt-3">
+                        <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Alat Fisik Ter-Scan</p>
                         <p class="font-bold text-secondary text-lg"><i class="fa-solid fa-microchip mr-1"></i> <span id="verifToolName">Nama Alat</span></p>
                         <p class="text-xs text-yellow-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Konfirmasi akan mengurangi stok di Database</p>
                     </div>
