@@ -6,6 +6,7 @@
     <title>CARES - Component Allocation for Robotics & Embedded Systems</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Library Asli untuk Scan QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script>
         tailwind.config = {
@@ -30,28 +31,14 @@
         ::-webkit-scrollbar-thumb { background: #2CA3D1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #176B9E; }
 
-        #reader { border: 2px solid #374151 !important; border-radius: 1rem; overflow: hidden; background: #000; }
+        /* Kustomisasi UI bawaan html5-qrcode agar lebih cantik dan nyambung dengan tema gelap */
+        #reader { border: none !important; width: 100%; border-radius: 1rem; overflow: hidden; background: #000; }
         #reader button { background-color: #2CA3D1; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin: 0.5rem; cursor: pointer; font-weight: bold; border: none; }
         #reader button:hover { background-color: #176B9E; }
         #reader select { padding: 0.5rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: black; outline: none; }
         #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
         #reader__dashboard_section_swaplink { color: #2CA3D1 !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
         #reader video { border-radius: 1rem; object-fit: cover; }
-
-        @keyframes scanline {
-            0% { top: 0%; opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-        .scanner-line {
-            position: absolute;
-            width: 100%;
-            height: 3px;
-            background: #2CA3D1;
-            box-shadow: 0 0 10px #2CA3D1, 0 0 20px #2CA3D1;
-            animation: scanline 2.5s infinite linear;
-        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col relative overflow-x-hidden">
@@ -179,8 +166,23 @@
                     <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code tiket mahasiswa.</p>
                 </div>
 
+                <!-- Area Scanner Kamera (Aman & Manual) -->
                 <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full mb-8">
-                    <div id="reader" width="100%" class="bg-black"></div>
+                    <div id="reader-wrapper" class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden border-4 border-gray-900 flex flex-col items-center justify-center">
+                        
+                        <!-- Area Target Reader HTML5-QRCode -->
+                        <div id="reader" class="w-full h-full bg-black"></div>
+
+                        <!-- Placeholder & Tombol Manual Aktifkan Kamera -->
+                        <div id="scannerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-90">
+                            <i class="fa-solid fa-camera text-5xl text-gray-500 mb-4"></i>
+                            <button onclick="window.activateScanner()" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 py-3 rounded-xl font-bold transition shadow-[0_0_15px_rgba(44,163,209,0.4)] flex items-center gap-2">
+                                <i class="fa-solid fa-power-off"></i> Aktifkan Scanner
+                            </button>
+                            <p class="text-xs text-gray-400 mt-4 text-center px-4">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
+                        </div>
+
+                    </div>
 
                     <div class="mt-6 flex flex-col gap-4">
                         <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
@@ -426,15 +428,13 @@
             if (screenId === 'adminDashboardScreen') {
                 window.switchAdminView('scanner'); // Default view
             } else {
-                stopCamera();
+                stopCamera(); // Pastikan mati kalau pindah layar
             }
         };
 
         window.closeModal = (modalId) => { 
             document.getElementById(modalId).classList.add('hidden'); 
-            if (modalId === 'adminVerifyModal' && currentUser?.role === 'admin' && !document.getElementById('adminScannerSection').classList.contains('hidden')) {
-                startCamera();
-            }
+            // Scanner tidak menyala otomatis setelah modal tutup. User bisa menekan tombol lagi jika butuh.
         };
 
         // --- MANAJEMEN TAB ADMIN ---
@@ -449,42 +449,45 @@
                 invSec.classList.add('hidden');
                 tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
                 tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
-                startCamera();
+                
+                // Jangan paksa startCamera() disini agar tidak nge-hang. 
                 renderAdminPendingTickets();
             } else {
                 scannerSec.classList.add('hidden');
                 invSec.classList.remove('hidden');
                 tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
                 tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
-                stopCamera();
+                
+                stopCamera(); // Matikan kamera jika pindah ke Inventaris
                 renderAdminInventory();
             }
         };
 
-        // --- MANAJEMEN KAMERA QR CODE ---
+        // --- MANAJEMEN KAMERA QR CODE (PERBAIKAN ANTI-FREEZE) ---
+        window.activateScanner = () => {
+            const placeholder = document.getElementById('scannerPlaceholder');
+            if (placeholder) placeholder.classList.add('hidden');
+            startCamera();
+        };
+
         const startCamera = () => {
             if (html5QrcodeScanner) return; 
-            
-            // Jeda 300ms agar animasi halaman selesai sebelum kamera menyala (mencegah error macet)
-            setTimeout(() => {
-                try {
-                    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
-                    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-                } catch (e) {
-                    console.error("Gagal menyalakan scanner:", e);
-                }
-            }, 300);
+            try {
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+                html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            } catch (e) {
+                console.error("Gagal menyalakan scanner:", e);
+                showToast("Gagal menyalakan kamera. Coba izinkan akses kamera di browser.", "error");
+            }
         };
 
         const stopCamera = () => {
             if (html5QrcodeScanner) {
-                try {
-                    html5QrcodeScanner.clear();
-                } catch(e) {
-                    console.error("Gagal mematikan scanner:", e);
-                }
+                try { html5QrcodeScanner.clear(); } catch(e) { console.error("Gagal mematikan scanner:", e); }
                 html5QrcodeScanner = null;
             }
+            const placeholder = document.getElementById('scannerPlaceholder');
+            if (placeholder) placeholder.classList.remove('hidden');
         };
 
         function onScanSuccess(decodedText, decodedResult) {
@@ -501,7 +504,6 @@
             try {
                 // =========================================================================
                 // CONFIG FIREBASE MILIKMU
-                // PASTIKAN KAMU MENEMPEL KODE CONFIG-MU DI SINI SEBELUM UPLOAD KE GITHUB!
                 // =========================================================================
                 const fallbackConfig = {
                     apiKey: "AIzaSyDnRBNveKktlHQiuSJ7HpU8FjFbo6rBO24",
@@ -590,7 +592,8 @@
             const grid = document.getElementById('catalogGrid');
             if(!grid) return;
             grid.innerHTML = '';
-            const sortedTools = [...allTools].sort((a,b) => a.name.localeCompare(b.name));
+            // Safe sort mencegah error undefined property
+            const sortedTools = [...allTools].sort((a,b) => (a.name || '').localeCompare(b.name || ''));
 
             sortedTools.forEach(tool => {
                 const isOutOfStock = tool.stock <= 0;
@@ -607,8 +610,8 @@
                                 ${isOutOfStock ? 'Stok Kosong' : '<i class="fa-solid fa-box mr-1"></i> Sisa ' + tool.stock}
                             </span>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-800 mb-1 leading-tight">${tool.name}</h3>
-                        <p class="text-sm text-secondary font-medium">${tool.category}</p>
+                        <h3 class="font-bold text-lg text-gray-800 mb-1 leading-tight">${tool.name || 'Tanpa Nama'}</h3>
+                        <p class="text-sm text-secondary font-medium">${tool.category || 'Lainnya'}</p>
                     </div>
                     <div class="px-6 pb-6 mt-auto">
                         <button onclick="window.initiateBooking('${tool.id}')" 
@@ -629,7 +632,7 @@
             if(!tbody) return;
             tbody.innerHTML = '';
             
-            const sortedTools = [...allTools].sort((a,b) => a.name.localeCompare(b.name));
+            const sortedTools = [...allTools].sort((a,b) => (a.name || '').localeCompare(b.name || ''));
 
             sortedTools.forEach(tool => {
                 const tr = document.createElement('tr');
@@ -638,12 +641,12 @@
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-secondary">
-                                <i class="fa-solid ${tool.icon}"></i>
+                                <i class="fa-solid ${tool.icon || 'fa-microchip'}"></i>
                             </div>
-                            <span class="font-bold text-gray-100">${tool.name}</span>
+                            <span class="font-bold text-gray-100">${tool.name || 'Tanpa Nama'}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-400">${tool.category}</td>
+                    <td class="px-6 py-4 text-sm text-gray-400">${tool.category || '-'}</td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
                             <button onclick="window.quickUpdateStock('${tool.id}', -1)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-minus text-xs"></i></button>
@@ -693,32 +696,34 @@
             });
         };
 
-        // --- GLOBAL WINDOW HANDLERS ---
-
+        // --- GLOBAL WINDOW HANDLERS (DILENGKAPI TRY CATCH) ---
         window.handleLogin = (e) => {
             e.preventDefault();
-            const nim = document.getElementById('nimInput').value.trim();
-            const pass = document.getElementById('passwordInput').value.trim();
+            try {
+                const nim = document.getElementById('nimInput').value.trim();
+                const pass = document.getElementById('passwordInput').value.trim();
 
-            if(nim === 'admin' && pass === '123') {
-                currentUser = { role: 'admin', id: 'Admin Lab RES' };
-                document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
-                showScreen('adminDashboardScreen');
-                
-                // Pastikan fungsi ini dipanggil untuk memunculkan tabel dan tiket
-                renderAdminPendingTickets();
-                renderAdminInventory();
-                
-                showToast('Login berhasil sebagai Admin');
-            } else {
-                currentUser = { role: 'student', id: nim };
-                document.getElementById('userNameDisplay').innerText = `Mahasiswa (${nim})`;
-                showScreen('dashboardScreen');
-                
-                // Pastikan fungsi ini dipanggil untuk memunculkan kotak alat
-                renderCatalog();
-                
-                showToast(`Selamat datang, ${nim}`);
+                if(nim === 'admin' && pass === '123') {
+                    currentUser = { role: 'admin', id: 'Admin Lab RES' };
+                    document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
+                    showScreen('adminDashboardScreen');
+                    
+                    renderAdminPendingTickets();
+                    renderAdminInventory();
+                    
+                    showToast('Login berhasil sebagai Admin');
+                } else {
+                    currentUser = { role: 'student', id: nim };
+                    document.getElementById('userNameDisplay').innerText = `Mahasiswa (${nim})`;
+                    showScreen('dashboardScreen');
+                    
+                    renderCatalog();
+                    
+                    showToast(`Selamat datang, ${nim}`);
+                }
+            } catch (err) {
+                console.error("Login Error:", err);
+                showToast("Terjadi error sistem: " + err.message, "error");
             }
         };
 
@@ -734,17 +739,13 @@
             const tool = allTools.find(t => t.id === toolId);
             if(!tool || tool.stock <= 0) return;
 
-            // CEK 1: Ambil semua booking si user ini yang masih pending
             const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
-            
-            // CEK 2: Cegah booking jika alat yang JELAS SAMA masih pending (Sesuai ide Evan)
             const isAlreadyBooked = myPendingBookings.some(b => b.toolId === toolId);
             if (isAlreadyBooked) {
                 showToast(`Gagal! Anda masih memiliki tiket pending untuk ${tool.name}. Tidak bisa spam!`, "error");
                 return;
             }
 
-            // CEK 3: Batas pinjam maksimal 3 alat bersamaan
             if (myPendingBookings.length >= 3) {
                 showToast("Batas maksimal 3 alat! Tunggu admin verifikasi tiket lainnya.", "error");
                 return;
@@ -810,7 +811,6 @@
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
             if(!booking) {
                 showToast("Tiket tidak ditemukan atau sudah diproses.", "error");
-                startCamera();
                 return;
             }
 
@@ -856,14 +856,12 @@
                 btn.innerHTML = 'Konfirmasi Check-out';
                 btn.disabled = false;
                 selectedBookingForCheckout = null;
-                startCamera();
             }
         };
 
         // --- LOGIKA ADMIN INVENTARIS (CRUD) ---
         window.openToolModal = (toolId = null) => {
             if (toolId) {
-                // Mode Edit
                 const tool = allTools.find(t => t.id === toolId);
                 document.getElementById('toolModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-secondary"></i> Edit Alat`;
                 document.getElementById('formToolId').value = tool.id;
@@ -872,7 +870,6 @@
                 document.getElementById('formToolStock').value = tool.stock;
                 document.getElementById('formToolIcon').value = tool.icon;
             } else {
-                // Mode Tambah Baru
                 document.getElementById('toolModalTitle').innerHTML = `<i class="fa-solid fa-box-open text-secondary"></i> Tambah Alat Baru`;
                 document.getElementById('formToolId').value = '';
                 document.getElementById('formToolName').value = '';
@@ -928,7 +925,7 @@
             const tool = allTools.find(t => t.id === toolId);
             if(!tool) return;
             const newStock = tool.stock + changeAmount;
-            if(newStock < 0) return; // Tidak boleh minus
+            if(newStock < 0) return; 
             
             try {
                 await updateDoc(doc(db, toolsPath, toolId), { stock: newStock });
@@ -938,7 +935,6 @@
             }
         };
 
-        // Mulai aplikasi
         window.onload = initFirebase;
 
     </script>
