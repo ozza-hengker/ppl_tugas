@@ -48,9 +48,9 @@
 <body class="text-gray-800 h-screen flex flex-col relative overflow-x-hidden">
 
     <!-- OVERLAY LOADING FIREBASE -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center">
+    <div id="loadingOverlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-4">
         <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mb-4"></div>
-        <p class="text-primary font-bold animate-pulse">Menghubungkan ke Database CARES...</p>
+        <p class="text-primary font-bold animate-pulse text-center">Menghubungkan ke Database CARES...</p>
     </div>
 
     <!-- TOAST NOTIFICATION (Pengganti Alert) -->
@@ -382,7 +382,23 @@
 
             } catch (error) {
                 console.error("Firebase Init Error:", error);
-                document.getElementById('loadingOverlay').innerHTML = "<p class='text-red-500 font-bold px-6 text-center bg-white py-4 rounded-xl'>Gagal terhubung ke Database.<br>Periksa konfigurasi firebaseConfig di dalam kode JavaScript.</p>";
+                
+                // Menampilkan error asli dari Firebase ke layar agar mudah di-debug
+                document.getElementById('loadingOverlay').innerHTML = `
+                    <div class='text-center bg-white p-6 rounded-2xl shadow-xl max-w-md mx-4'>
+                        <i class='fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4'></i>
+                        <p class='text-red-600 font-bold text-lg mb-2'>Gagal Terhubung ke Database!</p>
+                        <p class='text-sm text-gray-600 mb-4'>Pesan Error Asli dari Firebase:</p>
+                        <div class='bg-red-50 p-3 rounded-lg text-xs text-left text-red-800 break-words font-mono mb-4 border border-red-200'>
+                            ${error.message}
+                        </div>
+                        <p class='text-sm text-gray-500 text-left mb-2'><i class="fa-solid fa-circle-info text-blue-500 mr-1"></i> <b>Cek 2 hal ini di Firebase Console:</b></p>
+                        <ul class="text-xs text-gray-500 text-left list-disc pl-5 mb-4 space-y-1">
+                            <li>Masuk ke menu <b>Build > Authentication > Sign-in method</b>, pastikan <b>Anonymous</b> sudah di-Enable.</li>
+                            <li>Pastikan Anda sudah klik <b>Create database</b> di menu <b>Firestore Database</b>.</li>
+                        </ul>
+                    </div>
+                `;
             }
         };
 
