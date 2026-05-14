@@ -847,7 +847,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, toolsPath, bookingsPath;
         let currentUser = null;
@@ -1346,50 +1346,48 @@
         window.submitBooking = async (e) => {
             e.preventDefault();
             
-            // Pengaman 1: Pastikan user valid, alat terpilih, dan tidak dobel klik
             if (!auth.currentUser || !selectedToolForBooking || isSubmitting) return;
             
             const btn = document.getElementById('btnConfirmBooking');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
-            isSubmitting = true; // Lock agar tidak ter-submit 2x dari console/UI
-
-            // ==========================================
-            // 🛡️ PENGAMAN GANDA (DOUBLE VALIDATION) 🛡️
-            // Mengecek ulang data secara real-time tepat sebelum menulis ke Firestore
-            // ==========================================
-            const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
-
-            // Cek Duplikat Alat
-            if (myPendingBookings.some(b => b.toolId === selectedToolForBooking.id)) {
-                showToast(`Peringatan Keamanan: Anda tidak bisa nge-spam meminjam ${selectedToolForBooking.name}!`, "error");
-                window.closeModal('bookingModal');
-                btn.innerHTML = 'Konfirmasi Booking';
-                btn.disabled = false;
-                isSubmitting = false;
-                return;
-            }
-
-            // Cek Limit Maksimal
-            if (myPendingBookings.length >= 3) {
-                showToast("Peringatan Keamanan: Limit 3 alat Anda sudah habis!", "error");
-                window.closeModal('bookingModal');
-                btn.innerHTML = 'Konfirmasi Booking';
-                btn.disabled = false;
-                isSubmitting = false;
-                return;
-            }
-            // ==========================================
-
-            const rawTujuan = document.getElementById('formTujuan').value;
-            const cleanTujuan = rawTujuan.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            const tanggal = document.getElementById('formTanggal').value;
-            const sesi = document.getElementById('formSesi').value;
-            
-            // Randomize Ticket (Sedikit diperpanjang biar sulit ditebak)
-            const ticketNum = `TKT-${Math.floor(10000 + Math.random() * 90000)}`;
+            isSubmitting = true;
 
             try {
+                // ==========================================
+                // 🛡️ SERVER-SIDE VALIDATION — Query langsung ke Firestore
+                // Tidak bisa di-bypass dari console atau multi-tab
+                // ==========================================
+                const q = query(
+                    collection(db, bookingsPath),
+                    where("studentId", "==", currentUser.id),
+                    where("status", "==", "pending")
+                );
+                const liveSnapshot = await getDocs(q);
+                const livePending = liveSnapshot.docs.map(d => d.data());
+
+                // Cek duplikat alat (real-time)
+                if (livePending.some(b => b.toolId === selectedToolForBooking.id)) {
+                    showToast(`Gagal: Kamu masih punya tiket pending untuk ${selectedToolForBooking.name}!`, "error");
+                    window.closeModal('bookingModal');
+                    return;
+                }
+
+                // Cek batas maksimal (real-time)
+                if (livePending.length >= 3) {
+                    showToast("Gagal: Batas maksimal 3 tiket pending sudah tercapai!", "error");
+                    window.closeModal('bookingModal');
+                    return;
+                }
+                // ==========================================
+
+                const rawTujuan = document.getElementById('formTujuan').value;
+                const cleanTujuan = rawTujuan.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                const tanggal = document.getElementById('formTanggal').value;
+                const sesi = document.getElementById('formSesi').value;
+                
+                const ticketNum = `TKT-${Math.floor(10000 + Math.random() * 90000)}`;
+
                 const bookingData = {
                     studentId: currentUser.id,
                     studentNama: currentUser.nama || currentUser.id,
@@ -1416,7 +1414,7 @@
             } finally {
                 btn.innerHTML = 'Konfirmasi Booking';
                 btn.disabled = false;
-                isSubmitting = false; // Buka kuncian
+                isSubmitting = false;
             }
         };
 
