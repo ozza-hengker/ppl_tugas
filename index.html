@@ -338,24 +338,39 @@
         // INITIALIZE FIREBASE
         const initFirebase = async () => {
             try {
-                const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+                // =========================================================================
+                // FALLBACK CONFIG: UNTUK MENJALANKAN DI LAPTOP LOKAL (DILUAR CANVAS)
+                // SILAKAN ISI DATA DI BAWAH INI SESUAI FIREBASE PROJECT KAMU (cares-64aba)
+                // =========================================================================
+                const fallbackConfig = {
+                    apiKey: "AIzaSyDnRBNveKktlHQiuSJ7HpU8FjFbo6rBO24",
+                    authDomain: "cares-64aba.firebaseapp.com",
+                    databaseURL: "https://cares-64aba-default-rtdb.asia-southeast1.firebasedatabase.app",
+                    projectId: "cares-64aba",
+                    storageBucket: "cares-64aba.firebasestorage.app",
+                    messagingSenderId: "71383482556",
+                    appId: "1:71383482556:web:8b37a972570e899eee90b9",
+                    measurementId: "G-KV081055X6"
+                };
+
+                const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
+                                        ? JSON.parse(__firebase_config) 
+                                        : fallbackConfig; // <-- Akan pakai data kamu jika di laptop lokal
+
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
                 
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-cares-app';
-                // ATURAN 1: Path Strict untuk Public Data
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'cares-local-app';
                 toolsPath = `artifacts/${appId}/public/data/tools`;
                 bookingsPath = `artifacts/${appId}/public/data/bookings`;
 
-                // ATURAN 3: Auth First
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
 
-                // Tunggu Auth State
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         await seedDataIfEmpty();
@@ -367,7 +382,7 @@
 
             } catch (error) {
                 console.error("Firebase Init Error:", error);
-                document.getElementById('loadingOverlay').innerHTML = "<p class='text-red-500 font-bold'>Gagal terhubung ke Database. Periksa konfigurasi.</p>";
+                document.getElementById('loadingOverlay').innerHTML = "<p class='text-red-500 font-bold px-6 text-center bg-white py-4 rounded-xl'>Gagal terhubung ke Database.<br>Periksa konfigurasi firebaseConfig di dalam kode JavaScript.</p>";
             }
         };
 
@@ -391,13 +406,11 @@
 
         // SETUP REALTIME LISTENERS
         const setupRealtimeListeners = () => {
-            // Listeners Alat
             onSnapshot(collection(db, toolsPath), (snapshot) => {
                 allTools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderCatalog();
             }, (error) => console.error("Snapshot error:", error));
 
-            // Listeners Booking
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderAdminPendingTickets();
@@ -410,7 +423,6 @@
             if(!grid) return;
             grid.innerHTML = '';
 
-            // Urutkan abjad
             const sortedTools = [...allTools].sort((a,b) => a.name.localeCompare(b.name));
 
             sortedTools.forEach(tool => {
@@ -450,7 +462,6 @@
             if(!list) return;
             list.innerHTML = '';
 
-            // ATURAN 2: Filter manual di memory (tanpa where/orderBy kompleks)
             const pendingBookings = allBookings.filter(b => b.status === 'pending');
 
             if(pendingBookings.length === 0) {
@@ -531,7 +542,6 @@
             const ticketNum = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
 
             try {
-                // Buat data tiket di DB (Sesuai Diagram LK03: Stok BUKAN dikurangi saat booking)
                 const bookingData = {
                     studentId: currentUser.id,
                     toolId: selectedToolForBooking.id,
@@ -566,7 +576,6 @@
 
         // [ADMIN] Buka Modal Verifikasi
         window.verifyTicket = (ticketNum) => {
-            // Cari di memori
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
             if(!booking) {
                 showToast("Tiket tidak ditemukan atau sudah selesai.");
@@ -582,7 +591,7 @@
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
 
-        // [ADMIN] Konfirmasi Check-Out -> Update Firestore (Booking & Stok Tool)
+        // [ADMIN] Konfirmasi Check-Out
         window.confirmAdminCheckOut = async () => {
             if(!auth.currentUser || !selectedBookingForCheckout) return;
 
@@ -599,11 +608,9 @@
                     return;
                 }
 
-                // 1. Update Status Tiket
                 const bookingRef = doc(db, bookingsPath, selectedBookingForCheckout.id);
                 await updateDoc(bookingRef, { status: 'checked-out' });
 
-                // 2. Kurangi Stok Alat (Sesuai Diagram LK03 -> Admin yang mengurangi stok)
                 const toolRef = doc(db, toolsPath, toolId);
                 await updateDoc(toolRef, { stock: tool.stock - 1 });
 
