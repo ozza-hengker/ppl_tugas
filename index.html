@@ -3,115 +3,352 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CARES - Component Allocation for Robotics & Embedded Systems</title>
+    <title>CARES — Lab RES</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Library Asli untuk Scan QR Code -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sora:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        primary: '#176B9E', // Biru Tua Lab RES
-                        secondary: '#2CA3D1', // Biru Cyan Lab RES
-                        darker: '#11547D',
+                        primary: '#176B9E',
+                        secondary: '#2CA3D1',
+                        darker: '#0e4267',
+                        accent: '#00D4FF',
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #2CA3D1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #176B9E; }
+        :root {
+            --primary: #176B9E;
+            --secondary: #2CA3D1;
+            --darker: #0e4267;
+            --accent: #00D4FF;
+            --bg-light: #EEF4FA;
+            --glass: rgba(255,255,255,0.7);
+        }
 
-        /* Kustomisasi UI bawaan html5-qrcode agar lebih cantik dan nyambung dengan tema gelap */
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg-light);
+            background-image:
+                radial-gradient(ellipse 80% 60% at 20% -10%, rgba(44, 163, 209, 0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 85% 110%, rgba(23, 107, 158, 0.10) 0%, transparent 55%);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Sora', sans-serif; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 99px; }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(44,163,209,0.4); } 50% { box-shadow: 0 0 0 12px rgba(44,163,209,0); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        @keyframes shimmer { 0% { background-position: -400px 0; } 100% { background-position: 400px 0; } }
+
+        .fade-up { animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.2) both; }
+        .fade-in { animation: fadeIn 0.3s ease both; }
+        .float-anim { animation: float 3.5s ease-in-out infinite; }
+
+        /* ── GLASSMORPHISM CARD ── */
+        .glass-card {
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.6);
+            box-shadow: 0 8px 40px rgba(23,107,158,0.10), 0 1px 0 rgba(255,255,255,0.9) inset;
+        }
+
+        /* ── LOGIN SCREEN ── */
+        #loginScreen { background: transparent; }
+
+        .login-card {
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(24px);
+            border: 1.5px solid rgba(44,163,209,0.18);
+            box-shadow: 0 24px 80px rgba(23,107,158,0.14), 0 2px 0 rgba(255,255,255,1) inset;
+        }
+
+        .logo-glow {
+            filter: drop-shadow(0 0 16px rgba(44,163,209,0.5));
+        }
+        .logo-container {
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+        /* ── NAVBAR ── */
+        .navbar-student {
+            background: linear-gradient(135deg, #0e4267 0%, #176B9E 50%, #2CA3D1 100%);
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 4px 24px rgba(14,66,103,0.25);
+        }
+
+        .navbar-admin {
+            background: #0a1628;
+            border-bottom: 1px solid rgba(44,163,209,0.2);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+
+        /* ── CATALOG CARDS ── */
+        .tool-card {
+            background: rgba(255,255,255,0.92);
+            border: 1.5px solid rgba(23,107,158,0.08);
+            box-shadow: 0 4px 20px rgba(23,107,158,0.07);
+            transition: all 0.3s cubic-bezier(.22,.68,0,1.1);
+        }
+        .tool-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 16px 40px rgba(23,107,158,0.16);
+            border-color: rgba(44,163,209,0.3);
+        }
+
+        /* ── GRADIENT TEXT ── */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ── BADGE PILL ── */
+        .badge-stock {
+            background: linear-gradient(135deg, #d1fadf, #a7f3c4);
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+        .badge-empty {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        /* ── ADMIN DARK CARD ── */
+        .admin-card {
+            background: #0f1e33;
+            border: 1px solid rgba(44,163,209,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        /* ── BUTTON STYLES ── */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            box-shadow: 0 4px 16px rgba(44,163,209,0.35);
+            transition: all 0.25s;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 6px 24px rgba(44,163,209,0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            transition: all 0.25s;
+        }
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 16px rgba(23,107,158,0.3);
+        }
+
+        /* ── LOADING SCREEN ── */
+        #loadingOverlay {
+            background: linear-gradient(135deg, #0e4267, #176B9E, #1a8cc2);
+        }
+        .spinner-ring {
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── QR READER ── */
         #reader { border: none !important; width: 100%; border-radius: 1rem; overflow: hidden; background: #000; }
-        #reader button { background-color: #2CA3D1; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; margin: 0.5rem; cursor: pointer; font-weight: bold; border: none; }
-        #reader button:hover { background-color: #176B9E; }
+        #reader button { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 0.5rem 1.2rem; border-radius: 0.6rem; margin: 0.5rem; cursor: pointer; font-weight: 700; border: none; font-family: 'Space Grotesk', sans-serif; letter-spacing: 0.02em; }
+        #reader button:hover { filter: brightness(1.1); }
         #reader select { padding: 0.5rem; border-radius: 0.5rem; margin-bottom: 0.5rem; color: black; outline: none; }
         #reader__dashboard_section_csr span { color: #9CA3AF !important; font-size: 0.875rem; }
-        #reader__dashboard_section_swaplink { color: #2CA3D1 !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
+        #reader__dashboard_section_swaplink { color: var(--accent) !important; text-decoration: underline; margin-top: 10px; display: inline-block; }
         #reader video { border-radius: 1rem; object-fit: cover; }
+
+        /* ── MODAL ── */
+        .modal-backdrop { background: rgba(8,18,36,0.65); backdrop-filter: blur(8px); }
+
+        /* ── ADMIN TICKET ITEM ── */
+        .ticket-item {
+            background: rgba(44,163,209,0.06);
+            border: 1px solid rgba(44,163,209,0.2);
+            transition: all 0.2s;
+        }
+        .ticket-item:hover {
+            background: rgba(44,163,209,0.12);
+            border-color: rgba(44,163,209,0.4);
+        }
+
+        /* ── INPUT ── */
+        .input-field {
+            background: rgba(240,247,255,0.8);
+            border: 1.5px solid rgba(23,107,158,0.12);
+            transition: all 0.2s;
+        }
+        .input-field:focus {
+            background: white;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(44,163,209,0.12);
+        }
+
+        /* ── DECORATIVE BG CIRCLES ── */
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── LOGO BADGE ── */
+        .logo-badge {
+            background: white;
+            border-radius: 14px;
+            padding: 6px;
+            box-shadow: 0 2px 12px rgba(23,107,158,0.2);
+        }
+
+        /* Tab active */
+        .tab-active { background: linear-gradient(135deg, var(--primary), var(--secondary)) !important; color: white !important; box-shadow: 0 4px 12px rgba(44,163,209,0.35); }
+        .tab-inactive { background: rgba(255,255,255,0.08) !important; color: rgba(255,255,255,0.6) !important; }
+        .tab-inactive:hover { background: rgba(255,255,255,0.14) !important; color: rgba(255,255,255,0.9) !important; }
     </style>
 </head>
-<body class="text-gray-800 h-screen flex flex-col relative overflow-x-hidden">
+<body class="text-gray-800 min-h-screen flex flex-col relative overflow-x-hidden">
 
-    <!-- OVERLAY LOADING FIREBASE -->
-    <div id="loadingOverlay" class="fixed inset-0 bg-white z-[100] flex flex-col items-center justify-center p-4">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-primary mb-4"></div>
-        <p class="text-primary font-bold animate-pulse text-center">Menghubungkan ke Database CARES...</p>
-    </div>
+    <!-- Decorative blobs -->
+    <div class="bg-blob w-96 h-96 bg-blue-200 opacity-30 -top-20 -left-20"></div>
+    <div class="bg-blob w-80 h-80 bg-cyan-200 opacity-20 top-1/2 -right-32"></div>
 
-    <!-- TOAST NOTIFICATION -->
-    <div id="toastNotification" class="fixed bottom-4 right-4 text-white px-6 py-3 rounded-xl shadow-lg z-50 transform transition-transform duration-300 translate-y-24 flex items-center gap-3">
-        <i id="toastIcon" class="fa-solid fa-circle-check text-xl"></i>
-        <span id="toastMessage" class="font-medium">Notifikasi</span>
-    </div>
-
-    <!-- ================= SCREENS ================= -->
-
-    <!-- SCREEN 1: LOGIN -->
-    <div id="loginScreen" class="hidden flex-1 flex items-center justify-center fade-in">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-primary relative overflow-hidden mx-4">
-            <i class="fa-solid fa-network-wired absolute -top-10 -right-10 text-9xl text-gray-50 opacity-50"></i>
-            <div class="text-center mb-8 relative z-10">
-                <div class="bg-gradient-to-br from-primary to-secondary text-white w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-lg transform rotate-3">
-                    <i class="fa-solid fa-robot -rotate-3"></i>
-                </div>
-                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">CARES</h1>
-                <p class="text-sm text-secondary font-semibold mt-1">Sistem Login Laboratorium</p>
+    <!-- LOADING OVERLAY -->
+    <div id="loadingOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4">
+        <div class="flex flex-col items-center gap-6">
+            <div class="logo-container">
+                <img src="logo_res.png" alt="Lab RES Logo" class="w-20 h-20 logo-glow">
             </div>
-            
-            <div class="bg-blue-50 border border-blue-100 p-3 rounded-lg text-xs text-blue-800 mb-6 relative z-10 text-center">
-                <strong>Info Login:</strong><br>
-                Mahasiswa: Gunakan NIM & Password bebas<br>
-                Admin: Username <b>admin</b> | Password <b>123</b>
+            <div class="spinner-ring w-12 h-12 rounded-full"></div>
+            <div class="text-center">
+                <p class="text-white font-bold text-lg tracking-wide" style="font-family:'Sora',sans-serif;">Menghubungkan ke Database</p>
+                <p class="text-white/60 text-sm mt-1 animate-pulse">CARES — Lab RES</p>
             </div>
-
-            <form onsubmit="window.handleLogin(event)" class="relative z-10">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">NIM / Username</label>
-                    <div class="relative">
-                        <i class="fa-regular fa-user absolute left-3 top-3.5 text-gray-400"></i>
-                        <input type="text" id="nimInput" required class="pl-10 w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition bg-gray-50 focus:bg-white" placeholder="Masukkan ID Anda">
-                    </div>
-                </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
-                    <div class="relative">
-                        <i class="fa-solid fa-lock absolute left-3 top-3.5 text-gray-400"></i>
-                        <input type="password" id="passwordInput" required class="pl-10 w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-secondary focus:border-secondary outline-none transition bg-gray-50 focus:bg-white" placeholder="••••••••">
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-gradient-to-r from-primary to-secondary hover:from-darker hover:to-primary text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5">
-                    Masuk ke Sistem <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </form>
         </div>
     </div>
 
-    <!-- SCREEN 2: DASHBOARD MAHASISWA -->
-    <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in">
-        <nav class="bg-gradient-to-r from-primary to-secondary text-white shadow-lg z-10">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-white text-primary p-1.5 rounded-lg"><i class="fa-solid fa-robot text-xl"></i></div>
-                        <span class="font-bold text-xl tracking-wider">CARES <span class="text-xs font-normal bg-white/20 px-2 py-0.5 rounded ml-1">Student</span></span>
+    <!-- TOAST -->
+    <div id="toastNotification" class="fixed bottom-6 right-6 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-50 transform transition-all duration-300 translate-y-28 flex items-center gap-3 text-sm font-semibold">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-lg"></i>
+        <span id="toastMessage">Notifikasi</span>
+    </div>
+
+    <!-- ======================== SCREEN 1: LOGIN ======================== -->
+    <div id="loginScreen" class="hidden flex-1 flex items-center justify-center fade-in relative z-10 min-h-screen px-4 py-12">
+        <div class="login-card rounded-3xl w-full max-w-md overflow-hidden fade-up">
+            
+            <!-- Top accent bar -->
+            <div class="h-1.5 w-full" style="background: linear-gradient(90deg, #0e4267, #176B9E, #2CA3D1, #00D4FF);"></div>
+            
+            <div class="p-8 sm:p-10">
+                <!-- Header with Logo -->
+                <div class="text-center mb-8">
+                    <div class="flex justify-center mb-5">
+                        <div class="relative">
+                            <div class="absolute inset-0 rounded-2xl" style="background: linear-gradient(135deg, rgba(44,163,209,0.2), rgba(23,107,158,0.1)); filter: blur(12px); transform: scale(1.2);"></div>
+                            <img src="logo_res.png" alt="Lab RES" class="relative w-20 h-20 logo-container logo-glow">
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-sm hidden sm:block bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm">
-                            <i class="fa-regular fa-user mr-1"></i> <span id="userNameDisplay">Mahasiswa</span>
+                    <h1 class="text-4xl font-extrabold tracking-tight" style="font-family:'Sora',sans-serif;">
+                        <span class="text-gradient">CARES</span>
+                    </h1>
+                    <p class="text-sm text-gray-500 font-medium mt-1.5">Component Allocation for Robotics & Embedded Systems</p>
+                    <div class="flex items-center justify-center gap-2 mt-3">
+                        <span class="w-8 h-px bg-gradient-to-r from-transparent to-secondary"></span>
+                        <span class="text-xs font-semibold uppercase tracking-widest text-secondary">Lab RES — Sistem Login</span>
+                        <span class="w-8 h-px bg-gradient-to-l from-transparent to-secondary"></span>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-800 mb-6 text-center leading-relaxed">
+                    <p class="font-bold mb-1 text-blue-900">💡 Info Akun Demo</p>
+                    Mahasiswa: Gunakan NIM & password bebas<br>
+                    Admin: Username <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">admin</code> | Password <code class="bg-blue-100 px-1.5 py-0.5 rounded font-bold">123</code>
+                </div>
+
+                <!-- Form -->
+                <form onsubmit="window.handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">NIM / Username</label>
+                        <div class="relative">
+                            <i class="fa-regular fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" id="nimInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Masukkan ID Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">Kata Sandi</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="password" id="passwordInput" required
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2">
+                            Masuk ke Sistem <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bottom brand strip -->
+            <div class="px-8 py-3 border-t border-gray-100 flex items-center justify-center gap-2">
+                <img src="logo_res.png" alt="" class="w-5 h-5 opacity-40">
+                <span class="text-xs text-gray-400 font-medium">Robotics & Embedded Systems Laboratory</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================== SCREEN 2: DASHBOARD MAHASISWA ======================== -->
+    <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in relative z-10">
+        <nav class="navbar-student text-white z-20 sticky top-0">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16 items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="logo-badge">
+                            <img src="logo_res.png" alt="RES" class="w-8 h-8">
+                        </div>
+                        <div>
+                            <span class="font-bold text-lg tracking-wide" style="font-family:'Sora',sans-serif;">CARES</span>
+                            <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full ml-2 font-medium border border-white/20">Student</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm hidden sm:flex items-center gap-2 bg-white/15 px-3 py-1.5 rounded-full border border-white/20">
+                            <i class="fa-regular fa-user text-xs"></i>
+                            <span id="userNameDisplay" class="font-medium">Mahasiswa</span>
                         </span>
-                        <button onclick="window.handleLogout()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg text-sm font-medium transition backdrop-blur-sm border border-white/20">
-                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                        <button onclick="window.handleLogout()" class="bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-xl text-sm font-semibold transition border border-white/15 flex items-center gap-1.5">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i> Keluar
                         </button>
                     </div>
                 </div>
@@ -119,154 +356,178 @@
         </nav>
 
         <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4">
+            <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Katalog Inventaris Real-Time</h2>
+                    <h2 class="text-2xl font-bold text-gray-800" style="font-family:'Sora',sans-serif;">
+                        Katalog Inventaris <span class="text-gradient">Real-Time</span>
+                    </h2>
                     <p class="text-sm text-gray-500 mt-1">Stok terhubung langsung dengan Firebase. Booking untuk membuat tiket pengambilan.</p>
                 </div>
+                <div class="flex items-center gap-2 text-xs text-green-700 bg-green-50 border border-green-200 px-3 py-2 rounded-xl font-semibold">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live Database
+                </div>
             </div>
-
-            <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                <!-- Di-render oleh JavaScript -->
-            </div>
+            <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
         </main>
     </div>
 
-    <!-- SCREEN 3: DASHBOARD ADMIN -->
-    <div id="adminDashboardScreen" class="hidden flex-1 flex flex-col fade-in bg-gray-900">
-        <nav class="bg-gray-800 text-white shadow-lg border-b border-gray-700">
+    <!-- ======================== SCREEN 3: ADMIN DASHBOARD ======================== -->
+    <div id="adminDashboardScreen" class="hidden flex-1 flex flex-col fade-in" style="background:#080f1e; min-height:100vh;">
+        <nav class="navbar-admin text-white z-20 sticky top-0">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
+                <div class="flex justify-between h-16 items-center gap-3">
                     <div class="flex items-center gap-3">
-                        <div class="bg-secondary text-white p-1.5 rounded-lg"><i class="fa-solid fa-qrcode text-xl"></i></div>
-                        <span class="font-bold text-xl tracking-wider text-gray-100 hidden sm:inline-block">CARES <span class="text-xs font-normal bg-secondary px-2 py-0.5 rounded ml-1 text-white">Admin</span></span>
-                    </div>
-                    
-                    <!-- ADMIN TABS -->
-                    <div class="flex gap-2">
-                        <button onclick="window.switchAdminView('scanner')" id="tabScanner" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition">Scanner</button>
-                        <button onclick="window.switchAdminView('inventory')" id="tabInventory" class="px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition">Inventaris</button>
+                        <div class="bg-gray-800 rounded-xl p-1.5 border border-secondary/30">
+                            <img src="logo_res.png" alt="RES" class="w-8 h-8">
+                        </div>
+                        <div class="hidden sm:block">
+                            <span class="font-bold text-lg tracking-wide" style="font-family:'Sora',sans-serif;">CARES</span>
+                            <span class="text-xs bg-secondary/20 text-secondary px-2 py-0.5 rounded-full ml-2 border border-secondary/30 font-semibold">Admin Panel</span>
+                        </div>
                     </div>
 
-                    <div class="flex items-center gap-4">
-                        <button onclick="window.handleLogout()" class="bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition border border-red-500/50">
-                            <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                    <!-- Tabs -->
+                    <div class="flex gap-2 flex-1 justify-center sm:justify-start max-w-xs">
+                        <button onclick="window.switchAdminView('scanner')" id="tabScanner"
+                            class="tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-qrcode text-xs"></i> Scanner
+                        </button>
+                        <button onclick="window.switchAdminView('inventory')" id="tabInventory"
+                            class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-boxes-stacked text-xs"></i> Inventaris
+                        </button>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs text-gray-400 hidden md:block bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                            <i class="fa-solid fa-user-shield mr-1 text-secondary"></i>
+                            <span id="adminUserNameDisplay">Admin</span>
+                        </span>
+                        <button onclick="window.handleLogout()" class="bg-red-500/15 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-xl text-sm font-bold transition border border-red-500/30 flex items-center gap-1.5">
+                            <i class="fa-solid fa-right-from-bracket text-xs"></i>
+                            <span class="hidden sm:inline">Keluar</span>
                         </button>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <main class="flex-1 flex flex-col items-center justify-start p-6 overflow-y-auto w-full">
-            
+        <main class="flex-1 flex flex-col items-center justify-start p-5 sm:p-8 overflow-y-auto w-full">
+
             <!-- SECTION A: SCANNER -->
             <div id="adminScannerSection" class="w-full flex flex-col items-center">
-                <div class="text-center mb-6 mt-4">
-                    <h2 class="text-3xl font-bold text-white tracking-wide">Pemindai & Validasi</h2>
-                    <p class="text-gray-400 mt-2">Arahkan kamera ke QR Code tiket mahasiswa.</p>
+                <div class="text-center mb-8 mt-2">
+                    <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">
+                        Pemindai <span style="color: var(--accent);">&</span> Validasi
+                    </h2>
+                    <p class="text-gray-500 mt-2 text-sm">Arahkan kamera ke QR Code tiket mahasiswa untuk proses check-out.</p>
                 </div>
 
-                <!-- Area Scanner Kamera (Aman & Manual) -->
-                <div class="relative bg-gray-800 p-4 rounded-3xl border-2 border-gray-700 shadow-2xl max-w-md w-full mb-8">
-                    <div id="reader-wrapper" class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden border-4 border-gray-900 flex flex-col items-center justify-center">
-                        
-                        <!-- Area Target Reader HTML5-QRCode -->
+                <!-- Scanner Box -->
+                <div class="relative p-5 rounded-3xl border border-secondary/20 shadow-2xl max-w-md w-full mb-8" style="background:#0f1e33;">
+                    <div id="reader-wrapper" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-gray-700 flex flex-col items-center justify-center" style="background:#000;">
                         <div id="reader" class="w-full h-full bg-black"></div>
-
-                        <!-- Placeholder & Tombol Manual Aktifkan Kamera -->
-                        <div id="scannerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-90">
-                            <i class="fa-solid fa-camera text-5xl text-gray-500 mb-4"></i>
-                            <button onclick="window.activateScanner()" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 py-3 rounded-xl font-bold transition shadow-[0_0_15px_rgba(44,163,209,0.4)] flex items-center gap-2">
+                        <div id="scannerPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-black bg-opacity-95">
+                            <div class="w-16 h-16 rounded-2xl border-2 border-secondary/40 flex items-center justify-center mb-4" style="background:rgba(44,163,209,0.08);">
+                                <i class="fa-solid fa-camera text-3xl text-secondary/60"></i>
+                            </div>
+                            <button onclick="window.activateScanner()"
+                                class="btn-primary text-white px-7 py-3 rounded-2xl font-bold flex items-center gap-2 text-sm">
                                 <i class="fa-solid fa-power-off"></i> Aktifkan Scanner
                             </button>
-                            <p class="text-xs text-gray-400 mt-4 text-center px-4">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
+                            <p class="text-xs text-gray-600 mt-4 text-center px-6">Klik tombol di atas untuk menyalakan kamera secara aman.</p>
                         </div>
-
                     </div>
 
-                    <div class="mt-6 flex flex-col gap-4">
+                    <div class="mt-5">
                         <form onsubmit="window.handleManualSearch(event)" class="flex gap-2">
-                            <input type="text" id="adminSearchInput" class="flex-1 bg-gray-700 border border-gray-600 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase" placeholder="Input Manual: TKT-XXXX">
-                            <button type="submit" class="bg-secondary hover:bg-blue-400 text-gray-900 px-6 rounded-xl font-bold transition shadow-[0_0_10px_rgba(44,163,209,0.3)]">Cari</button>
+                            <input type="text" id="adminSearchInput"
+                                class="flex-1 bg-white/5 border border-white/10 text-white p-3 rounded-xl outline-none focus:border-secondary uppercase text-sm placeholder-gray-600 font-mono"
+                                placeholder="Input Manual: TKT-XXXX">
+                            <button type="submit" class="btn-primary text-white px-5 rounded-xl font-bold text-sm">
+                                <i class="fa-solid fa-search"></i>
+                            </button>
                         </form>
                     </div>
                 </div>
 
-                <div class="w-full max-w-2xl bg-gray-800 rounded-2xl border border-gray-700 p-5 mb-10">
-                    <h3 class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)</h3>
-                    <div id="pendingTicketsList" class="flex flex-col gap-3">
-                        <!-- Di-render oleh JavaScript -->
-                    </div>
+                <!-- Pending Queue -->
+                <div class="w-full max-w-2xl admin-card rounded-2xl p-5 mb-10">
+                    <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+                        <i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)
+                    </h3>
+                    <div id="pendingTicketsList" class="flex flex-col gap-3"></div>
                 </div>
             </div>
 
-            <!-- SECTION B: KELOLA INVENTARIS -->
+            <!-- SECTION B: INVENTARIS -->
             <div id="adminInventorySection" class="hidden w-full max-w-5xl">
-                <div class="flex justify-between items-center mb-6 mt-4">
+                <div class="flex justify-between items-center mb-6 mt-2">
                     <div>
-                        <h2 class="text-3xl font-bold text-white tracking-wide">Kelola Inventaris</h2>
-                        <p class="text-gray-400 mt-1">Tambah, edit, atau hapus ketersediaan komponen lab.</p>
+                        <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">Kelola Inventaris</h2>
+                        <p class="text-gray-500 mt-1 text-sm">Tambah, edit, atau hapus ketersediaan komponen lab.</p>
                     </div>
-                    <button onclick="window.openToolModal()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2 shadow-lg">
+                    <button onclick="window.openToolModal()" class="bg-emerald-500 hover:bg-emerald-400 text-white px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-emerald-900/30 text-sm">
                         <i class="fa-solid fa-plus"></i> Tambah Alat
                     </button>
                 </div>
 
-                <div class="bg-gray-800 rounded-2xl border border-gray-700 overflow-hidden shadow-2xl">
+                <div class="admin-card rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-white">
-                            <thead class="bg-gray-900 border-b border-gray-700 text-gray-400 uppercase text-xs">
+                            <thead class="border-b border-white/5 text-gray-500 uppercase text-xs">
                                 <tr>
-                                    <th class="px-6 py-4">Alat</th>
-                                    <th class="px-6 py-4">Kategori</th>
-                                    <th class="px-6 py-4 text-center">Stok Real-time</th>
-                                    <th class="px-6 py-4 text-right">Aksi</th>
+                                    <th class="px-6 py-4 tracking-wider">Alat</th>
+                                    <th class="px-6 py-4 tracking-wider">Kategori</th>
+                                    <th class="px-6 py-4 text-center tracking-wider">Stok Real-time</th>
+                                    <th class="px-6 py-4 text-right tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="adminInventoryTableBody" class="divide-y divide-gray-700">
-                                <!-- Di-render oleh JavaScript -->
-                            </tbody>
+                            <tbody id="adminInventoryTableBody" class="divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
 
-    <!-- ================= MODALS ================= -->
+    <!-- ======================== MODALS ======================== -->
 
-    <!-- MODAL MAHASISWA: FORM RESERVASI -->
-    <div id="bookingModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100">
-            <div class="bg-gradient-to-r from-primary to-secondary p-5 text-white flex justify-between items-center">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-regular fa-calendar-check"></i> Form Reservasi</h3>
-                <button onclick="window.closeModal('bookingModal')" class="text-white hover:text-gray-200 transition bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+    <!-- MODAL: BOOKING MAHASISWA -->
+    <div id="bookingModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="p-5 text-white flex justify-between items-center" style="background: linear-gradient(135deg, var(--darker), var(--secondary));">
+                <h3 class="font-bold text-lg flex items-center gap-2" style="font-family:'Sora',sans-serif;">
+                    <i class="fa-regular fa-calendar-check"></i> Form Reservasi
+                </h3>
+                <button onclick="window.closeModal('bookingModal')" class="bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
             </div>
             <div class="p-6">
-                <div class="flex gap-4 items-center mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100/50">
-                    <div class="text-3xl text-secondary bg-white w-12 h-12 rounded-lg flex items-center justify-center shadow-sm">
+                <div class="flex gap-4 items-center mb-6 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                    <div class="text-3xl text-secondary bg-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-md border border-blue-100">
                         <i id="modalIcon" class="fa-solid fa-microchip"></i>
                     </div>
                     <div>
-                        <p class="text-xs font-semibold text-primary uppercase tracking-wider mb-0.5">Sisa Stok: <span id="modalToolStock" class="font-bold text-secondary"></span></p>
+                        <p class="text-xs font-bold text-primary uppercase tracking-wide mb-0.5">Sisa Stok: <span id="modalToolStock" class="text-secondary"></span></p>
                         <p id="modalToolName" class="font-bold text-gray-800 text-lg leading-tight">Nama Alat</p>
                     </div>
                 </div>
-                
                 <form onsubmit="window.submitBooking(event)">
                     <div class="mb-5">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Peminjaman</label>
-                        <select required id="formTujuan" class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-1 focus:ring-secondary bg-gray-50 focus:bg-white transition">
-                            <option value="">-- Pilih Tujuan --</option>
+                        <select required id="formTujuan"
+                            class="w-full p-3 border border-gray-200 rounded-xl outline-none focus:border-secondary focus:ring-2 focus:ring-secondary/20 bg-gray-50 focus:bg-white transition text-sm font-medium">
+                            <option value="">— Pilih Tujuan —</option>
                             <option value="Praktikum">Praktikum / Tugas Kelas</option>
                             <option value="Proyek Akhir">Proyek Akhir / Skripsi</option>
                             <option value="Penelitian">Penelitian Lab</option>
                         </select>
                     </div>
-                    <div class="flex gap-3 mt-8">
-                        <button type="button" onclick="window.closeModal('bookingModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl transition">Batal</button>
-                        <button type="submit" id="btnConfirmBooking" class="flex-1 bg-secondary hover:bg-[#238bb3] text-white font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg flex justify-center items-center">
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" onclick="window.closeModal('bookingModal')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 px-4 rounded-xl transition text-sm">Batal</button>
+                        <button type="submit" id="btnConfirmBooking" class="btn-primary flex-1 text-white font-bold py-3 px-4 rounded-xl flex justify-center items-center text-sm">
                             Konfirmasi Booking
                         </button>
                     </div>
@@ -275,67 +536,69 @@
         </div>
     </div>
 
-    <!-- MODAL MAHASISWA: TIKET SUKSES -->
-    <div id="ticketModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden text-center border border-gray-100">
-            <div class="bg-green-500 p-8 text-white relative overflow-hidden">
-                <i class="fa-solid fa-ticket absolute -right-4 -bottom-4 text-7xl text-white opacity-20"></i>
+    <!-- MODAL: TIKET SUKSES -->
+    <div id="ticketModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden text-center">
+            <div class="p-8 text-white relative overflow-hidden" style="background: linear-gradient(135deg, #059669, #10b981);">
+                <div class="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/10"></div>
+                <div class="absolute -left-6 -top-6 w-24 h-24 rounded-full bg-white/10"></div>
                 <div class="relative z-10">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg">
-                        <i class="fa-solid fa-check text-3xl text-green-500"></i>
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-xl" style="animation: pulse-ring 2s ease-in-out infinite;">
+                        <i class="fa-solid fa-check text-3xl text-emerald-500"></i>
                     </div>
-                    <h3 class="font-bold text-2xl">Tiket Dibuat!</h3>
+                    <h3 class="font-extrabold text-2xl" style="font-family:'Sora',sans-serif;">Booking Berhasil!</h3>
+                    <p class="text-emerald-100 text-sm mt-1">Tiket reservasi Anda sudah dibuat</p>
                 </div>
             </div>
             <div class="p-6">
-                <p class="text-gray-600 text-sm mb-5">Tunjukkan kode tiket ini kepada Asisten Lab RES untuk validasi pengambilan alat.</p>
-                <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl text-2xl font-mono font-bold tracking-widest text-primary mb-6">
+                <p class="text-gray-500 text-sm mb-5">Tunjukkan kode tiket ini kepada Asisten Lab RES untuk validasi pengambilan alat.</p>
+                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-100 p-4 rounded-2xl text-2xl font-mono font-extrabold tracking-widest text-primary mb-5">
                     <span id="ticketNumberDisplay">TKT-0000</span>
                 </div>
-                
-                <div class="border-2 border-dashed border-secondary p-3 rounded-xl inline-block mb-5 bg-gray-50">
-                    <img id="qrCodeImage" src="" alt="QR Code Tiket" class="mx-auto w-32 h-32 rounded">
+                <div class="border-2 border-dashed border-secondary/40 p-4 rounded-2xl inline-block mb-5 bg-gray-50">
+                    <img id="qrCodeImage" src="" alt="QR Code Tiket" class="mx-auto w-32 h-32 rounded-xl">
                 </div>
-
-                <button onclick="window.closeModal('ticketModal')" class="w-full bg-primary hover:bg-darker text-white font-bold py-3 px-4 rounded-xl transition shadow-md hover:shadow-lg">Selesai & Kembali</button>
+                <button onclick="window.closeModal('ticketModal')" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-xl text-sm">
+                    Selesai & Kembali
+                </button>
             </div>
         </div>
     </div>
 
     <!-- MODAL ADMIN: VERIFIKASI ALAT -->
-    <div id="adminVerifyModal" class="hidden fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-600">
-            <div class="bg-secondary p-5 text-gray-900 flex justify-between items-center">
-                <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-clipboard-check"></i> Verifikasi Pengambilan</h3>
-                <button onclick="window.closeModal('adminVerifyModal')" class="text-gray-900 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center"><i class="fa-solid fa-times"></i></button>
+    <div id="adminVerifyModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
+        <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-secondary/30" style="background:#0f1e33;">
+            <div class="p-5 text-gray-900 flex justify-between items-center" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+                <h3 class="font-bold text-lg flex items-center gap-2 text-white" style="font-family:'Sora',sans-serif;">
+                    <i class="fa-solid fa-clipboard-check"></i> Verifikasi Pengambilan
+                </h3>
+                <button onclick="window.closeModal('adminVerifyModal')" class="bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full flex items-center justify-center text-white transition"><i class="fa-solid fa-times"></i></button>
             </div>
             <div class="p-6 text-gray-200">
-                <div class="flex justify-center mb-4">
-                    <div class="bg-green-500/20 text-green-400 px-4 py-2 rounded-full border border-green-500/50 flex items-center gap-2 text-sm font-bold">
+                <div class="flex justify-center mb-5">
+                    <div class="bg-emerald-500/15 text-emerald-400 px-5 py-2 rounded-full border border-emerald-500/30 flex items-center gap-2 text-sm font-bold">
                         <i class="fa-solid fa-check-circle"></i> Data Tiket Valid
                     </div>
                 </div>
-                
-                <div class="space-y-4 bg-gray-900 p-4 rounded-xl border border-gray-700">
+                <div class="space-y-4 p-4 rounded-2xl border border-white/8" style="background:rgba(0,0,0,0.25);">
                     <div>
-                        <p class="text-xs text-gray-500 uppercase tracking-wider">Tiket Mahasiswa</p>
+                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Tiket Mahasiswa</p>
                         <p id="verifTicketNum" class="font-mono text-xl text-secondary font-bold">TKT-XXXX</p>
                     </div>
-                    <div class="border-t border-gray-700 pt-3">
-                        <p class="text-xs text-gray-500 uppercase tracking-wider">Identitas Peminjam</p>
-                        <p id="verifStudentId" class="font-bold text-lg">Nama Mahasiswa</p>
-                        <p id="verifTujuan" class="text-sm text-gray-400">Tujuan: -</p>
+                    <div class="border-t border-white/8 pt-3">
+                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Identitas Peminjam</p>
+                        <p id="verifStudentId" class="font-bold text-lg text-white">Nama Mahasiswa</p>
+                        <p id="verifTujuan" class="text-sm text-gray-500">Tujuan: -</p>
                     </div>
-                    <div class="border-t border-gray-700 pt-3">
-                        <p class="text-xs text-gray-500 uppercase tracking-wider">Alat Fisik Ter-Scan</p>
-                        <p class="font-bold text-blue-400 text-lg"><i class="fa-solid fa-microchip mr-1"></i> <span id="verifToolName">Nama Alat</span></p>
-                        <p class="text-sm text-yellow-400"><i class="fa-solid fa-triangle-exclamation"></i> Konfirmasi akan mengurangi stok di Database</p>
+                    <div class="border-t border-white/8 pt-3">
+                        <p class="text-xs text-gray-600 uppercase tracking-widest mb-1">Alat Fisik Ter-Scan</p>
+                        <p class="font-bold text-secondary text-lg"><i class="fa-solid fa-microchip mr-1"></i> <span id="verifToolName">Nama Alat</span></p>
+                        <p class="text-xs text-yellow-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Konfirmasi akan mengurangi stok di Database</p>
                     </div>
                 </div>
-
-                <div class="mt-8 flex gap-3">
-                    <button onclick="window.closeModal('adminVerifyModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition border border-gray-600">Batal</button>
-                    <button id="btnConfirmCheckout" onclick="window.confirmAdminCheckOut()" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-xl transition shadow-[0_0_15px_rgba(34,197,94,0.3)] flex justify-center items-center">
+                <div class="mt-6 flex gap-3">
+                    <button onclick="window.closeModal('adminVerifyModal')" class="flex-1 bg-white/8 hover:bg-white/15 text-white font-bold py-3 px-4 rounded-xl transition border border-white/10 text-sm">Batal</button>
+                    <button id="btnConfirmCheckout" onclick="window.confirmAdminCheckOut()" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-white font-bold py-3 px-4 rounded-xl transition shadow-lg shadow-emerald-900/30 flex justify-center items-center text-sm">
                         Konfirmasi Check-out
                     </button>
                 </div>
@@ -344,31 +607,39 @@
     </div>
 
     <!-- MODAL ADMIN: FORM KELOLA ALAT -->
-    <div id="adminToolModal" class="hidden fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center p-4 z-50 fade-in">
-        <div class="bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-600">
-            <div class="bg-gray-900 p-5 border-b border-gray-700 text-white flex justify-between items-center">
-                <h3 id="toolModalTitle" class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-box-open text-secondary"></i> Tambah Alat</h3>
-                <button onclick="window.closeModal('adminToolModal')" class="text-gray-400 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
+    <div id="adminToolModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
+        <div class="rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-white/10" style="background:#0f1e33;">
+            <div class="p-5 border-b border-white/8 text-white flex justify-between items-center" style="background:rgba(0,0,0,0.3);">
+                <h3 id="toolModalTitle" class="font-bold text-lg flex items-center gap-2" style="font-family:'Sora',sans-serif;">
+                    <i class="fa-solid fa-box-open text-secondary"></i> Tambah Alat
+                </h3>
+                <button onclick="window.closeModal('adminToolModal')" class="text-gray-500 hover:text-white transition"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             <div class="p-6">
-                <form onsubmit="window.submitTool(event)">
+                <form onsubmit="window.submitTool(event)" class="space-y-4">
                     <input type="hidden" id="formToolId">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-300 mb-2">Nama Alat</label>
-                        <input type="text" id="formToolName" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition" placeholder="Cth: Arduino Uno R3">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-400 mb-2">Nama Alat</label>
+                        <input type="text" id="formToolName" required
+                            class="w-full p-3 bg-white/6 border border-white/10 rounded-xl text-white outline-none focus:border-secondary transition text-sm placeholder-gray-600"
+                            placeholder="Cth: Arduino Uno R3">
                     </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-300 mb-2">Kategori</label>
-                        <input type="text" id="formToolCategory" required class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition" placeholder="Cth: Mikrokontroler">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-400 mb-2">Kategori</label>
+                        <input type="text" id="formToolCategory" required
+                            class="w-full p-3 bg-white/6 border border-white/10 rounded-xl text-white outline-none focus:border-secondary transition text-sm placeholder-gray-600"
+                            placeholder="Cth: Mikrokontroler">
                     </div>
-                    <div class="flex gap-4 mb-6">
+                    <div class="flex gap-4">
                         <div class="flex-1">
-                            <label class="block text-sm font-semibold text-gray-300 mb-2">Jumlah Stok</label>
-                            <input type="number" id="formToolStock" required min="0" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition">
+                            <label class="block text-sm font-semibold text-gray-400 mb-2">Jumlah Stok</label>
+                            <input type="number" id="formToolStock" required min="0"
+                                class="w-full p-3 bg-white/6 border border-white/10 rounded-xl text-white outline-none focus:border-secondary transition text-sm">
                         </div>
                         <div class="flex-1">
-                            <label class="block text-sm font-semibold text-gray-300 mb-2">Pilih Ikon</label>
-                            <select id="formToolIcon" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-xl text-white outline-none focus:border-secondary transition">
+                            <label class="block text-sm font-semibold text-gray-400 mb-2">Pilih Ikon</label>
+                            <select id="formToolIcon"
+                                class="w-full p-3 bg-white/6 border border-white/10 rounded-xl text-white outline-none focus:border-secondary transition text-sm">
                                 <option value="fa-microchip">Microchip</option>
                                 <option value="fa-wifi">WiFi / NodeMCU</option>
                                 <option value="fa-server">Server / Pi</option>
@@ -381,42 +652,39 @@
                             </select>
                         </div>
                     </div>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="window.closeModal('adminToolModal')" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl transition border border-gray-600">Batal</button>
-                        <button type="submit" id="btnSaveTool" class="flex-1 bg-secondary hover:bg-blue-400 text-gray-900 font-bold py-3 px-4 rounded-xl transition shadow-lg">Simpan</button>
+                    <div class="flex gap-3 pt-2">
+                        <button type="button" onclick="window.closeModal('adminToolModal')" class="flex-1 bg-white/6 hover:bg-white/12 text-white font-bold py-3 px-4 rounded-xl transition border border-white/10 text-sm">Batal</button>
+                        <button type="submit" id="btnSaveTool" class="btn-primary flex-1 text-white font-bold py-3 px-4 rounded-xl text-sm">Simpan</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- ================= FIREBASE & LOGIC ================= -->
+    <!-- ======================== FIREBASE & LOGIC ======================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDocs, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let app, auth, db, toolsPath, bookingsPath;
-        let currentUser = null; 
+        let currentUser = null;
         let selectedToolForBooking = null;
-        let selectedBookingForCheckout = null; 
-        
+        let selectedBookingForCheckout = null;
         let allTools = [];
         let allBookings = [];
-
         let html5QrcodeScanner = null;
 
         // UI Helpers
         const showToast = (message, type = 'success') => {
             const toast = document.getElementById('toastNotification');
             const icon = document.getElementById('toastIcon');
-            
-            toast.className = `fixed bottom-4 right-4 text-white px-6 py-3 rounded-xl shadow-lg z-[110] transform transition-transform duration-300 flex items-center gap-3 ${type === 'error' ? 'bg-red-500' : 'bg-green-500'}`;
-            icon.className = type === 'error' ? 'fa-solid fa-circle-exclamation text-xl' : 'fa-solid fa-circle-check text-xl';
-            
+            const isError = type === 'error';
+            toast.className = `fixed bottom-6 right-6 text-white px-5 py-3.5 rounded-2xl shadow-2xl z-[110] transform transition-all duration-300 flex items-center gap-3 text-sm font-semibold ${isError ? 'bg-red-500' : 'bg-emerald-500'}`;
+            icon.className = isError ? 'fa-solid fa-circle-exclamation text-lg' : 'fa-solid fa-circle-check text-lg';
             document.getElementById('toastMessage').innerText = message;
-            toast.classList.remove('translate-y-24');
-            setTimeout(() => { toast.classList.add('translate-y-24'); }, 3500);
+            toast.classList.remove('translate-y-28');
+            setTimeout(() => { toast.classList.add('translate-y-28'); }, 3500);
         };
 
         const showScreen = (screenId) => {
@@ -424,20 +692,17 @@
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
-
             if (screenId === 'adminDashboardScreen') {
-                window.switchAdminView('scanner'); // Default view
+                window.switchAdminView('scanner');
             } else {
-                stopCamera(); // Pastikan mati kalau pindah layar
+                stopCamera();
             }
         };
 
-        window.closeModal = (modalId) => { 
-            document.getElementById(modalId).classList.add('hidden'); 
-            // Scanner tidak menyala otomatis setelah modal tutup. User bisa menekan tombol lagi jika butuh.
+        window.closeModal = (modalId) => {
+            document.getElementById(modalId).classList.add('hidden');
         };
 
-        // --- MANAJEMEN TAB ADMIN ---
         window.switchAdminView = (view) => {
             const scannerSec = document.getElementById('adminScannerSection');
             const invSec = document.getElementById('adminInventorySection');
@@ -447,23 +712,19 @@
             if (view === 'scanner') {
                 scannerSec.classList.remove('hidden');
                 invSec.classList.add('hidden');
-                tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
-                tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
-                
-                // Jangan paksa startCamera() disini agar tidak nge-hang. 
+                tabScan.className = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+                tabInv.className = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
                 renderAdminPendingTickets();
             } else {
                 scannerSec.classList.add('hidden');
                 invSec.classList.remove('hidden');
-                tabScan.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-700 text-gray-300 hover:bg-gray-600 rounded-lg text-sm sm:text-base font-bold transition';
-                tabInv.className = 'px-3 py-1.5 sm:px-4 sm:py-2 bg-secondary text-white rounded-lg text-sm sm:text-base font-bold transition';
-                
-                stopCamera(); // Matikan kamera jika pindah ke Inventaris
+                tabScan.className = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+                tabInv.className = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
+                stopCamera();
                 renderAdminInventory();
             }
         };
 
-        // --- MANAJEMEN KAMERA QR CODE (PERBAIKAN ANTI-FREEZE) ---
         window.activateScanner = () => {
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.add('hidden');
@@ -471,9 +732,9 @@
         };
 
         const startCamera = () => {
-            if (html5QrcodeScanner) return; 
+            if (html5QrcodeScanner) return;
             try {
-                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250}, aspectRatio: 1.0 }, false);
+                html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 }, false);
                 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
             } catch (e) {
                 console.error("Gagal menyalakan scanner:", e);
@@ -483,28 +744,23 @@
 
         const stopCamera = () => {
             if (html5QrcodeScanner) {
-                try { html5QrcodeScanner.clear(); } catch(e) { console.error("Gagal mematikan scanner:", e); }
+                try { html5QrcodeScanner.clear(); } catch (e) { console.error(e); }
                 html5QrcodeScanner = null;
             }
             const placeholder = document.getElementById('scannerPlaceholder');
             if (placeholder) placeholder.classList.remove('hidden');
         };
 
-        function onScanSuccess(decodedText, decodedResult) {
-            stopCamera(); 
-            try { navigator.vibrate && navigator.vibrate(200); } catch(e){}
+        function onScanSuccess(decodedText) {
+            stopCamera();
+            try { navigator.vibrate && navigator.vibrate(200); } catch (e) {}
             window.verifyTicket(decodedText.trim().toUpperCase());
         }
+        function onScanFailure() {}
 
-        function onScanFailure(error) {}
-
-
-        // INITIALIZE FIREBASE
+        // FIREBASE INIT
         const initFirebase = async () => {
             try {
-                // =========================================================================
-                // CONFIG FIREBASE MILIKMU
-                // =========================================================================
                 const fallbackConfig = {
                     apiKey: "AIzaSyDnRBNveKktlHQiuSJ7HpU8FjFbo6rBO24",
                     authDomain: "cares-64aba.firebaseapp.com",
@@ -515,25 +771,18 @@
                     appId: "1:71383482556:web:8b37a972570e899eee90b9",
                     measurementId: "G-KV081055X6"
                 };
-
-                const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config 
-                                        ? JSON.parse(__firebase_config) 
-                                        : fallbackConfig; 
-
+                const firebaseConfig = typeof __firebase_config !== 'undefined' && __firebase_config ? JSON.parse(__firebase_config) : fallbackConfig;
                 app = initializeApp(firebaseConfig);
                 auth = getAuth(app);
                 db = getFirestore(app);
-                
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'cares-local-app';
                 toolsPath = `artifacts/${appId}/public/data/tools`;
                 bookingsPath = `artifacts/${appId}/public/data/bookings`;
-
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
                     await signInAnonymously(auth);
                 }
-
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
                         await seedDataIfEmpty();
@@ -542,18 +791,14 @@
                         showScreen('loginScreen');
                     }
                 });
-
             } catch (error) {
                 console.error("Firebase Init Error:", error);
                 document.getElementById('loadingOverlay').innerHTML = `
-                    <div class='text-center bg-white p-6 rounded-2xl shadow-xl max-w-md mx-4'>
-                        <i class='fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4'></i>
-                        <p class='text-red-600 font-bold text-lg mb-2'>Gagal Terhubung ke Database!</p>
-                        <div class='bg-red-50 p-3 rounded-lg text-xs text-left text-red-800 break-words font-mono mb-4 border border-red-200'>
-                            ${error.message}
-                        </div>
-                    </div>
-                `;
+                    <div class='text-center bg-white p-8 rounded-3xl shadow-2xl max-w-md mx-4'>
+                        <i class='fa-solid fa-triangle-exclamation text-5xl text-red-500 mb-4 block'></i>
+                        <p class='text-red-600 font-bold text-lg mb-2' style="font-family:'Sora',sans-serif;">Gagal Terhubung ke Database!</p>
+                        <div class='bg-red-50 p-3 rounded-xl text-xs text-left text-red-800 break-words font-mono mb-4 border border-red-200'>${error.message}</div>
+                    </div>`;
             }
         };
 
@@ -568,57 +813,54 @@
                     { name: "Sensor Ultrasonik HC-SR04", category: "Sensor", stock: 20, icon: "fa-satellite-dish" },
                     { name: "Motor Servo SG90", category: "Aktuator", stock: 8, icon: "fa-gear" }
                 ];
-                for (const tool of initialTools) {
-                    await addDoc(toolsCol, tool);
-                }
+                for (const tool of initialTools) { await addDoc(toolsCol, tool); }
             }
         };
 
         const setupRealtimeListeners = () => {
             onSnapshot(collection(db, toolsPath), (snapshot) => {
                 allTools = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if(currentUser?.role === 'student') renderCatalog();
-                if(currentUser?.role === 'admin' && !document.getElementById('adminInventorySection').classList.contains('hidden')) renderAdminInventory();
+                if (currentUser?.role === 'student') renderCatalog();
+                if (currentUser?.role === 'admin' && !document.getElementById('adminInventorySection').classList.contains('hidden')) renderAdminInventory();
             }, (error) => console.error(error));
 
             onSnapshot(collection(db, bookingsPath), (snapshot) => {
                 allBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if(currentUser?.role === 'admin') renderAdminPendingTickets();
+                if (currentUser?.role === 'admin') renderAdminPendingTickets();
             }, (error) => console.error(error));
         };
 
-        // --- RENDER MAHASISWA ---
+        // RENDER STUDENT CATALOG
         const renderCatalog = () => {
             const grid = document.getElementById('catalogGrid');
-            if(!grid) return;
+            if (!grid) return;
             grid.innerHTML = '';
-            // Safe sort mencegah error undefined property
-            const sortedTools = [...allTools].sort((a,b) => (a.name || '').localeCompare(b.name || ''));
-
-            sortedTools.forEach(tool => {
+            const sortedTools = [...allTools].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            sortedTools.forEach((tool, i) => {
                 const isOutOfStock = tool.stock <= 0;
                 const card = document.createElement('div');
-                card.className = `bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${isOutOfStock ? 'opacity-80 grayscale-[30%]' : ''}`;
-                
+                card.className = `tool-card rounded-2xl overflow-hidden flex flex-col fade-up`;
+                card.style.animationDelay = `${i * 0.05}s`;
                 card.innerHTML = `
-                    <div class="p-6 flex-1 relative">
-                        <div class="flex justify-between items-start mb-5">
-                            <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-primary flex items-center justify-center text-3xl shadow-inner border border-blue-200/50">
+                    <div class="p-5 flex-1">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm border"
+                                style="background: linear-gradient(135deg, #EEF4FA, #dbeafe); border-color: rgba(44,163,209,0.2); color: var(--primary);">
                                 <i class="fa-solid ${tool.icon || 'fa-microchip'}"></i>
                             </div>
-                            <span class="text-xs font-bold px-2.5 py-1.5 rounded-lg ${isOutOfStock ? 'bg-red-100 text-red-600 border border-red-200' : 'bg-green-100 text-green-700 border border-green-200'}">
-                                ${isOutOfStock ? 'Stok Kosong' : '<i class="fa-solid fa-box mr-1"></i> Sisa ' + tool.stock}
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-lg ${isOutOfStock ? 'badge-empty' : 'badge-stock'}">
+                                ${isOutOfStock ? '<i class="fa-solid fa-xmark mr-1"></i>Habis' : '<i class="fa-solid fa-box mr-1"></i>Sisa ' + tool.stock}
                             </span>
                         </div>
-                        <h3 class="font-bold text-lg text-gray-800 mb-1 leading-tight">${tool.name || 'Tanpa Nama'}</h3>
-                        <p class="text-sm text-secondary font-medium">${tool.category || 'Lainnya'}</p>
+                        <h3 class="font-bold text-gray-800 mb-1 leading-snug">${tool.name || 'Tanpa Nama'}</h3>
+                        <p class="text-xs font-semibold" style="color: var(--secondary);">${tool.category || 'Lainnya'}</p>
                     </div>
-                    <div class="px-6 pb-6 mt-auto">
-                        <button onclick="window.initiateBooking('${tool.id}')" 
-                            class="w-full py-2.5 rounded-xl font-bold transition duration-200 flex justify-center items-center gap-2
-                            ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white shadow-sm'}"
+                    <div class="px-5 pb-5">
+                        <button onclick="window.initiateBooking('${tool.id}')"
+                            class="w-full py-2.5 rounded-xl font-bold transition text-sm flex justify-center items-center gap-2
+                            ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200' : 'btn-outline'}"
                             ${isOutOfStock ? 'disabled' : ''}>
-                            <i class="fa-solid fa-bookmark"></i> Booking Alat
+                            <i class="fa-solid fa-bookmark text-xs"></i> Booking Alat
                         </button>
                     </div>
                 `;
@@ -626,69 +868,64 @@
             });
         };
 
-        // --- RENDER ADMIN INVENTORY (CRUD) ---
+        // RENDER ADMIN INVENTORY
         const renderAdminInventory = () => {
             const tbody = document.getElementById('adminInventoryTableBody');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            
-            const sortedTools = [...allTools].sort((a,b) => (a.name || '').localeCompare(b.name || ''));
-
+            const sortedTools = [...allTools].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             sortedTools.forEach(tool => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-700/50 transition";
+                tr.className = "hover:bg-white/3 transition";
                 tr.innerHTML = `
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-700 rounded-lg flex items-center justify-center text-secondary">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-secondary/20" style="background:rgba(44,163,209,0.1); color: var(--secondary);">
                                 <i class="fa-solid ${tool.icon || 'fa-microchip'}"></i>
                             </div>
-                            <span class="font-bold text-gray-100">${tool.name || 'Tanpa Nama'}</span>
+                            <span class="font-semibold text-gray-100 text-sm">${tool.name || 'Tanpa Nama'}</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-400">${tool.category || '-'}</td>
+                    <td class="px-6 py-4 text-xs text-gray-500 font-medium">${tool.category || '-'}</td>
                     <td class="px-6 py-4 text-center">
                         <div class="flex items-center justify-center gap-2">
-                            <button onclick="window.quickUpdateStock('${tool.id}', -1)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-red-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-minus text-xs"></i></button>
-                            <span class="font-bold text-lg w-8">${tool.stock}</span>
-                            <button onclick="window.quickUpdateStock('${tool.id}', 1)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-green-500 hover:text-white transition flex items-center justify-center"><i class="fa-solid fa-plus text-xs"></i></button>
+                            <button onclick="window.quickUpdateStock('${tool.id}', -1)" class="w-8 h-8 rounded-full bg-white/6 hover:bg-red-500 hover:text-white transition flex items-center justify-center text-gray-400 border border-white/10"><i class="fa-solid fa-minus text-xs"></i></button>
+                            <span class="font-bold text-lg w-8 text-white">${tool.stock}</span>
+                            <button onclick="window.quickUpdateStock('${tool.id}', 1)" class="w-8 h-8 rounded-full bg-white/6 hover:bg-emerald-500 hover:text-white transition flex items-center justify-center text-gray-400 border border-white/10"><i class="fa-solid fa-plus text-xs"></i></button>
                         </div>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="window.openToolModal('${tool.id}')" class="text-blue-400 hover:text-blue-300 mr-3 transition"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button onclick="window.deleteTool('${tool.id}')" class="text-red-500 hover:text-red-400 transition"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="window.openToolModal('${tool.id}')" class="text-secondary hover:text-white mr-3 transition text-sm font-semibold"><i class="fa-solid fa-pen-to-square mr-1"></i>Edit</button>
+                        <button onclick="window.deleteTool('${tool.id}')" class="text-red-500 hover:text-red-300 transition text-sm font-semibold"><i class="fa-solid fa-trash mr-1"></i>Hapus</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         };
 
-        // --- RENDER ADMIN TICKETS ---
+        // RENDER ADMIN PENDING TICKETS
         const renderAdminPendingTickets = () => {
             const list = document.getElementById('pendingTicketsList');
-            if(!list) return;
+            if (!list) return;
             list.innerHTML = '';
-
             const pendingBookings = allBookings.filter(b => b.status === 'pending');
-
-            if(pendingBookings.length === 0) {
-                list.innerHTML = '<p class="text-gray-400 text-sm italic">Tidak ada tiket yang mengantre.</p>';
+            if (pendingBookings.length === 0) {
+                list.innerHTML = '<p class="text-gray-600 text-sm italic text-center py-4">Tidak ada tiket yang mengantre.</p>';
                 return;
             }
-
             pendingBookings.forEach(booking => {
                 const item = document.createElement('div');
-                item.className = "bg-gray-700 p-4 rounded-xl flex justify-between items-center border border-gray-600 mb-3";
+                item.className = "ticket-item p-4 rounded-xl flex justify-between items-center";
                 item.innerHTML = `
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="font-mono text-secondary font-bold">${booking.ticketNum}</span>
-                            <span class="bg-yellow-500/20 text-yellow-400 text-xs px-2 py-0.5 rounded border border-yellow-500/30">Menunggu</span>
+                            <span class="font-mono font-bold text-sm" style="color:var(--accent);">${booking.ticketNum}</span>
+                            <span class="bg-yellow-500/15 text-yellow-400 text-xs px-2 py-0.5 rounded-full border border-yellow-500/25">Menunggu</span>
                         </div>
-                        <p class="text-white font-bold text-sm">${booking.studentId}</p>
-                        <p class="text-gray-400 text-xs"><i class="fa-solid fa-microchip"></i> ${booking.toolName}</p>
+                        <p class="text-white font-semibold text-sm">${booking.studentId}</p>
+                        <p class="text-gray-500 text-xs mt-0.5"><i class="fa-solid fa-microchip mr-1"></i>${booking.toolName}</p>
                     </div>
-                    <button onclick="window.verifyTicket('${booking.ticketNum}')" class="bg-primary hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-bold transition">
+                    <button onclick="window.verifyTicket('${booking.ticketNum}')" class="btn-primary text-white px-4 py-2 rounded-xl text-xs font-bold flex-shrink-0">
                         Verifikasi
                     </button>
                 `;
@@ -696,33 +933,28 @@
             });
         };
 
-        // --- GLOBAL WINDOW HANDLERS (DILENGKAPI TRY CATCH) ---
+        // AUTH HANDLERS
         window.handleLogin = (e) => {
             e.preventDefault();
             try {
                 const nim = document.getElementById('nimInput').value.trim();
                 const pass = document.getElementById('passwordInput').value.trim();
-
-                if(nim === 'admin' && pass === '123') {
+                if (nim === 'admin' && pass === '123') {
                     currentUser = { role: 'admin', id: 'Admin Lab RES' };
                     document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
                     showScreen('adminDashboardScreen');
-                    
                     renderAdminPendingTickets();
                     renderAdminInventory();
-                    
                     showToast('Login berhasil sebagai Admin');
                 } else {
                     currentUser = { role: 'student', id: nim };
                     document.getElementById('userNameDisplay').innerText = `Mahasiswa (${nim})`;
                     showScreen('dashboardScreen');
-                    
                     renderCatalog();
-                    
                     showToast(`Selamat datang, ${nim}`);
                 }
             } catch (err) {
-                console.error("Login Error:", err);
+                console.error(err);
                 showToast("Terjadi error sistem: " + err.message, "error");
             }
         };
@@ -734,23 +966,19 @@
             showScreen('loginScreen');
         };
 
-        // --- SISTEM ANTI-SPAM (RATE LIMIT) MAHASISWA ---
         window.initiateBooking = (toolId) => {
             const tool = allTools.find(t => t.id === toolId);
-            if(!tool || tool.stock <= 0) return;
-
+            if (!tool || tool.stock <= 0) return;
             const myPendingBookings = allBookings.filter(b => b.studentId === currentUser.id && b.status === 'pending');
             const isAlreadyBooked = myPendingBookings.some(b => b.toolId === toolId);
             if (isAlreadyBooked) {
-                showToast(`Gagal! Anda masih memiliki tiket pending untuk ${tool.name}. Tidak bisa spam!`, "error");
+                showToast(`Gagal! Anda masih memiliki tiket pending untuk ${tool.name}.`, "error");
                 return;
             }
-
             if (myPendingBookings.length >= 3) {
                 showToast("Batas maksimal 3 alat! Tunggu admin verifikasi tiket lainnya.", "error");
                 return;
             }
-
             selectedToolForBooking = tool;
             document.getElementById('modalToolName').innerText = tool.name;
             document.getElementById('modalIcon').className = `fa-solid ${tool.icon}`;
@@ -761,34 +989,26 @@
 
         window.submitBooking = async (e) => {
             e.preventDefault();
-            if(!auth.currentUser) return;
-
+            if (!auth.currentUser) return;
             const btn = document.getElementById('btnConfirmBooking');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
-
             const tujuan = document.getElementById('formTujuan').value;
             const ticketNum = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
-
             try {
                 const bookingData = {
                     studentId: currentUser.id,
                     toolId: selectedToolForBooking.id,
                     toolName: selectedToolForBooking.name,
-                    tujuan: tujuan,
-                    ticketNum: ticketNum,
+                    tujuan, ticketNum,
                     status: 'pending',
                     createdAt: new Date().toISOString()
                 };
-
                 await addDoc(collection(db, bookingsPath), bookingData);
-
                 document.getElementById('ticketNumberDisplay').innerText = ticketNum;
                 document.getElementById('qrCodeImage').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${ticketNum}`;
-                
                 window.closeModal('bookingModal');
                 document.getElementById('ticketModal').classList.remove('hidden');
-                
             } catch (err) {
                 console.error(err);
                 showToast("Gagal membuat tiket reservasi.", "error");
@@ -798,57 +1018,44 @@
             }
         };
 
-        // --- LOGIKA ADMIN SCANNER ---
         window.handleManualSearch = (e) => {
             e.preventDefault();
             const input = document.getElementById('adminSearchInput').value.trim().toUpperCase();
-            if(input) window.verifyTicket(input);
+            if (input) window.verifyTicket(input);
         };
 
         window.verifyTicket = (ticketNum) => {
             stopCamera();
-
             const booking = allBookings.find(b => b.ticketNum === ticketNum && b.status === 'pending');
-            if(!booking) {
+            if (!booking) {
                 showToast("Tiket tidak ditemukan atau sudah diproses.", "error");
                 return;
             }
-
             selectedBookingForCheckout = booking;
             document.getElementById('verifTicketNum').innerText = booking.ticketNum;
             document.getElementById('verifStudentId').innerText = booking.studentId;
             document.getElementById('verifTujuan').innerText = `Tujuan: ${booking.tujuan}`;
             document.getElementById('verifToolName').innerText = booking.toolName;
-            
             document.getElementById('adminVerifyModal').classList.remove('hidden');
         };
 
         window.confirmAdminCheckOut = async () => {
-            if(!auth.currentUser || !selectedBookingForCheckout) return;
-
+            if (!auth.currentUser || !selectedBookingForCheckout) return;
             const btn = document.getElementById('btnConfirmCheckout');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
             btn.disabled = true;
-
             try {
                 const toolId = selectedBookingForCheckout.toolId;
                 const tool = allTools.find(t => t.id === toolId);
-
-                if(!tool || tool.stock <= 0) {
+                if (!tool || tool.stock <= 0) {
                     showToast("Stok alat fisik habis di database!", "error");
                     return;
                 }
-
-                const bookingRef = doc(db, bookingsPath, selectedBookingForCheckout.id);
-                await updateDoc(bookingRef, { status: 'checked-out' });
-
-                const toolRef = doc(db, toolsPath, toolId);
-                await updateDoc(toolRef, { stock: tool.stock - 1 });
-
+                await updateDoc(doc(db, bookingsPath, selectedBookingForCheckout.id), { status: 'checked-out' });
+                await updateDoc(doc(db, toolsPath, toolId), { stock: tool.stock - 1 });
                 window.closeModal('adminVerifyModal');
                 showToast(`Check-out Sukses! Stok ${tool.name} berkurang.`);
                 document.getElementById('adminSearchInput').value = '';
-
             } catch (err) {
                 console.error(err);
                 showToast("Gagal memproses check-out.", "error");
@@ -859,7 +1066,6 @@
             }
         };
 
-        // --- LOGIKA ADMIN INVENTARIS (CRUD) ---
         window.openToolModal = (toolId = null) => {
             if (toolId) {
                 const tool = allTools.find(t => t.id === toolId);
@@ -885,13 +1091,11 @@
             const btn = document.getElementById('btnSaveTool');
             btn.disabled = true;
             btn.innerText = 'Menyimpan...';
-
             const id = document.getElementById('formToolId').value;
             const name = document.getElementById('formToolName').value;
             const category = document.getElementById('formToolCategory').value;
             const stock = parseInt(document.getElementById('formToolStock').value);
             const icon = document.getElementById('formToolIcon').value;
-
             try {
                 if (id) {
                     await updateDoc(doc(db, toolsPath, id), { name, category, stock, icon });
@@ -901,7 +1105,7 @@
                     showToast("Alat baru berhasil ditambahkan!");
                 }
                 window.closeModal('adminToolModal');
-            } catch(err) {
+            } catch (err) {
                 console.error(err);
                 showToast("Gagal menyimpan data alat.", "error");
             } finally {
@@ -911,11 +1115,11 @@
         };
 
         window.deleteTool = async (toolId) => {
-            if(!confirm("Anda yakin ingin menghapus alat ini secara permanen dari inventaris?")) return;
+            if (!confirm("Anda yakin ingin menghapus alat ini secara permanen dari inventaris?")) return;
             try {
                 await deleteDoc(doc(db, toolsPath, toolId));
                 showToast("Alat berhasil dihapus!");
-            } catch(err) {
+            } catch (err) {
                 console.error(err);
                 showToast("Gagal menghapus alat.", "error");
             }
@@ -923,20 +1127,18 @@
 
         window.quickUpdateStock = async (toolId, changeAmount) => {
             const tool = allTools.find(t => t.id === toolId);
-            if(!tool) return;
+            if (!tool) return;
             const newStock = tool.stock + changeAmount;
-            if(newStock < 0) return; 
-            
+            if (newStock < 0) return;
             try {
                 await updateDoc(doc(db, toolsPath, toolId), { stock: newStock });
-            } catch(err) {
+            } catch (err) {
                 console.error(err);
                 showToast("Gagal update stok.", "error");
             }
         };
 
         window.onload = initFirebase;
-
     </script>
 </body>
 </html>
