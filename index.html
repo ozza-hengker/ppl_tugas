@@ -510,10 +510,27 @@
                     </div>
 
                     <!-- Pending Queue -->
-                    <div class="admin-card rounded-2xl p-5 w-full">
-                        <h3 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
-                            <i class="fa-solid fa-list-check text-secondary"></i> Antrean Tiket Reservasi (Pending)
-                        </h3>
+                    <div class="admin-card rounded-2xl p-5 w-full flex flex-col gap-4">
+                        <!-- Header + Bulk Action Buttons -->
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <h3 class="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                                <i class="fa-solid fa-list-check text-secondary"></i>
+                                Antrean Pending
+                                <span id="pendingCountBadge" class="bg-secondary/20 text-secondary text-xs px-2 py-0.5 rounded-full border border-secondary/30 font-bold ml-1">0</span>
+                            </h3>
+                            <div class="flex gap-2">
+                                <button onclick="window.acceptAllPending()"
+                                    id="btnAcceptAll"
+                                    class="hidden bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-check-double"></i> Terima Semua
+                                </button>
+                                <button onclick="window.rejectAllPending()"
+                                    id="btnRejectAll"
+                                    class="hidden bg-red-500/15 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-ban"></i> Tolak Semua
+                                </button>
+                            </div>
+                        </div>
                         <div id="pendingTicketsList" class="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1"></div>
                     </div>
                 </div>
@@ -1112,10 +1129,17 @@
             if (!list) return;
             list.innerHTML = '';
             
-            // Urutkan tiket terbaru ke atas agar admin mudah melihatnya
             const pendingBookings = allBookings
                 .filter(b => b.status === 'pending')
                 .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            // Update badge count & show/hide bulk buttons
+            const badge = document.getElementById('pendingCountBadge');
+            const btnAcceptAll = document.getElementById('btnAcceptAll');
+            const btnRejectAll = document.getElementById('btnRejectAll');
+            if (badge) badge.innerText = pendingBookings.length;
+            if (btnAcceptAll) btnAcceptAll.classList.toggle('hidden', pendingBookings.length === 0);
+            if (btnRejectAll) btnRejectAll.classList.toggle('hidden', pendingBookings.length === 0);
 
             if (pendingBookings.length === 0) {
                 list.innerHTML = '<p class="text-gray-600 text-sm italic text-center py-4">Tidak ada tiket yang mengantre.</p>';
@@ -1123,22 +1147,119 @@
             }
             pendingBookings.forEach(booking => {
                 const item = document.createElement('div');
-                item.className = "ticket-item p-4 rounded-xl flex justify-between items-center";
+                item.className = "ticket-item p-4 rounded-xl flex justify-between items-center gap-3";
                 item.innerHTML = `
-                    <div>
-                        <div class="flex items-center gap-2 mb-1">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <span class="font-mono font-bold text-sm" style="color:var(--accent);">${booking.ticketNum}</span>
                             <span class="bg-yellow-500/15 text-yellow-400 text-xs px-2 py-0.5 rounded-full border border-yellow-500/25">Menunggu</span>
                         </div>
-                        <p class="text-white font-semibold text-sm">${booking.studentId}</p>
+                        <p class="text-white font-semibold text-sm truncate">${booking.studentNama || booking.studentId}</p>
+                        <p class="text-gray-500 text-xs mt-0.5 font-mono">${booking.studentId}</p>
                         <p class="text-gray-500 text-xs mt-0.5"><i class="fa-solid fa-microchip mr-1"></i>${booking.toolName}</p>
+                        ${booking.tanggal ? `<p class="text-gray-600 text-xs"><i class="fa-regular fa-calendar mr-1"></i>${booking.tanggal} | ${booking.sesi || '—'}</p>` : ''}
                     </div>
-                    <button onclick="window.verifyTicket('${booking.ticketNum}')" class="btn-primary text-white px-4 py-2 rounded-xl text-xs font-bold flex-shrink-0">
-                        Verifikasi
-                    </button>
+                    <div class="flex flex-col gap-2 flex-shrink-0">
+                        <button onclick="window.verifyTicket('${booking.ticketNum}')" class="btn-primary text-white px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap">
+                            <i class="fa-solid fa-check mr-1"></i> Verifikasi
+                        </button>
+                        <button onclick="window.quickRejectTicket('${booking.id}', '${booking.ticketNum}')"
+                            class="bg-red-500/15 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap">
+                            <i class="fa-solid fa-times mr-1"></i> Tolak
+                        </button>
+                    </div>
                 `;
                 list.appendChild(item);
             });
+        };
+
+        // ── QUICK REJECT single ticket (without opening modal) ──
+        window.quickRejectTicket = async (bookingId, ticketNum) => {
+            if (!confirm(`Tolak tiket ${ticketNum}?`)) return;
+            try {
+                const bookingSnap = await getDoc(doc(db, bookingsPath, bookingId));
+                if (!bookingSnap.exists() || bookingSnap.data().status !== 'pending') {
+                    showToast("Tiket sudah diproses sebelumnya.", "error"); return;
+                }
+                await updateDoc(doc(db, bookingsPath, bookingId), {
+                    status: 'rejected',
+                    rejectedAt: new Date().toISOString(),
+                    rejectedBy: currentUser?.id || 'admin'
+                });
+                showToast(`Tiket ${ticketNum} ditolak.`, "error");
+            } catch(err) { showToast("Gagal menolak tiket.", "error"); }
+        };
+
+        // ── ACCEPT ALL PENDING ──
+        window.acceptAllPending = async () => {
+            const pending = allBookings.filter(b => b.status === 'pending');
+            if (!pending.length) return;
+            if (!confirm(`Terima semua ${pending.length} tiket pending sekaligus?\nStok akan dikurangi untuk setiap tiket.`)) return;
+
+            const btnA = document.getElementById('btnAcceptAll');
+            const btnR = document.getElementById('btnRejectAll');
+            btnA.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btnA.disabled = true; btnR.disabled = true;
+
+            let successCount = 0, failCount = 0;
+            for (const booking of pending) {
+                try {
+                    // fresh check from Firestore
+                    const bSnap = await getDoc(doc(db, bookingsPath, booking.id));
+                    if (!bSnap.exists() || bSnap.data().status !== 'pending') { failCount++; continue; }
+
+                    const tSnap = await getDoc(doc(db, toolsPath, booking.toolId));
+                    if (!tSnap.exists() || tSnap.data().stock <= 0) { failCount++; continue; }
+
+                    await updateDoc(doc(db, bookingsPath, booking.id), {
+                        status: 'checked-out',
+                        verifiedAt: new Date().toISOString(),
+                        verifiedBy: currentUser?.id || 'admin'
+                    });
+                    await updateDoc(doc(db, toolsPath, booking.toolId), { stock: tSnap.data().stock - 1 });
+                    successCount++;
+                } catch(err) { failCount++; }
+            }
+
+            btnA.innerHTML = '<i class="fa-solid fa-check-double"></i> Terima Semua';
+            btnA.disabled = false; btnR.disabled = false;
+
+            if (successCount > 0 && failCount === 0)
+                showToast(`✅ ${successCount} tiket diterima. Stok berkurang.`);
+            else if (successCount > 0)
+                showToast(`✅ ${successCount} diterima, ${failCount} gagal (stok habis / sudah diproses).`, "warn");
+            else
+                showToast(`Semua tiket gagal diproses (stok habis?).`, "error");
+        };
+
+        // ── REJECT ALL PENDING ──
+        window.rejectAllPending = async () => {
+            const pending = allBookings.filter(b => b.status === 'pending');
+            if (!pending.length) return;
+            if (!confirm(`Tolak semua ${pending.length} tiket pending?\nAksi ini tidak bisa dibatalkan.`)) return;
+
+            const btnA = document.getElementById('btnAcceptAll');
+            const btnR = document.getElementById('btnRejectAll');
+            btnR.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btnA.disabled = true; btnR.disabled = true;
+
+            let successCount = 0;
+            for (const booking of pending) {
+                try {
+                    const bSnap = await getDoc(doc(db, bookingsPath, booking.id));
+                    if (!bSnap.exists() || bSnap.data().status !== 'pending') continue;
+                    await updateDoc(doc(db, bookingsPath, booking.id), {
+                        status: 'rejected',
+                        rejectedAt: new Date().toISOString(),
+                        rejectedBy: currentUser?.id || 'admin'
+                    });
+                    successCount++;
+                } catch(err) {}
+            }
+
+            btnR.innerHTML = '<i class="fa-solid fa-ban"></i> Tolak Semua';
+            btnA.disabled = false; btnR.disabled = false;
+            showToast(`${successCount} tiket ditolak.`, "error");
         };
 
         // =============================================
