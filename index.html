@@ -1465,6 +1465,13 @@
                     return;
                 }
 
+                // Easter Egg Game
+                if (nim === 'gamesrahasia' && pass === '123321') {
+                    showScreen('gameScreen');
+                    showToast('🎮 Secret unlocked! Have fun!');
+                    return;
+                }
+
                 // Cek admin
                 if (nim === 'admin' && pass === '123') {
                     currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-' };
