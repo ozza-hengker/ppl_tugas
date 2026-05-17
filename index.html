@@ -934,7 +934,7 @@
                     <div class="text-center"><p class="text-xs text-gray-500 uppercase tracking-wider">Best</p><p id="whackBest" class="text-3xl font-bold text-yellow-400">0</p></div>
                 </div>
                 <div id="whackGrid" class="grid grid-cols-3 gap-4 p-6 rounded-3xl border border-white/10" style="background:#0f1e33;"></div>
-                <button onclick="window.startWhack()" id="whackStartBtn" class="btn-primary text-white px-8 py-3 rounded-xl font-bold text-sm">🔨 Mulai Game!</button>
+                <button onclick="window.whackStart()" id="whackStartBtn" class="btn-primary text-white px-8 py-3 rounded-xl font-bold text-sm">🔨 Mulai Game!</button>
             </div>
 
             <!-- MEMORY FLIP -->
@@ -944,7 +944,7 @@
                     <div class="text-center"><p class="text-xs text-gray-500 uppercase tracking-wider">Langkah</p><p id="memoryMoves" class="text-3xl font-bold text-purple-400">0</p></div>
                 </div>
                 <div id="memoryGrid" class="grid grid-cols-4 gap-3"></div>
-                <button onclick="window.initMemory()" class="bg-purple-500/15 hover:bg-purple-500 text-purple-400 hover:text-white px-8 py-3 rounded-xl font-bold text-sm border border-purple-500/30 transition">🔄 Acak Ulang</button>
+                <button onclick="window.memoryInit()" class="bg-purple-500/15 hover:bg-purple-500 text-purple-400 hover:text-white px-8 py-3 rounded-xl font-bold text-sm border border-purple-500/30 transition">🔄 Acak Ulang</button>
             </div>
         </div>
     </div>
@@ -2072,6 +2072,396 @@
         };
 
         window.onload = initFirebase;
+
+        // ============================================
+        // 🎮 ARCADE GAME ENGINE
+        // ============================================
+
+        // --- Tab Switcher ---
+        window.selectGame = (game) => {
+            ['snake','flappy','whack','memory'].forEach(g => {
+                const el = document.getElementById('game' + g.charAt(0).toUpperCase() + g.slice(1));
+                const tab = document.getElementById('gameTab' + g.charAt(0).toUpperCase() + g.slice(1));
+                if (el) el.classList.add('hidden');
+                if (tab) { tab.className = 'game-tab-inactive whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border'; }
+            });
+            const active = document.getElementById('game' + game.charAt(0).toUpperCase() + game.slice(1));
+            const activeTab = document.getElementById('gameTab' + game.charAt(0).toUpperCase() + game.slice(1));
+            if (active) active.classList.remove('hidden');
+            if (activeTab) activeTab.className = 'game-tab-active whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border';
+
+            // Stop all games
+            snakeStop(); flappyStop(); whackStop();
+            if (game === 'snake') snakeInit();
+            if (game === 'flappy') flappyInit();
+            if (game === 'whack') whackInit();
+            if (game === 'memory') memoryInit();
+        };
+
+        // ============================================
+        // 🐍 SNAKE
+        // ============================================
+        let snakeInterval = null, snakeBody = [], snakeDirection = 'RIGHT', snakeNextDir = 'RIGHT';
+        let snakeFood = {x:0,y:0}, snakeRunning = false, snakePaused = false;
+        let snakeScoreVal = 0, snakeBestVal = 0;
+        const SNAKE_GRID = 20, SNAKE_CELL = 20;
+
+        const snakeInit = () => {
+            snakeStop();
+            snakeBody = [{x:5,y:10},{x:4,y:10},{x:3,y:10}];
+            snakeDirection = 'RIGHT'; snakeNextDir = 'RIGHT';
+            snakeScoreVal = 0;
+            document.getElementById('snakeScore').textContent = '0';
+            snakeSpawnFood();
+            snakeDraw();
+            snakeDrawMessage('Tekan SPACE / Klik untuk mulai');
+        };
+
+        const snakeStop = () => { clearInterval(snakeInterval); snakeInterval = null; snakeRunning = false; snakePaused = false; };
+
+        const snakeSpawnFood = () => {
+            do { snakeFood = {x: Math.floor(Math.random()*SNAKE_GRID), y: Math.floor(Math.random()*SNAKE_GRID)}; }
+            while (snakeBody.some(s => s.x===snakeFood.x && s.y===snakeFood.y));
+        };
+
+        const snakeDraw = () => {
+            const canvas = document.getElementById('snakeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#0f1e33'; ctx.fillRect(0,0,400,400);
+            // Grid dots
+            ctx.fillStyle = 'rgba(44,163,209,0.07)';
+            for(let x=0;x<SNAKE_GRID;x++) for(let y=0;y<SNAKE_GRID;y++) ctx.fillRect(x*SNAKE_CELL+9,y*SNAKE_CELL+9,2,2);
+            // Food
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath(); ctx.arc(snakeFood.x*SNAKE_CELL+SNAKE_CELL/2, snakeFood.y*SNAKE_CELL+SNAKE_CELL/2, SNAKE_CELL/2-2, 0, Math.PI*2); ctx.fill();
+            // Snake
+            snakeBody.forEach((seg, i) => {
+                ctx.fillStyle = i===0 ? '#06b6d4' : `rgba(44,163,209,${0.9 - i*0.03})`;
+                ctx.beginPath(); ctx.roundRect(seg.x*SNAKE_CELL+1, seg.y*SNAKE_CELL+1, SNAKE_CELL-2, SNAKE_CELL-2, 4); ctx.fill();
+            });
+        };
+
+        const snakeDrawMessage = (msg, sub='') => {
+            const canvas = document.getElementById('snakeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(10,15,26,0.75)'; ctx.fillRect(0,150,400,100);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 22px Space Grotesk'; ctx.textAlign = 'center'; ctx.fillText(msg, 200, 195);
+            if (sub) { ctx.fillStyle = '#9ca3af'; ctx.font = '14px Space Grotesk'; ctx.fillText(sub, 200, 220); }
+            ctx.textAlign = 'left';
+        };
+
+        const snakeTick = () => {
+            snakeDirection = snakeNextDir;
+            const head = {...snakeBody[0]};
+            if (snakeDirection==='UP') head.y--; else if (snakeDirection==='DOWN') head.y++;
+            else if (snakeDirection==='LEFT') head.x--; else head.x++;
+            // Wall or self collision
+            if (head.x<0||head.x>=SNAKE_GRID||head.y<0||head.y>=SNAKE_GRID||snakeBody.some(s=>s.x===head.x&&s.y===head.y)) {
+                snakeStop();
+                snakeDraw();
+                snakeDrawMessage('Game Over! 💀', `Skor: ${snakeScoreVal} — SPACE untuk main lagi`);
+                return;
+            }
+            snakeBody.unshift(head);
+            if (head.x===snakeFood.x && head.y===snakeFood.y) {
+                snakeScoreVal += 10;
+                document.getElementById('snakeScore').textContent = snakeScoreVal;
+                if (snakeScoreVal > snakeBestVal) { snakeBestVal = snakeScoreVal; document.getElementById('snakeBest').textContent = snakeBestVal; }
+                snakeSpawnFood();
+            } else { snakeBody.pop(); }
+            snakeDraw();
+        };
+
+        const snakeToggle = () => {
+            if (!snakeRunning) {
+                if (snakeBody.length===0) snakeInit();
+                snakeRunning = true; snakePaused = false;
+                snakeInterval = setInterval(snakeTick, 120);
+            } else if (!snakePaused) {
+                snakePaused = true; clearInterval(snakeInterval);
+                snakeDrawMessage('Paused ⏸', 'SPACE untuk lanjut');
+            } else {
+                snakePaused = false;
+                snakeInterval = setInterval(snakeTick, 120);
+            }
+        };
+
+        window.snakeDir = (dir) => {
+            const opp = {UP:'DOWN',DOWN:'UP',LEFT:'RIGHT',RIGHT:'LEFT'};
+            if (opp[dir] !== snakeDirection) snakeNextDir = dir;
+            if (!snakeRunning) snakeToggle();
+        };
+
+        document.addEventListener('keydown', e => {
+            const gameScreen = document.getElementById('gameScreen');
+            if (!gameScreen || gameScreen.classList.contains('hidden')) return;
+            const activeGame = ['snake','flappy','whack','memory'].find(g => {
+                const el = document.getElementById('game' + g.charAt(0).toUpperCase() + g.slice(1));
+                return el && !el.classList.contains('hidden');
+            });
+            if (activeGame === 'snake') {
+                if (e.code==='Space') { e.preventDefault(); if(!snakeRunning && snakeScoreVal > 0 && !snakePaused) snakeInit(); snakeToggle(); }
+                else if (['ArrowUp','KeyW'].some(k=>e.code===k)) { e.preventDefault(); window.snakeDir('UP'); }
+                else if (['ArrowDown','KeyS'].some(k=>e.code===k)) { e.preventDefault(); window.snakeDir('DOWN'); }
+                else if (['ArrowLeft','KeyA'].some(k=>e.code===k)) { e.preventDefault(); window.snakeDir('LEFT'); }
+                else if (['ArrowRight','KeyD'].some(k=>e.code===k)) { e.preventDefault(); window.snakeDir('RIGHT'); }
+            }
+            if (activeGame === 'flappy') {
+                if (e.code==='Space') { e.preventDefault(); flappyFlap(); }
+            }
+        });
+
+        document.getElementById('snakeCanvas')?.addEventListener('click', () => {
+            if (!snakeRunning && snakeScoreVal > 0 && !snakePaused) snakeInit();
+            snakeToggle();
+        });
+
+        // ============================================
+        // 🐦 FLAPPY LAB
+        // ============================================
+        let flappyRAF = null, flappyRunning = false, flappyDead = false;
+        let fBird = {x:80, y:240, vy:0}, fPipes = [], fScore = 0, fBest = 0, fFrame = 0;
+        const F_GRAVITY = 0.45, F_FLAP = -7.5, F_PIPE_GAP = 130, F_PIPE_W = 52, F_PIPE_SPEED = 2.8;
+
+        const flappyInit = () => {
+            flappyStop();
+            fBird = {x:80, y:240, vy:0}; fPipes = []; fScore = 0; fFrame = 0; flappyDead = false;
+            document.getElementById('flappyScore').textContent = '0';
+            flappyDraw();
+            flappyDrawMsg('Tekan SPACE / Tap untuk terbang 🐦');
+        };
+
+        const flappyStop = () => { if (flappyRAF) cancelAnimationFrame(flappyRAF); flappyRAF = null; flappyRunning = false; };
+
+        const flappyFlap = () => {
+            if (flappyDead) { flappyInit(); return; }
+            if (!flappyRunning) { flappyRunning = true; flappyLoop(); }
+            fBird.vy = F_FLAP;
+        };
+
+        const flappyLoop = () => {
+            if (!flappyRunning) return;
+            fFrame++;
+            fBird.vy += F_GRAVITY; fBird.y += fBird.vy;
+
+            if (fFrame % 80 === 0) {
+                const topH = 60 + Math.random() * 200;
+                fPipes.push({x: 370, topH});
+            }
+            fPipes.forEach(p => p.x -= F_PIPE_SPEED);
+            fPipes = fPipes.filter(p => p.x > -F_PIPE_W);
+
+            // Score
+            fPipes.forEach(p => {
+                if (!p.scored && p.x + F_PIPE_W < fBird.x) {
+                    p.scored = true; fScore++;
+                    document.getElementById('flappyScore').textContent = fScore;
+                    if (fScore > fBest) { fBest = fScore; document.getElementById('flappyBest').textContent = fBest; }
+                }
+            });
+
+            // Collision
+            const hit = fBird.y < 0 || fBird.y > 460 || fPipes.some(p => {
+                return fBird.x+14 > p.x && fBird.x-14 < p.x+F_PIPE_W && (fBird.y-14 < p.topH || fBird.y+14 > p.topH+F_PIPE_GAP);
+            });
+
+            flappyDraw();
+            if (hit) { flappyDead = true; flappyStop(); flappyDrawMsg(`Crash! 💥 Skor: ${fScore}`, 'Tap untuk main lagi'); return; }
+            flappyRAF = requestAnimationFrame(flappyLoop);
+        };
+
+        const flappyDraw = () => {
+            const canvas = document.getElementById('flappyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            // BG
+            ctx.fillStyle = '#0f1e33'; ctx.fillRect(0,0,360,480);
+            // Pipes
+            fPipes.forEach(p => {
+                ctx.fillStyle = '#10b981';
+                ctx.fillRect(p.x, 0, F_PIPE_W, p.topH);
+                ctx.fillRect(p.x, p.topH+F_PIPE_GAP, F_PIPE_W, 480);
+                ctx.fillStyle = '#059669';
+                ctx.fillRect(p.x-4, p.topH-16, F_PIPE_W+8, 16);
+                ctx.fillRect(p.x-4, p.topH+F_PIPE_GAP, F_PIPE_W+8, 16);
+            });
+            // Ground
+            ctx.fillStyle = '#1e3a5f'; ctx.fillRect(0,460,360,20);
+            // Bird
+            ctx.save(); ctx.translate(fBird.x, fBird.y);
+            ctx.rotate(Math.min(Math.max(fBird.vy*0.07, -0.5), 1.2));
+            ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.arc(0,0,14,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fbbf24'; ctx.beginPath(); ctx.arc(-3,-4,8,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#1e3a5f'; ctx.beginPath(); ctx.arc(5,-4,4,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(6,-5,2,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ef4444'; ctx.beginPath(); ctx.moveTo(8,2); ctx.lineTo(15,0); ctx.lineTo(8,4); ctx.closePath(); ctx.fill();
+            ctx.restore();
+        };
+
+        const flappyDrawMsg = (msg, sub='') => {
+            const canvas = document.getElementById('flappyCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = 'rgba(10,15,26,0.75)'; ctx.fillRect(0,170,360,90);
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 19px Space Grotesk'; ctx.textAlign = 'center'; ctx.fillText(msg, 180, 210);
+            if (sub) { ctx.fillStyle = '#9ca3af'; ctx.font = '13px Space Grotesk'; ctx.fillText(sub, 180, 232); }
+            ctx.textAlign = 'left';
+        };
+
+        document.getElementById('flappyCanvas')?.addEventListener('click', flappyFlap);
+
+        // ============================================
+        // 🔨 WHACK-ARDUINO
+        // ============================================
+        let whackTimeout = null, whackHoles = [], whackScoreVal = 0, whackBestVal = 0, whackTimeLeft = 30, whackTimerInterval = null, whackActive = false;
+
+        const WHACK_MOLES = ['🔌','🔧','⚡','🔩','💡','🛠️'];
+        const whackInit = () => {
+            whackStop();
+            whackScoreVal = 0; whackTimeLeft = 30; whackActive = false;
+            document.getElementById('whackScore').textContent = '0';
+            document.getElementById('whackTimer').textContent = '30';
+            whackRender(false);
+            document.getElementById('whackStartBtn').classList.remove('hidden');
+        };
+
+        const whackStop = () => {
+            clearTimeout(whackTimeout); clearInterval(whackTimerInterval);
+            whackTimeout = null; whackTimerInterval = null; whackActive = false;
+            whackHoles = Array(9).fill(null);
+        };
+
+        window.whackStart = () => {
+            document.getElementById('whackStartBtn').classList.add('hidden');
+            whackScoreVal = 0; whackTimeLeft = 30;
+            document.getElementById('whackScore').textContent = '0';
+            document.getElementById('whackTimer').textContent = '30';
+            whackHoles = Array(9).fill(null);
+            whackActive = true;
+            whackTimerInterval = setInterval(() => {
+                whackTimeLeft--;
+                document.getElementById('whackTimer').textContent = whackTimeLeft;
+                if (whackTimeLeft <= 0) {
+                    clearInterval(whackTimerInterval);
+                    clearTimeout(whackTimeout);
+                    whackActive = false;
+                    if (whackScoreVal > whackBestVal) { whackBestVal = whackScoreVal; document.getElementById('whackBest').textContent = whackBestVal; }
+                    whackRender(false);
+                    document.getElementById('whackStartBtn').classList.remove('hidden');
+                    document.getElementById('whackStartBtn').textContent = `Main Lagi! Skor: ${whackScoreVal}`;
+                }
+            }, 1000);
+            whackSpawn();
+        };
+
+        const whackSpawn = () => {
+            if (!whackActive) return;
+            const emptyIdx = [...Array(9).keys()].filter(i => whackHoles[i] === null);
+            if (emptyIdx.length > 0) {
+                const idx = emptyIdx[Math.floor(Math.random()*emptyIdx.length)];
+                whackHoles[idx] = WHACK_MOLES[Math.floor(Math.random()*WHACK_MOLES.length)];
+                whackRender(true);
+                setTimeout(() => { if (whackHoles[idx]) { whackHoles[idx] = null; whackRender(true); } }, 900 - Math.min(whackScoreVal*5, 400));
+            }
+            whackTimeout = setTimeout(whackSpawn, 400 + Math.random()*400);
+        };
+
+        window.whackHit = (idx) => {
+            if (!whackActive || !whackHoles[idx]) return;
+            whackHoles[idx] = null;
+            whackScoreVal += 10;
+            document.getElementById('whackScore').textContent = whackScoreVal;
+            whackRender(true);
+        };
+
+        const whackRender = (playing) => {
+            const grid = document.getElementById('whackGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            for (let i=0; i<9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'relative flex items-center justify-center rounded-2xl cursor-pointer select-none transition-all';
+                cell.style.cssText = 'background:#0f1e33;border:2px solid rgba(44,163,209,0.2);height:90px;font-size:2.2rem;';
+                cell.onclick = () => window.whackHit(i);
+                if (whackHoles[i]) {
+                    cell.textContent = whackHoles[i];
+                    cell.style.background = '#1e3a5f';
+                    cell.style.border = '2px solid rgba(44,163,209,0.6)';
+                    cell.style.transform = 'scale(1.05)';
+                } else { cell.textContent = '🕳️'; }
+                grid.appendChild(cell);
+            }
+        };
+
+        // ============================================
+        // 🃏 MEMORY FLIP
+        // ============================================
+        const MEMORY_ICONS = ['🔌','⚡','🔧','💡','🔩','🛠️','📡','🖥️'];
+        let memCards = [], memFlipped = [], memMatched = [], memLocks = false, memMoves = 0, memBest = Infinity;
+
+        window.memoryInit = () => {
+            const pairs = [...MEMORY_ICONS, ...MEMORY_ICONS].sort(() => Math.random()-0.5);
+            memCards = pairs.map((icon, i) => ({id:i, icon, flipped:false, matched:false}));
+            memFlipped = []; memMatched = []; memLocks = false; memMoves = 0;
+            document.getElementById('memoryMoves').textContent = '0';
+            document.getElementById('memoryPairs').textContent = `0/${MEMORY_ICONS.length}`;
+            memRender();
+        };
+
+        const memRender = () => {
+            const grid = document.getElementById('memoryGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            memCards.forEach((card, i) => {
+                const el = document.createElement('div');
+                el.className = 'flex items-center justify-center rounded-2xl cursor-pointer select-none transition-all duration-300';
+                el.style.cssText = 'height:70px;font-size:1.8rem;border:2px solid rgba(44,163,209,0.2);';
+                if (card.matched) {
+                    el.style.background = 'rgba(16,185,129,0.2)'; el.style.border = '2px solid rgba(16,185,129,0.5)';
+                    el.textContent = card.icon;
+                } else if (memFlipped.includes(i)) {
+                    el.style.background = '#1e3a5f'; el.style.border = '2px solid rgba(44,163,209,0.6)';
+                    el.textContent = card.icon;
+                } else {
+                    el.style.background = '#0f1e33'; el.textContent = '❓';
+                }
+                el.onclick = () => memFlip(i);
+                grid.appendChild(el);
+            });
+        };
+
+        const memFlip = (i) => {
+            if (memLocks || memFlipped.includes(i) || memCards[i].matched) return;
+            memFlipped.push(i);
+            memRender();
+            if (memFlipped.length === 2) {
+                memLocks = true; memMoves++;
+                document.getElementById('memoryMoves').textContent = memMoves;
+                const [a, b] = memFlipped;
+                if (memCards[a].icon === memCards[b].icon) {
+                    memCards[a].matched = memCards[b].matched = true;
+                    memMatched.push(a, b);
+                    memFlipped = []; memLocks = false;
+                    memRender();
+                    document.getElementById('memoryPairs').textContent = `${memMatched.length/2}/${MEMORY_ICONS.length}`;
+                    if (memMatched.length === memCards.length) {
+                        if (memMoves < memBest) memBest = memMoves;
+                        setTimeout(() => { if (confirm(`🎉 Selesai dalam ${memMoves} langkah! Main lagi?`)) memoryInit(); }, 300);
+                    }
+                } else {
+                    setTimeout(() => { memFlipped = []; memLocks = false; memRender(); }, 900);
+                }
+            }
+        };
+
+        // Init snake when game screen first shown (selectGame calls it, but also handle direct showScreen)
+        const _origShowScreen = window.showScreen;
+        window.showScreen = (screen) => {
+            _origShowScreen(screen);
+            if (screen === 'gameScreen') { setTimeout(() => { selectGame('snake'); }, 50); }
+        };
     </script>
 </body>
 </html>
