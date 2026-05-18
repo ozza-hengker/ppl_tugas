@@ -889,6 +889,7 @@
             <button onclick="window.selectGame('flappy')" id="gameTabFlappy" class="game-tab-inactive whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border">🐦 Flappy Lab</button>
             <button onclick="window.selectGame('whack')" id="gameTabWhack" class="game-tab-inactive whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border">🔨 Whack-Arduino</button>
             <button onclick="window.selectGame('memory')" id="gameTabMemory" class="game-tab-inactive whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border">🃏 Memory Flip</button>
+            <button onclick="window.selectGame('poker')" id="gameTabPoker" class="game-tab-inactive whitespace-nowrap px-5 py-2.5 rounded-xl text-sm font-bold transition border">♠️ Poker</button>
         </div>
 
         <!-- Game area -->
@@ -945,6 +946,56 @@
                 </div>
                 <div id="memoryGrid" class="grid grid-cols-4 gap-3"></div>
                 <button onclick="window.memoryInit()" class="bg-purple-500/15 hover:bg-purple-500 text-purple-400 hover:text-white px-8 py-3 rounded-xl font-bold text-sm border border-purple-500/30 transition">🔄 Acak Ulang</button>
+            </div>
+
+            <!-- POKER -->
+            <div id="gamePoker" class="hidden flex-col items-center gap-4 w-full" style="max-width:680px;">
+                <!-- Lobby -->
+                <div id="pokerLobby" class="flex flex-col items-center gap-4 w-full">
+                    <div class="text-center">
+                        <p class="text-white text-2xl font-bold mb-1" style="font-family:'Sora',sans-serif;">♠️ Texas Hold'em Poker</p>
+                        <p class="text-gray-400 text-sm">Modal awal: <span class="text-yellow-400 font-bold">$100</span> per pemain</p>
+                    </div>
+                    <div id="pokerPlayerList" class="w-full p-4 rounded-2xl border border-white/10 space-y-2" style="background:#0f1e33;min-height:72px;">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Pemain yang bergabung:</p>
+                    </div>
+                    <div class="flex gap-3 w-full">
+                        <input id="pokerNameInput" type="text" placeholder="Nama kamu..." maxlength="16"
+                            class="flex-1 px-4 py-2.5 rounded-xl text-sm font-medium outline-none"
+                            style="background:#1e3a5f;color:#fff;border:1px solid rgba(44,163,209,0.3);">
+                        <button onclick="window.pokerJoin()" class="bg-secondary hover:bg-cyan-400 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition">Bergabung</button>
+                    </div>
+                    <div class="flex flex-wrap gap-3 justify-center">
+                        <button onclick="window.pokerStartGame()" class="btn-primary text-white px-8 py-3 rounded-xl font-bold text-sm">
+                            ▶ Mulai Multiplayer (<span id="pokerPlayerCount">0</span>)
+                        </button>
+                        <button onclick="window.pokerStartVsAI()" class="text-purple-300 hover:text-white px-8 py-3 rounded-xl font-bold text-sm border border-purple-500/30 transition" style="background:rgba(168,85,247,0.15);">
+                            🤖 Main vs AI
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-600">Min. 2 pemain untuk multiplayer. Tiap pemain klik "Bergabung" dari device masing-masing.</p>
+                </div>
+                <!-- Table -->
+                <div id="pokerTable" class="hidden flex-col items-center gap-3 w-full">
+                    <div class="flex items-center gap-6 text-white w-full justify-center flex-wrap">
+                        <div class="text-center"><p class="text-xs text-gray-500 uppercase">Pot</p><p id="pokerPot" class="text-3xl font-bold text-yellow-400">$0</p></div>
+                        <div class="text-center"><p class="text-xs text-gray-500 uppercase">Ronde</p><p id="pokerRound" class="text-lg font-bold text-secondary">Pre-Flop</p></div>
+                        <div class="text-center"><p class="text-xs text-gray-500 uppercase">Giliran</p><p id="pokerTurnName" class="text-lg font-bold text-green-400">-</p></div>
+                    </div>
+                    <div class="flex gap-2 items-center justify-center flex-wrap">
+                        <p class="text-xs text-gray-500 uppercase mr-1">Community:</p>
+                        <div id="pokerCommunity" class="flex gap-2"></div>
+                    </div>
+                    <div id="pokerPlayers" class="flex flex-wrap gap-3 justify-center w-full"></div>
+                    <div id="pokerMsg" class="text-center text-sm text-green-400 font-semibold min-h-[20px]"></div>
+                    <div id="pokerActions" class="flex flex-wrap gap-2 justify-center">
+                        <button onclick="window.pokerAction('fold')" class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-red-500/30 transition">Fold</button>
+                        <button onclick="window.pokerAction('check')" id="pokerCheckBtn" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2 rounded-xl font-bold text-sm border border-white/10 transition">Check</button>
+                        <button onclick="window.pokerAction('call')" id="pokerCallBtn" class="text-secondary hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-secondary/30 transition" style="background:rgba(44,163,209,0.15);">Call $0</button>
+                        <button onclick="window.pokerAction('raise')" id="pokerRaiseBtn" class="text-yellow-400 hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-yellow-500/30 transition" style="background:rgba(245,158,11,0.15);">Raise $20</button>
+                    </div>
+                    <button onclick="window.pokerRestart()" class="text-xs text-gray-600 hover:text-gray-400 transition mt-1">↩ Kembali ke Lobby</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2079,7 +2130,7 @@
 
         // --- Tab Switcher ---
         window.selectGame = (game) => {
-            ['snake','flappy','whack','memory'].forEach(g => {
+            ['snake','flappy','whack','memory','poker'].forEach(g => {
                 const el = document.getElementById('game' + g.charAt(0).toUpperCase() + g.slice(1));
                 const tab = document.getElementById('gameTab' + g.charAt(0).toUpperCase() + g.slice(1));
                 if (el) el.classList.add('hidden');
@@ -2096,6 +2147,7 @@
             if (game === 'flappy') flappyInit();
             if (game === 'whack') whackInit();
             if (game === 'memory') memoryInit();
+            if (game === 'poker') pokerInit();
         };
 
         // ============================================
@@ -2456,11 +2508,368 @@
             }
         };
 
+
+        // ============================================
+        // ♠️ POKER — Texas Hold'em
+        // ============================================
+        const SUITS = ['♠','♥','♦','♣'];
+        const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+        const SUIT_COLOR = {'♠':'#e2e8f0','♥':'#f87171','♦':'#f87171','♣':'#e2e8f0'};
+
+        let pokerPlayers = [];       // {name, chips, hand:[], bet, folded, isAI}
+        let pokerDeck = [];
+        let pokerCommunityCards = [];
+        let pokerPotVal = 0;
+        let pokerCurrentBet = 0;
+        let pokerTurnIdx = 0;
+        let pokerRoundName = 'Pre-Flop';
+        let pokerActionIdx = 0;     // how many players have acted this round
+        let pokerDealerIdx = 0;
+        let pokerVsAI = false;
+
+        const pokerMakeDeck = () => {
+            const d = [];
+            for (const s of SUITS) for (const r of RANKS) d.push({r,s});
+            for (let i=d.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+            return d;
+        };
+
+        const pokerCard = (card, hidden=false) => {
+            if (!card || hidden) return `<div style="width:42px;height:60px;border-radius:8px;background:#1e3a5f;border:1.5px solid rgba(44,163,209,0.3);display:flex;align-items:center;justify-content:center;font-size:1.3rem;color:#555;">🂠</div>`;
+            return `<div style="width:42px;height:60px;border-radius:8px;background:#fff;border:1.5px solid #ccc;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:0.9rem;font-weight:bold;color:${SUIT_COLOR[card.s] === '#e2e8f0' ? '#1e293b' : '#ef4444'};line-height:1.1;">${card.r}<br>${card.s}</div>`;
+        };
+
+        const pokerHandName = (cards) => {
+            // Simple hand evaluator (returns string for display)
+            if (!cards || cards.length < 5) return '';
+            const all = cards;
+            const ranks = all.map(c => RANKS.indexOf(c.r));
+            const suits = all.map(c => c.s);
+            const rankCount = {};
+            ranks.forEach(r => rankCount[r] = (rankCount[r]||0)+1);
+            const counts = Object.values(rankCount).sort((a,b)=>b-a);
+            const isFlush = suits.filter(s=>s===suits[0]).length === suits.length;
+            const sortedR = [...new Set(ranks)].sort((a,b)=>a-b);
+            const isStraight = sortedR.length === 5 && sortedR[4]-sortedR[0] === 4;
+            if (isFlush && isStraight && sortedR[0] === 8) return 'Royal Flush 👑';
+            if (isFlush && isStraight) return 'Straight Flush 🔥';
+            if (counts[0]===4) return 'Four of a Kind 🎯';
+            if (counts[0]===3 && counts[1]===2) return 'Full House 🏠';
+            if (isFlush) return 'Flush ♠';
+            if (isStraight) return 'Straight ↗';
+            if (counts[0]===3) return 'Three of a Kind';
+            if (counts[0]===2 && counts[1]===2) return 'Two Pair';
+            if (counts[0]===2) return 'One Pair';
+            return 'High Card';
+        };
+
+        const pokerHandScore = (cards) => {
+            if (!cards || cards.length < 5) return 0;
+            const ranks = cards.map(c => RANKS.indexOf(c.r));
+            const suits = cards.map(c => c.s);
+            const rankCount = {};
+            ranks.forEach(r => rankCount[r] = (rankCount[r]||0)+1);
+            const counts = Object.values(rankCount).sort((a,b)=>b-a);
+            const isFlush = suits.filter(s=>s===suits[0]).length === suits.length;
+            const sortedR = [...new Set(ranks)].sort((a,b)=>a-b);
+            const isStraight = sortedR.length === 5 && sortedR[4]-sortedR[0] === 4;
+            if (isFlush && isStraight && sortedR[0]===8) return 9000;
+            if (isFlush && isStraight) return 8000 + sortedR[4];
+            if (counts[0]===4) return 7000;
+            if (counts[0]===3 && counts[1]===2) return 6000;
+            if (isFlush) return 5000 + Math.max(...ranks);
+            if (isStraight) return 4000 + sortedR[4];
+            if (counts[0]===3) return 3000;
+            if (counts[0]===2 && counts[1]===2) return 2000;
+            if (counts[0]===2) return 1000;
+            return Math.max(...ranks);
+        };
+
+        const getBestHand = (hole, community) => {
+            const all = [...hole, ...community];
+            if (all.length < 5) return all;
+            // Try all C(n,5) combinations
+            let best = null, bestScore = -1;
+            const combos = (arr, k) => {
+                const res = [];
+                const go = (start, cur) => { if (cur.length===k) { res.push([...cur]); return; } for(let i=start;i<arr.length;i++) { cur.push(arr[i]); go(i+1,cur); cur.pop(); } };
+                go(0,[]); return res;
+            };
+            for (const c of combos(all,5)) {
+                const s = pokerHandScore(c);
+                if (s > bestScore) { bestScore = s; best = c; }
+            }
+            return { cards: best, score: bestScore };
+        };
+
+        const pokerInit = () => {
+            pokerPlayers = [];
+            document.getElementById('pokerPlayerList').innerHTML = '<p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Pemain yang bergabung:</p>';
+            document.getElementById('pokerPlayerCount').textContent = '0';
+            document.getElementById('pokerNameInput').value = '';
+            document.getElementById('pokerLobby').classList.remove('hidden');
+            document.getElementById('pokerTable').classList.add('hidden');
+        };
+
+        window.pokerJoin = () => {
+            const name = document.getElementById('pokerNameInput').value.trim();
+            if (!name) return;
+            if (pokerPlayers.find(p => p.name === name)) { alert('Nama sudah dipakai!'); return; }
+            if (pokerPlayers.length >= 6) { alert('Maks 6 pemain!'); return; }
+            pokerPlayers.push({ name, chips: 100, hand: [], bet: 0, folded: false, isAI: false });
+            document.getElementById('pokerNameInput').value = '';
+            document.getElementById('pokerPlayerCount').textContent = pokerPlayers.length;
+            const list = document.getElementById('pokerPlayerList');
+            const div = document.createElement('div');
+            div.className = 'flex items-center gap-2 text-sm text-white';
+            div.innerHTML = `<span class="text-green-400">✔</span> <span class="font-semibold">${name}</span> <span class="text-gray-500">— $100</span>`;
+            list.appendChild(div);
+        };
+
+        window.pokerStartVsAI = () => {
+            const humanName = document.getElementById('pokerNameInput').value.trim() || 'Kamu';
+            if (!pokerPlayers.find(p => p.name === humanName && !p.isAI)) {
+                pokerPlayers = [{ name: humanName, chips: 100, hand: [], bet: 0, folded: false, isAI: false }];
+            }
+            const aiNames = ['🤖 CPU-1','🤖 CPU-2'];
+            for (const n of aiNames) pokerPlayers.push({ name: n, chips: 100, hand: [], bet: 0, folded: false, isAI: true });
+            pokerBeginGame();
+        };
+
+        window.pokerStartGame = () => {
+            if (pokerPlayers.length < 2) { alert('Min. 2 pemain! Klik Bergabung dulu.'); return; }
+            pokerBeginGame();
+        };
+
+        const pokerBeginGame = () => {
+            pokerDeck = pokerMakeDeck();
+            pokerCommunityCards = [];
+            pokerPotVal = 0;
+            pokerCurrentBet = 0;
+            pokerRoundName = 'Pre-Flop';
+            pokerTurnIdx = 0;
+            pokerActionIdx = 0;
+            pokerPlayers.forEach(p => { p.hand = []; p.bet = 0; p.folded = false; });
+
+            // Deal 2 cards to each player
+            for (let i = 0; i < 2; i++) pokerPlayers.forEach(p => p.hand.push(pokerDeck.pop()));
+
+            // Blinds
+            const smallB = pokerPlayers[pokerDealerIdx % pokerPlayers.length];
+            const bigB = pokerPlayers[(pokerDealerIdx+1) % pokerPlayers.length];
+            const smallAmt = Math.min(5, smallB.chips);
+            const bigAmt = Math.min(10, bigB.chips);
+            smallB.chips -= smallAmt; smallB.bet = smallAmt; pokerPotVal += smallAmt;
+            bigB.chips -= bigAmt; bigB.bet = bigAmt; pokerPotVal += bigAmt;
+            pokerCurrentBet = bigAmt;
+            pokerTurnIdx = (pokerDealerIdx + 2) % pokerPlayers.length;
+
+            document.getElementById('pokerLobby').classList.add('hidden');
+            document.getElementById('pokerTable').classList.remove('hidden');
+            pokerRender();
+            if (pokerPlayers[pokerTurnIdx]?.isAI) setTimeout(pokerAITurn, 1000);
+        };
+
+        const pokerRender = () => {
+            document.getElementById('pokerPot').textContent = `$${pokerPotVal}`;
+            document.getElementById('pokerRound').textContent = pokerRoundName;
+            const cur = pokerPlayers[pokerTurnIdx];
+            document.getElementById('pokerTurnName').textContent = cur?.folded ? '-' : (cur?.name || '-');
+
+            // Community cards
+            const comm = document.getElementById('pokerCommunity');
+            comm.innerHTML = '';
+            for (let i=0;i<5;i++) {
+                const c = pokerCommunityCards[i];
+                comm.innerHTML += pokerCard(c, !c);
+            }
+
+            // Players
+            const pp = document.getElementById('pokerPlayers');
+            pp.innerHTML = '';
+            pokerPlayers.forEach((p, i) => {
+                const isHuman = !p.isAI;
+                const isTurn = i === pokerTurnIdx;
+                const div = document.createElement('div');
+                div.style.cssText = `background:${p.folded?'rgba(0,0,0,0.3)':isTurn?'rgba(44,163,209,0.15)':'#0f1e33'};border:1.5px solid ${isTurn?'rgba(44,163,209,0.8)':'rgba(255,255,255,0.08)'};border-radius:16px;padding:12px;min-width:130px;text-align:center;`;
+                const showCards = isHuman || (pokerRoundName === 'Showdown');
+                div.innerHTML = `
+                    <p class="text-xs font-bold mb-1" style="color:${p.folded?'#6b7280':'#fff'}">${p.name}${isTurn?' 👈':''}</p>
+                    <p class="text-xs" style="color:#fbbf24">$${p.chips} ${p.bet?`(bet $${p.bet})`:''}` + (p.folded?` <span style="color:#6b7280">Fold</span>`:'')+`</p>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;">
+                        ${p.hand.map(c => pokerCard(c, !showCards && p.isAI)).join('')}
+                    </div>
+                    ${showCards && pokerCommunityCards.length>=3 ? `<p style="font-size:0.65rem;color:#a78bfa;margin-top:4px;">${pokerHandName(getBestHand(p.hand, pokerCommunityCards).cards)}</p>`:''}
+                `;
+                pp.appendChild(div);
+            });
+
+            // Action buttons
+            const callAmt = pokerCurrentBet - (cur?.bet || 0);
+            const canCheck = callAmt <= 0;
+            document.getElementById('pokerCheckBtn').style.display = canCheck ? '' : 'none';
+            const callBtn = document.getElementById('pokerCallBtn');
+            callBtn.style.display = !canCheck ? '' : 'none';
+            callBtn.textContent = `Call $${callAmt}`;
+            const raiseBtn = document.getElementById('pokerRaiseBtn');
+            raiseBtn.textContent = `Raise $${Math.min(20, cur?.chips || 0)}`;
+
+            const myTurn = cur && !cur.isAI && !cur.folded;
+            document.getElementById('pokerActions').style.opacity = myTurn ? '1' : '0.3';
+            document.getElementById('pokerActions').style.pointerEvents = myTurn ? '' : 'none';
+        };
+
+        window.pokerAction = (action) => {
+            const p = pokerPlayers[pokerTurnIdx];
+            if (!p || p.isAI || p.folded) return;
+            applyPokerAction(p, action);
+        };
+
+        const applyPokerAction = (p, action) => {
+            const callAmt = Math.max(0, pokerCurrentBet - p.bet);
+            if (action === 'fold') {
+                p.folded = true;
+            } else if (action === 'check') {
+                // only if callAmt === 0
+            } else if (action === 'call') {
+                const pay = Math.min(callAmt, p.chips);
+                p.chips -= pay; p.bet += pay; pokerPotVal += pay;
+            } else if (action === 'raise') {
+                const rAmt = Math.min(20, p.chips);
+                const total = callAmt + rAmt;
+                const pay = Math.min(total, p.chips);
+                p.chips -= pay; p.bet += pay; pokerPotVal += pay;
+                pokerCurrentBet = p.bet;
+                pokerActionIdx = 0; // reset so everyone acts again
+            }
+            pokerActionIdx++;
+            pokerAdvanceTurn();
+        };
+
+        const pokerAdvanceTurn = () => {
+            const active = pokerPlayers.filter(p => !p.folded);
+            if (active.length === 1) {
+                pokerShowdown(true);
+                return;
+            }
+            // Check if all active players have acted and matched bet
+            const allActed = active.every(p => p.bet === pokerCurrentBet || p.chips === 0);
+            const roundOver = allActed && pokerActionIdx >= active.length;
+
+            if (roundOver) {
+                pokerNextRound();
+                return;
+            }
+
+            // Find next non-folded player
+            let next = (pokerTurnIdx + 1) % pokerPlayers.length;
+            while (pokerPlayers[next].folded) next = (next+1) % pokerPlayers.length;
+            pokerTurnIdx = next;
+            pokerRender();
+            if (pokerPlayers[pokerTurnIdx]?.isAI) setTimeout(pokerAITurn, 900);
+        };
+
+        const pokerNextRound = () => {
+            // reset bets
+            pokerPlayers.forEach(p => p.bet = 0);
+            pokerCurrentBet = 0;
+            pokerActionIdx = 0;
+            // First active player after dealer acts first
+            pokerTurnIdx = (pokerDealerIdx + 1) % pokerPlayers.length;
+            while (pokerPlayers[pokerTurnIdx].folded) pokerTurnIdx = (pokerTurnIdx+1) % pokerPlayers.length;
+
+            if (pokerRoundName === 'Pre-Flop') {
+                pokerCommunityCards.push(pokerDeck.pop(), pokerDeck.pop(), pokerDeck.pop());
+                pokerRoundName = 'Flop';
+            } else if (pokerRoundName === 'Flop') {
+                pokerCommunityCards.push(pokerDeck.pop());
+                pokerRoundName = 'Turn';
+            } else if (pokerRoundName === 'Turn') {
+                pokerCommunityCards.push(pokerDeck.pop());
+                pokerRoundName = 'River';
+            } else if (pokerRoundName === 'River') {
+                pokerShowdown(false);
+                return;
+            }
+            pokerRender();
+            if (pokerPlayers[pokerTurnIdx]?.isAI) setTimeout(pokerAITurn, 900);
+        };
+
+        const pokerAITurn = () => {
+            const p = pokerPlayers[pokerTurnIdx];
+            if (!p || !p.isAI || p.folded) return;
+            const callAmt = Math.max(0, pokerCurrentBet - p.bet);
+            const rand = Math.random();
+            let action;
+            if (rand < 0.15) action = 'fold';
+            else if (callAmt === 0) action = rand < 0.5 ? 'check' : 'raise';
+            else if (rand < 0.6) action = 'call';
+            else action = 'raise';
+            applyPokerAction(p, action);
+        };
+
+        const pokerShowdown = (onlyWinner) => {
+            pokerRoundName = 'Showdown';
+            const active = pokerPlayers.filter(p => !p.folded);
+            let winner = active[0];
+            if (!onlyWinner && active.length > 1) {
+                active.forEach(p => {
+                    const best = getBestHand(p.hand, pokerCommunityCards);
+                    p._score = best.score;
+                });
+                winner = active.reduce((a, b) => a._score > b._score ? a : b);
+            }
+            winner.chips += pokerPotVal;
+            pokerPotVal = 0;
+
+            pokerRender();
+            const msg = document.getElementById('pokerMsg');
+            const handDesc = !onlyWinner && pokerCommunityCards.length >= 3 ? ` dengan ${pokerHandName(getBestHand(winner.hand, pokerCommunityCards).cards)}` : '';
+            msg.textContent = `🏆 ${winner.name} menang$${winner.chips > 0 ? '' : ''}${handDesc}!`;
+
+            // Check if anyone's out
+            const busted = pokerPlayers.filter(p => p.chips <= 0);
+            if (busted.length) busted.forEach(p => p.chips = 0);
+
+            setTimeout(() => {
+                const stillIn = pokerPlayers.filter(p => p.chips > 0);
+                if (stillIn.length <= 1) {
+                    msg.textContent = `🎉 Game over! ${stillIn[0]?.name || winner.name} menang semua!`;
+                    setTimeout(() => pokerRestart(), 4000);
+                    return;
+                }
+                // Next hand
+                pokerPlayers = pokerPlayers.filter(p => p.chips > 0);
+                pokerDealerIdx = (pokerDealerIdx + 1) % pokerPlayers.length;
+                pokerBeginGame();
+            }, 4000);
+        };
+
+        window.pokerRestart = () => {
+            pokerPlayers = [];
+            pokerVsAI = false;
+            pokerInit();
+        };
+
+        // ============================================
+        // Fix: closeGames was called but never defined
+        window.closeGames = () => {
+            snakeStop(); flappyStop(); whackStop();
+            document.getElementById('gameScreen').classList.add('hidden');
+            // Return to login screen (game is accessed without a real login)
+            showScreen('loginScreen');
+        };
+
         // Init snake when game screen first shown (selectGame calls it, but also handle direct showScreen)
         const _origShowScreen = window.showScreen;
         window.showScreen = (screen) => {
             _origShowScreen(screen);
-            if (screen === 'gameScreen') { setTimeout(() => { selectGame('snake'); }, 50); }
+            if (screen === 'gameScreen') {
+                document.getElementById('gameScreen').classList.remove('hidden');
+                setTimeout(() => { selectGame('snake'); }, 50);
+            } else {
+                document.getElementById('gameScreen').classList.add('hidden');
+            }
         };
     </script>
 </body>
