@@ -949,12 +949,63 @@
             </div>
 
             <!-- POKER -->
-            <div id="gamePoker" class="hidden flex-col items-center gap-4 w-full" style="max-width:680px;">
-                <!-- Lobby -->
-                <div id="pokerLobby" class="flex flex-col items-center gap-4 w-full">
+            <div id="gamePoker" class="hidden flex-col items-center gap-4 w-full" style="max-width:720px;">
+                <!-- Mode Select -->
+                <div id="pokerModeSelect" class="flex flex-col items-center gap-4 w-full">
                     <div class="text-center">
                         <p class="text-white text-2xl font-bold mb-1" style="font-family:'Sora',sans-serif;">♠️ Texas Hold'em Poker</p>
                         <p class="text-gray-400 text-sm">Modal awal: <span class="text-yellow-400 font-bold">$100</span> per pemain</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3 justify-center w-full">
+                        <button onclick="window.pokerShowOnlineLobby()" class="btn-primary text-white px-8 py-4 rounded-xl font-bold text-sm flex flex-col items-center gap-1" style="min-width:160px;">
+                            <span class="text-xl">🌐</span> Main Online
+                            <span class="text-xs font-normal opacity-70">Mabar antar device</span>
+                        </button>
+                        <button onclick="window.pokerStartVsAI()" class="text-purple-300 hover:text-white px-8 py-4 rounded-xl font-bold text-sm border border-purple-500/30 transition flex flex-col items-center gap-1" style="background:rgba(168,85,247,0.15);min-width:160px;">
+                            <span class="text-xl">🤖</span> Main vs AI
+                            <span class="text-xs font-normal opacity-70">Offline sendiri</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Online Lobby -->
+                <div id="pokerOnlineLobby" class="hidden flex-col items-center gap-4 w-full">
+                    <p class="text-white text-lg font-bold">🌐 Poker Online</p>
+                    <div class="w-full p-4 rounded-2xl border border-white/10" style="background:#0f1e33;">
+                        <p class="text-xs text-gray-400 mb-3">Kamu main sebagai: <span id="pokerOnlineUsername" class="text-yellow-400 font-bold"></span></p>
+                        <p class="text-xs text-gray-500 mb-2 uppercase tracking-wider">Pilih atau buat room:</p>
+                        <div id="pokerRoomList" class="space-y-2 mb-3 min-h-[40px]">
+                            <p class="text-xs text-gray-600">Loading rooms...</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <input id="pokerRoomNameInput" type="text" placeholder="Nama room baru..." maxlength="20"
+                                class="flex-1 px-3 py-2 rounded-xl text-sm font-medium outline-none"
+                                style="background:#1e3a5f;color:#fff;border:1px solid rgba(44,163,209,0.3);">
+                            <button onclick="window.pokerCreateRoom()" class="bg-secondary hover:bg-cyan-400 text-white px-4 py-2 rounded-xl font-bold text-xs transition">Buat Room</button>
+                        </div>
+                    </div>
+                    <!-- Waiting Room -->
+                    <div id="pokerWaitingRoom" class="hidden w-full p-4 rounded-2xl border border-secondary/30" style="background:#0a1628;">
+                        <div class="flex justify-between items-center mb-3">
+                            <p class="text-sm font-bold text-white">Room: <span id="pokerRoomNameDisplay" class="text-secondary"></span></p>
+                            <button onclick="window.pokerLeaveRoom()" class="text-xs text-gray-500 hover:text-red-400 transition">Keluar</button>
+                        </div>
+                        <div id="pokerWaitingPlayerList" class="space-y-1 mb-4 min-h-[40px]"></div>
+                        <p class="text-xs text-gray-500 mb-3">Min. 2 pemain. Host yang mulai game.</p>
+                        <div id="pokerHostStartBtn" class="hidden">
+                            <button onclick="window.pokerOnlineStartGame()" class="btn-primary text-white w-full py-3 rounded-xl font-bold text-sm">▶ Mulai Game!</button>
+                        </div>
+                        <div id="pokerGuestWait" class="hidden">
+                            <p class="text-xs text-gray-400 text-center">⏳ Menunggu host memulai...</p>
+                        </div>
+                    </div>
+                    <button onclick="window.pokerBackToModeSelect()" class="text-xs text-gray-600 hover:text-gray-400 transition">← Kembali</button>
+                </div>
+
+                <!-- Offline Lobby (vs AI) -->
+                <div id="pokerLobby" class="hidden flex-col items-center gap-4 w-full">
+                    <div class="text-center">
+                        <p class="text-white text-lg font-bold mb-1">🤖 Main vs AI</p>
                     </div>
                     <div id="pokerPlayerList" class="w-full p-4 rounded-2xl border border-white/10 space-y-2" style="background:#0f1e33;min-height:72px;">
                         <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Pemain yang bergabung:</p>
@@ -967,16 +1018,18 @@
                     </div>
                     <div class="flex flex-wrap gap-3 justify-center">
                         <button onclick="window.pokerStartGame()" class="btn-primary text-white px-8 py-3 rounded-xl font-bold text-sm">
-                            ▶ Mulai Multiplayer (<span id="pokerPlayerCount">0</span>)
-                        </button>
-                        <button onclick="window.pokerStartVsAI()" class="text-purple-300 hover:text-white px-8 py-3 rounded-xl font-bold text-sm border border-purple-500/30 transition" style="background:rgba(168,85,247,0.15);">
-                            🤖 Main vs AI
+                            ▶ Mulai (<span id="pokerPlayerCount">0</span> pemain)
                         </button>
                     </div>
-                    <p class="text-xs text-gray-600">Min. 2 pemain untuk multiplayer. Tiap pemain klik "Bergabung" dari device masing-masing.</p>
+                    <button onclick="window.pokerBackToModeSelect()" class="text-xs text-gray-600 hover:text-gray-400 transition">← Kembali</button>
                 </div>
-                <!-- Table -->
+
+                <!-- Table (shared offline/online) -->
                 <div id="pokerTable" class="hidden flex-col items-center gap-3 w-full">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span id="pokerOnlineBadge" class="hidden text-xs px-2 py-0.5 rounded-full font-bold" style="background:rgba(44,163,209,0.2);color:#2ca3d1;border:1px solid rgba(44,163,209,0.3);">🌐 ONLINE</span>
+                        <span id="pokerRoomBadge" class="hidden text-xs text-gray-500"></span>
+                    </div>
                     <div class="flex items-center gap-6 text-white w-full justify-center flex-wrap">
                         <div class="text-center"><p class="text-xs text-gray-500 uppercase">Pot</p><p id="pokerPot" class="text-3xl font-bold text-yellow-400">$0</p></div>
                         <div class="text-center"><p class="text-xs text-gray-500 uppercase">Ronde</p><p id="pokerRound" class="text-lg font-bold text-secondary">Pre-Flop</p></div>
@@ -988,11 +1041,19 @@
                     </div>
                     <div id="pokerPlayers" class="flex flex-wrap gap-3 justify-center w-full"></div>
                     <div id="pokerMsg" class="text-center text-sm text-green-400 font-semibold min-h-[20px]"></div>
-                    <div id="pokerActions" class="flex flex-wrap gap-2 justify-center">
+                    <!-- Actions -->
+                    <div id="pokerActions" class="flex flex-wrap gap-2 justify-center items-center">
                         <button onclick="window.pokerAction('fold')" class="bg-red-500/20 hover:bg-red-500 text-red-400 hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-red-500/30 transition">Fold</button>
                         <button onclick="window.pokerAction('check')" id="pokerCheckBtn" class="bg-white/10 hover:bg-white/20 text-white px-5 py-2 rounded-xl font-bold text-sm border border-white/10 transition">Check</button>
                         <button onclick="window.pokerAction('call')" id="pokerCallBtn" class="text-secondary hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-secondary/30 transition" style="background:rgba(44,163,209,0.15);">Call $0</button>
-                        <button onclick="window.pokerAction('raise')" id="pokerRaiseBtn" class="text-yellow-400 hover:text-white px-5 py-2 rounded-xl font-bold text-sm border border-yellow-500/30 transition" style="background:rgba(245,158,11,0.15);">Raise $20</button>
+                        <!-- Raise with custom input -->
+                        <div class="flex items-center gap-1">
+                            <input id="pokerRaiseInput" type="number" min="1" value="20"
+                                class="w-16 px-2 py-2 rounded-xl text-sm font-bold text-center outline-none"
+                                style="background:#1e3a5f;color:#fbbf24;border:1px solid rgba(245,158,11,0.4);"
+                                oninput="this.value=Math.max(1,parseInt(this.value)||1)">
+                            <button onclick="window.pokerAction('raise')" id="pokerRaiseBtn" class="text-yellow-400 hover:text-white px-4 py-2 rounded-xl font-bold text-sm border border-yellow-500/30 transition" style="background:rgba(245,158,11,0.15);">Raise</button>
+                        </div>
                     </div>
                     <button onclick="window.pokerRestart()" class="text-xs text-gray-600 hover:text-gray-400 transition mt-1">↩ Kembali ke Lobby</button>
                 </div>
@@ -2510,8 +2571,422 @@
 
 
         // ============================================
-        // ♠️ POKER — Texas Hold'em
+        // ♠️ POKER — Texas Hold'em (ONLINE MULTIPLAYER)
         // ============================================
+
+        // ---- Online state ----
+        let pokerOnlineMode = false;
+        let pokerRoomId = null;
+        let pokerRoomUnsubscribe = null;
+        let pokerMyName = '';
+        let pokerIsHost = false;
+        let pokerRoomsUnsubscribe = null;
+
+        const pokerRoomsPath = () => {
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'cares-local-app';
+            return `artifacts/${appId}/public/data/pokerRooms`;
+        };
+
+        window.pokerShowOnlineLobby = () => {
+            // Determine player name from login or prompt
+            pokerMyName = (currentUser && currentUser.nama) ? currentUser.nama : null;
+            if (!pokerMyName) {
+                // anonymous game login
+                pokerMyName = prompt('Masukkan nama kamu untuk main online:', '') || 'Pemain';
+            }
+            document.getElementById('pokerOnlineUsername').textContent = pokerMyName;
+            document.getElementById('pokerModeSelect').classList.add('hidden');
+            document.getElementById('pokerOnlineLobby').classList.remove('hidden');
+            document.getElementById('pokerLobby').classList.add('hidden');
+            pokerListenRooms();
+        };
+
+        window.pokerBackToModeSelect = () => {
+            pokerLeaveRoom();
+            if (pokerRoomsUnsubscribe) { pokerRoomsUnsubscribe(); pokerRoomsUnsubscribe = null; }
+            document.getElementById('pokerModeSelect').classList.remove('hidden');
+            document.getElementById('pokerOnlineLobby').classList.add('hidden');
+            document.getElementById('pokerLobby').classList.add('hidden');
+            document.getElementById('pokerTable').classList.add('hidden');
+        };
+
+        const pokerListenRooms = () => {
+            if (pokerRoomsUnsubscribe) pokerRoomsUnsubscribe();
+            const roomsCol = collection(db, pokerRoomsPath());
+            pokerRoomsUnsubscribe = onSnapshot(roomsCol, (snap) => {
+                const list = document.getElementById('pokerRoomList');
+                if (!list) return;
+                list.innerHTML = '';
+                if (snap.empty) {
+                    list.innerHTML = '<p class="text-xs text-gray-600">Belum ada room. Buat room baru!</p>';
+                    return;
+                }
+                snap.forEach(d => {
+                    const r = d.data();
+                    if (r.status === 'finished') return;
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center justify-between p-2 rounded-xl border border-white/10';
+                    div.style.background = '#0f1e33';
+                    const playerCount = (r.players || []).length;
+                    div.innerHTML = `
+                        <span class="text-sm text-white font-semibold">🎲 ${r.name}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs text-gray-400">${playerCount}/6 pemain</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-bold" style="background:${r.status==='waiting'?'rgba(34,197,94,0.15)':'rgba(251,191,36,0.15)'};color:${r.status==='waiting'?'#4ade80':'#fbbf24'}">${r.status==='waiting'?'Menunggu':'Bermain'}</span>
+                            ${r.status==='waiting' ? `<button onclick="window.pokerJoinRoom('${d.id}')" class="text-xs bg-secondary/20 hover:bg-secondary/40 text-secondary px-3 py-1 rounded-lg font-bold transition">Masuk</button>` : ''}
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+            });
+        };
+
+        window.pokerCreateRoom = async () => {
+            const name = document.getElementById('pokerRoomNameInput').value.trim() || `Room ${pokerMyName}`;
+            try {
+                const ref = await addDoc(collection(db, pokerRoomsPath()), {
+                    name,
+                    status: 'waiting',
+                    host: pokerMyName,
+                    players: [{ name: pokerMyName, chips: 100, bet: 0, folded: false, isAI: false, hand: [] }],
+                    gameState: null,
+                    createdAt: new Date().toISOString()
+                });
+                pokerRoomId = ref.id;
+                pokerIsHost = true;
+                document.getElementById('pokerRoomNameInput').value = '';
+                pokerShowWaitingRoom(ref.id);
+            } catch(e) {
+                console.error(e);
+                showToast('Gagal buat room!', 'error');
+            }
+        };
+
+        window.pokerJoinRoom = async (roomId) => {
+            try {
+                const ref = doc(db, pokerRoomsPath(), roomId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) { showToast('Room tidak ditemukan!', 'error'); return; }
+                const data = snap.data();
+                if (data.status !== 'waiting') { showToast('Game sudah dimulai!', 'error'); return; }
+                if ((data.players||[]).length >= 6) { showToast('Room penuh!', 'error'); return; }
+                if ((data.players||[]).find(p => p.name === pokerMyName)) {
+                    // already in room, just show it
+                    pokerRoomId = roomId;
+                    pokerIsHost = data.host === pokerMyName;
+                    pokerShowWaitingRoom(roomId);
+                    return;
+                }
+                const newPlayers = [...(data.players||[]), { name: pokerMyName, chips: 100, bet: 0, folded: false, isAI: false, hand: [] }];
+                await updateDoc(ref, { players: newPlayers });
+                pokerRoomId = roomId;
+                pokerIsHost = false;
+                pokerShowWaitingRoom(roomId);
+            } catch(e) {
+                console.error(e);
+                showToast('Gagal masuk room!', 'error');
+            }
+        };
+
+        const pokerShowWaitingRoom = (roomId) => {
+            document.getElementById('pokerWaitingRoom').classList.remove('hidden');
+            // listen to room
+            if (pokerRoomUnsubscribe) pokerRoomUnsubscribe();
+            const ref = doc(db, pokerRoomsPath(), roomId);
+            pokerRoomUnsubscribe = onSnapshot(ref, (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+                document.getElementById('pokerRoomNameDisplay').textContent = data.name;
+                const wpl = document.getElementById('pokerWaitingPlayerList');
+                wpl.innerHTML = '';
+                (data.players||[]).forEach(p => {
+                    const d = document.createElement('div');
+                    d.className = 'flex items-center gap-2 text-sm text-white';
+                    d.innerHTML = `<span class="text-green-400">✔</span> <span class="font-semibold">${p.name}</span>${data.host===p.name?' <span class="text-xs text-yellow-400">(Host)</span>':''}`;
+                    wpl.appendChild(d);
+                });
+                // host/guest buttons
+                const amHost = data.host === pokerMyName;
+                document.getElementById('pokerHostStartBtn').classList.toggle('hidden', !amHost || (data.players||[]).length < 2);
+                document.getElementById('pokerGuestWait').classList.toggle('hidden', amHost);
+
+                // If game started, enter game
+                if (data.status === 'playing' && data.gameState) {
+                    pokerOnlineMode = true;
+                    document.getElementById('pokerWaitingRoom').classList.add('hidden');
+                    document.getElementById('pokerOnlineLobby').classList.add('hidden');
+                    pokerOnlineRenderFromState(data.gameState);
+                }
+            });
+        };
+
+        window.pokerLeaveRoom = async () => {
+            if (pokerRoomUnsubscribe) { pokerRoomUnsubscribe(); pokerRoomUnsubscribe = null; }
+            if (pokerRoomId) {
+                try {
+                    const ref = doc(db, pokerRoomsPath(), pokerRoomId);
+                    const snap = await getDoc(ref);
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        const newPlayers = (data.players||[]).filter(p => p.name !== pokerMyName);
+                        if (newPlayers.length === 0) {
+                            await deleteDoc(ref);
+                        } else {
+                            const newHost = data.host === pokerMyName ? newPlayers[0].name : data.host;
+                            await updateDoc(ref, { players: newPlayers, host: newHost });
+                        }
+                    }
+                } catch(e) { console.error(e); }
+                pokerRoomId = null;
+            }
+            pokerOnlineMode = false;
+            document.getElementById('pokerWaitingRoom').classList.add('hidden');
+            document.getElementById('pokerTable').classList.add('hidden');
+            document.getElementById('pokerOnlineBadge').classList.add('hidden');
+        };
+
+        window.pokerOnlineStartGame = async () => {
+            if (!pokerRoomId) return;
+            try {
+                const ref = doc(db, pokerRoomsPath(), pokerRoomId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return;
+                const data = snap.data();
+                // Build initial game state
+                const gs = pokerBuildInitialState(data.players);
+                await updateDoc(ref, { status: 'playing', gameState: gs });
+            } catch(e) {
+                console.error(e);
+                showToast('Gagal mulai game!', 'error');
+            }
+        };
+
+        const pokerSaveStateToFirestore = async (gs) => {
+            if (!pokerRoomId || !pokerOnlineMode) return;
+            try {
+                await updateDoc(doc(db, pokerRoomsPath(), pokerRoomId), { gameState: gs });
+            } catch(e) { console.error(e); }
+        };
+
+        // Serialize deck/hand for Firestore (plain objects)
+        const serializeCards = (cards) => cards.map(c => ({ r: c.r, s: c.s }));
+
+        const pokerBuildInitialState = (players) => {
+            const deck = pokerMakeDeck();
+            const ps = players.map(p => ({ ...p, hand: [], bet: 0, folded: false, chips: 100 }));
+            // Deal 2 cards each
+            for (let i=0;i<2;i++) ps.forEach(p => p.hand.push(deck.pop()));
+            // Blinds
+            const dealerIdx = 0;
+            const smallB = ps[dealerIdx % ps.length];
+            const bigB = ps[(dealerIdx+1) % ps.length];
+            const smallAmt = Math.min(5, smallB.chips);
+            const bigAmt = Math.min(10, bigB.chips);
+            smallB.chips -= smallAmt; smallB.bet = smallAmt;
+            bigB.chips -= bigAmt; bigB.bet = bigAmt;
+            const pot = smallAmt + bigAmt;
+            const currentBet = bigAmt;
+            const turnIdx = (dealerIdx+2) % ps.length;
+            return {
+                players: ps,
+                deck: serializeCards(deck),
+                community: [],
+                pot,
+                currentBet,
+                turnIdx,
+                roundName: 'Pre-Flop',
+                actionIdx: 0,
+                dealerIdx,
+                msg: '',
+                finished: false
+            };
+        };
+
+        const pokerOnlineRenderFromState = (gs) => {
+            if (!gs) return;
+            document.getElementById('pokerModeSelect').classList.add('hidden');
+            document.getElementById('pokerOnlineLobby').classList.add('hidden');
+            document.getElementById('pokerLobby').classList.add('hidden');
+            document.getElementById('pokerTable').classList.remove('hidden');
+            document.getElementById('pokerOnlineBadge').classList.remove('hidden');
+            document.getElementById('pokerRoomBadge').classList.remove('hidden');
+            document.getElementById('pokerRoomBadge').textContent = `Room: ${pokerRoomId?.slice(0,6) || ''}`;
+
+            document.getElementById('pokerPot').textContent = `$${gs.pot}`;
+            document.getElementById('pokerRound').textContent = gs.roundName;
+            const cur = gs.players[gs.turnIdx];
+            document.getElementById('pokerTurnName').textContent = cur?.folded ? '-' : (cur?.name || '-');
+
+            // Community cards
+            const comm = document.getElementById('pokerCommunity');
+            comm.innerHTML = '';
+            for (let i=0;i<5;i++) {
+                const c = gs.community[i];
+                comm.innerHTML += pokerCard(c, !c);
+            }
+
+            // Players
+            const pp = document.getElementById('pokerPlayers');
+            pp.innerHTML = '';
+            gs.players.forEach((p, i) => {
+                const isMe = p.name === pokerMyName;
+                const isTurn = i === gs.turnIdx;
+                const div = document.createElement('div');
+                div.style.cssText = `background:${p.folded?'rgba(0,0,0,0.3)':isTurn?'rgba(44,163,209,0.15)':'#0f1e33'};border:1.5px solid ${isTurn?'rgba(44,163,209,0.8)':'rgba(255,255,255,0.08)'};border-radius:16px;padding:12px;min-width:130px;text-align:center;`;
+                const showCards = isMe || gs.roundName === 'Showdown';
+                div.innerHTML = `
+                    <p class="text-xs font-bold mb-1" style="color:${p.folded?'#6b7280':'#fff'}">${p.name}${isTurn?' 👈':''}${isMe?' <span style="color:#2ca3d1">(Kamu)</span>':''}</p>
+                    <p class="text-xs" style="color:#fbbf24">$${p.chips} ${p.bet?`(bet $${p.bet})`:''}`+(p.folded?` <span style="color:#6b7280">Fold</span>`:'')+`</p>
+                    <div style="display:flex;gap:4px;justify-content:center;margin-top:8px;">
+                        ${(p.hand||[]).map(c => pokerCard(c, !showCards)).join('')}
+                    </div>
+                    ${showCards && gs.community.length>=3 ? `<p style="font-size:0.65rem;color:#a78bfa;margin-top:4px;">${pokerHandName(getBestHand(p.hand, gs.community).cards)}</p>`:''}
+                `;
+                pp.appendChild(div);
+            });
+
+            document.getElementById('pokerMsg').textContent = gs.msg || '';
+
+            // Actions — only my turn
+            const isMyTurn = cur && cur.name === pokerMyName && !cur.folded;
+            const callAmt = gs.currentBet - (cur?.bet||0);
+            const canCheck = callAmt <= 0;
+            document.getElementById('pokerCheckBtn').style.display = canCheck ? '' : 'none';
+            const callBtn = document.getElementById('pokerCallBtn');
+            callBtn.style.display = !canCheck ? '' : 'none';
+            callBtn.textContent = `Call $${callAmt}`;
+            document.getElementById('pokerActions').style.opacity = isMyTurn ? '1' : '0.3';
+            document.getElementById('pokerActions').style.pointerEvents = isMyTurn ? '' : 'none';
+
+            if (gs.finished) {
+                setTimeout(async () => {
+                    if (pokerIsHost && pokerOnlineMode) {
+                        // host triggers next hand
+                        const snap2 = await getDoc(doc(db, pokerRoomsPath(), pokerRoomId));
+                        if (!snap2.exists()) return;
+                        const d2 = snap2.data();
+                        const stillIn = (d2.gameState?.players||[]).filter(p=>p.chips>0);
+                        if (stillIn.length <= 1) {
+                            await updateDoc(doc(db, pokerRoomsPath(), pokerRoomId), { status: 'finished' });
+                            return;
+                        }
+                        const nextGs = pokerBuildNextHand(d2.gameState);
+                        await updateDoc(doc(db, pokerRoomsPath(), pokerRoomId), { gameState: nextGs });
+                    }
+                }, 4000);
+            }
+        };
+
+        const pokerBuildNextHand = (prevGs) => {
+            const alivePlayers = prevGs.players.filter(p=>p.chips>0);
+            const newGs = pokerBuildInitialState(alivePlayers);
+            return newGs;
+        };
+
+        window.pokerAction = async (action) => {
+            if (pokerOnlineMode) {
+                await pokerOnlineAction(action);
+            } else {
+                const p = pokerPlayers[pokerTurnIdx];
+                if (!p || p.isAI || p.folded) return;
+                applyPokerAction(p, action);
+            }
+        };
+
+        const pokerOnlineAction = async (action) => {
+            if (!pokerRoomId) return;
+            try {
+                const ref = doc(db, pokerRoomsPath(), pokerRoomId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) return;
+                const gs = snap.data().gameState;
+                const cur = gs.players[gs.turnIdx];
+                if (!cur || cur.name !== pokerMyName || cur.folded) return;
+
+                const callAmt = Math.max(0, gs.currentBet - cur.bet);
+                if (action === 'fold') {
+                    cur.folded = true;
+                } else if (action === 'check') {
+                    // ok
+                } else if (action === 'call') {
+                    const pay = Math.min(callAmt, cur.chips);
+                    cur.chips -= pay; cur.bet += pay; gs.pot += pay;
+                } else if (action === 'raise') {
+                    const rInput = parseInt(document.getElementById('pokerRaiseInput').value) || 20;
+                    const rAmt = Math.min(rInput, cur.chips);
+                    const total = callAmt + rAmt;
+                    const pay = Math.min(total, cur.chips);
+                    cur.chips -= pay; cur.bet += pay; gs.pot += pay;
+                    gs.currentBet = cur.bet;
+                    gs.actionIdx = 0;
+                }
+                gs.actionIdx++;
+                // Advance turn
+                const newGs = pokerAdvanceOnlineTurn(gs);
+                await updateDoc(ref, { gameState: newGs });
+            } catch(e) {
+                console.error(e);
+                showToast('Gagal kirim aksi!', 'error');
+            }
+        };
+
+        const pokerAdvanceOnlineTurn = (gs) => {
+            const active = gs.players.filter(p => !p.folded);
+            if (active.length === 1) {
+                return pokerOnlineShowdown(gs, true);
+            }
+            const allActed = active.every(p => p.bet === gs.currentBet || p.chips === 0);
+            const roundOver = allActed && gs.actionIdx >= active.length;
+            if (roundOver) return pokerOnlineNextRound(gs);
+
+            let next = (gs.turnIdx + 1) % gs.players.length;
+            while (gs.players[next].folded) next = (next+1) % gs.players.length;
+            gs.turnIdx = next;
+            gs.msg = '';
+            return gs;
+        };
+
+        const pokerOnlineNextRound = (gs) => {
+            gs.players.forEach(p => p.bet = 0);
+            gs.currentBet = 0;
+            gs.actionIdx = 0;
+            gs.turnIdx = (gs.dealerIdx + 1) % gs.players.length;
+            while (gs.players[gs.turnIdx].folded) gs.turnIdx = (gs.turnIdx+1) % gs.players.length;
+
+            if (gs.roundName === 'Pre-Flop') {
+                gs.community.push(gs.deck.pop(), gs.deck.pop(), gs.deck.pop());
+                gs.roundName = 'Flop';
+            } else if (gs.roundName === 'Flop') {
+                gs.community.push(gs.deck.pop());
+                gs.roundName = 'Turn';
+            } else if (gs.roundName === 'Turn') {
+                gs.community.push(gs.deck.pop());
+                gs.roundName = 'River';
+            } else if (gs.roundName === 'River') {
+                return pokerOnlineShowdown(gs, false);
+            }
+            return gs;
+        };
+
+        const pokerOnlineShowdown = (gs, onlyWinner) => {
+            gs.roundName = 'Showdown';
+            const active = gs.players.filter(p => !p.folded);
+            let winner = active[0];
+            if (!onlyWinner && active.length > 1) {
+                active.forEach(p => {
+                    const best = getBestHand(p.hand, gs.community);
+                    p._score = best.score;
+                });
+                winner = active.reduce((a,b) => a._score > b._score ? a : b);
+            }
+            winner.chips += gs.pot;
+            gs.pot = 0;
+            const handDesc = !onlyWinner && gs.community.length>=3 ? ` dengan ${pokerHandName(getBestHand(winner.hand, gs.community).cards)}` : '';
+            gs.msg = `🏆 ${winner.name} menang!${handDesc}`;
+            gs.finished = true;
+            return gs;
+        };
+
         const SUITS = ['♠','♥','♦','♣'];
         const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
         const SUIT_COLOR = {'♠':'#e2e8f0','♥':'#f87171','♦':'#f87171','♣':'#e2e8f0'};
