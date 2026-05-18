@@ -2848,15 +2848,23 @@
             document.getElementById('pokerMsg').textContent = gs.msg || '';
 
             // Actions — only my turn
-            const isMyTurn = cur && cur.name === pokerMyName && !cur.folded;
-            const callAmt = gs.currentBet - (cur?.bet||0);
+            // Fix: trim & case-insensitive name match to avoid mismatch bugs
+            const myNameNorm = (pokerMyName || '').trim().toLowerCase();
+            const curNameNorm = (cur?.name || '').trim().toLowerCase();
+            const isMyTurn = cur && curNameNorm === myNameNorm && !cur.folded;
+            const callAmt = Math.max(0, gs.currentBet - (cur?.bet||0));
             const canCheck = callAmt <= 0;
             document.getElementById('pokerCheckBtn').style.display = canCheck ? '' : 'none';
             const callBtn = document.getElementById('pokerCallBtn');
             callBtn.style.display = !canCheck ? '' : 'none';
             callBtn.textContent = `Call $${callAmt}`;
-            document.getElementById('pokerActions').style.opacity = isMyTurn ? '1' : '0.3';
-            document.getElementById('pokerActions').style.pointerEvents = isMyTurn ? '' : 'none';
+            const actionsDiv = document.getElementById('pokerActions');
+            actionsDiv.style.opacity = isMyTurn ? '1' : '0.3';
+            actionsDiv.style.pointerEvents = isMyTurn ? 'auto' : 'none';
+            // Also explicitly enable/disable each button so there's no CSS override issue
+            actionsDiv.querySelectorAll('button, input').forEach(el => {
+                el.disabled = !isMyTurn;
+            });
 
             if (gs.finished) {
                 setTimeout(async () => {
@@ -2901,7 +2909,8 @@
                 if (!snap.exists()) return;
                 const gs = snap.data().gameState;
                 const cur = gs.players[gs.turnIdx];
-                if (!cur || cur.name !== pokerMyName || cur.folded) return;
+                // Use normalized comparison to avoid name mismatch bugs
+                if (!cur || cur.name.trim().toLowerCase() !== (pokerMyName||'').trim().toLowerCase() || cur.folded) return;
 
                 const callAmt = Math.max(0, gs.currentBet - cur.bet);
                 if (action === 'fold') {
@@ -3190,8 +3199,12 @@
             raiseBtn.textContent = `Raise $${Math.min(20, cur?.chips || 0)}`;
 
             const myTurn = cur && !cur.isAI && !cur.folded;
-            document.getElementById('pokerActions').style.opacity = myTurn ? '1' : '0.3';
-            document.getElementById('pokerActions').style.pointerEvents = myTurn ? '' : 'none';
+            const actionsDiv2 = document.getElementById('pokerActions');
+            actionsDiv2.style.opacity = myTurn ? '1' : '0.3';
+            actionsDiv2.style.pointerEvents = myTurn ? 'auto' : 'none';
+            actionsDiv2.querySelectorAll('button, input').forEach(el => {
+                el.disabled = !myTurn;
+            });
         };
 
         window.pokerAction = (action) => {
