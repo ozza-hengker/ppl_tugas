@@ -652,7 +652,7 @@
                         <h3 class="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2">
                             <i class="fa-solid fa-table-list text-secondary"></i> Detail Semua Transaksi
                         </h3>
-                        <div class="flex gap-2 flex-wrap">
+                        <div class="flex gap-2 flex-wrap items-center">
                             <select id="rekapFilterStatus" onchange="window.renderRekapitulasi()"
                                 class="bg-white/6 border border-white/10 text-gray-300 text-xs font-semibold px-3 py-1.5 rounded-xl outline-none focus:border-secondary transition">
                                 <option value="all">Semua Status</option>
@@ -663,13 +663,18 @@
                             </select>
                             <input id="rekapSearchInput" oninput="window.renderRekapitulasi()" type="text" placeholder="Cari nama / NIM / alat..."
                                 class="bg-white/6 border border-white/10 text-white text-xs px-3 py-1.5 rounded-xl outline-none focus:border-secondary placeholder-gray-600 w-48 transition">
+                            <button id="btnHapusTerpilih" onclick="window.deleteRekapSelected()"
+                                class="hidden items-center gap-1.5 bg-red-500/15 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                                <i class="fa-solid fa-trash"></i> Hapus Terpilih (<span id="rekapSelectedCount">0</span>)
+                            </button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-white text-sm">
                             <thead class="border-b border-white/5 text-gray-500 uppercase text-xs">
                                 <tr>
-                                    <th class="px-5 py-4 tracking-wider">No</th>
+                                    <th class="px-4 py-4"><input type="checkbox" id="rekapCheckAll" onchange="window.rekapToggleAll(this)" class="accent-secondary w-3.5 h-3.5 cursor-pointer"></th>
+                                    <th class="px-3 py-4 tracking-wider">No</th>
                                     <th class="px-5 py-4 tracking-wider">Tiket</th>
                                     <th class="px-5 py-4 tracking-wider">Peminjam</th>
                                     <th class="px-5 py-4 tracking-wider">Alat</th>
@@ -677,12 +682,15 @@
                                     <th class="px-5 py-4 tracking-wider">Sesi</th>
                                     <th class="px-5 py-4 text-center tracking-wider">Status</th>
                                     <th class="px-5 py-4 tracking-wider">Tgl Kembali</th>
+                                    <th class="px-5 py-4 text-center tracking-wider">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="rekapTableBody" class="divide-y divide-white/5"></tbody>
                         </table>
                     </div>
-                    <div class="px-6 py-3 border-t border-white/5 text-xs text-gray-500" id="rekapRowCount">Menampilkan 0 data</div>
+                    <div class="px-6 py-3 border-t border-white/5 text-xs text-gray-500 flex items-center justify-between" id="rekapRowCount">
+                        <span id="rekapRowCountText">Menampilkan 0 data</span>
+                    </div>
                 </div>
             </div>
         </main>
@@ -2255,9 +2263,14 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
+            // Reset check-all
+            const checkAll = document.getElementById('rekapCheckAll');
+            if (checkAll) checkAll.checked = false;
+            window.updateRekapDeleteBtn();
+
             if (data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-gray-500 py-8 italic text-sm">Tidak ada data.</td></tr>`;
-                document.getElementById('rekapRowCount').innerText = 'Menampilkan 0 data';
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center text-gray-500 py-8 italic text-sm">Tidak ada data.</td></tr>`;
+                document.getElementById('rekapRowCountText').innerText = 'Menampilkan 0 data';
                 return;
             }
 
@@ -2265,7 +2278,7 @@
                 'checked-out': { label: 'Dipinjam', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
                 'returned':    { label: 'Dikembalikan', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
                 'rejected':    { label: 'Ditolak', cls: 'bg-red-500/15 text-red-400 border-red-500/30' },
-                'pending':     { label: 'Pending', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
+                'pending':     { label: 'Pending', cls: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30' },
             };
 
             data.forEach((b, i) => {
@@ -2273,9 +2286,11 @@
                 const createdDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'}) : '-';
                 const returnDate = b.returnedAt ? new Date(b.returnedAt).toLocaleDateString('id-ID', {day:'2-digit',month:'short',year:'numeric'}) : '—';
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-white/3 transition';
+                tr.className = 'hover:bg-white/3 transition rekap-row';
+                tr.dataset.id = b.id;
                 tr.innerHTML = `
-                    <td class="px-5 py-3 text-gray-500 text-xs">${i+1}</td>
+                    <td class="px-4 py-3"><input type="checkbox" class="rekap-cb accent-secondary w-3.5 h-3.5 cursor-pointer" data-id="${b.id}" onchange="window.updateRekapDeleteBtn()"></td>
+                    <td class="px-3 py-3 text-gray-500 text-xs">${i+1}</td>
                     <td class="px-5 py-3 font-mono text-xs" style="color:var(--accent);">${b.ticketNum || '-'}</td>
                     <td class="px-5 py-3">
                         <p class="font-semibold text-white text-xs">${b.studentNama || b.studentId}</p>
@@ -2286,10 +2301,62 @@
                     <td class="px-5 py-3 text-gray-400 text-xs">${b.sesi || '-'}</td>
                     <td class="px-5 py-3 text-center"><span class="text-xs font-bold px-2 py-0.5 rounded-full border ${s.cls}">${s.label}</span></td>
                     <td class="px-5 py-3 text-gray-400 text-xs">${returnDate}</td>
+                    <td class="px-5 py-3 text-center">
+                        <button onclick="window.deleteRekapEntry('${b.id}', '${(b.ticketNum||'').replace(/'/g,"\\'")}', '${b.toolId||''}')"
+                            class="bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-red-500/30 transition whitespace-nowrap">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
-            document.getElementById('rekapRowCount').innerText = `Menampilkan ${data.length} data`;
+            document.getElementById('rekapRowCountText').innerText = `Menampilkan ${data.length} data`;
+        };
+
+        window.updateRekapDeleteBtn = () => {
+            const checked = document.querySelectorAll('.rekap-cb:checked').length;
+            const btn = document.getElementById('btnHapusTerpilih');
+            const countEl = document.getElementById('rekapSelectedCount');
+            if (!btn) return;
+            if (checked > 0) {
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            } else {
+                btn.classList.add('hidden');
+                btn.classList.remove('flex');
+            }
+            if (countEl) countEl.innerText = checked;
+        };
+
+        window.rekapToggleAll = (masterCb) => {
+            document.querySelectorAll('.rekap-cb').forEach(cb => cb.checked = masterCb.checked);
+            window.updateRekapDeleteBtn();
+        };
+
+        window.deleteRekapEntry = async (bookingId, ticketNum, toolId) => {
+            if (!confirm(`Hapus data tiket ${ticketNum} secara permanen?\nJika statusnya "Dipinjam", stok alat TIDAK akan otomatis dikembalikan.`)) return;
+            try {
+                await deleteDoc(doc(db, bookingsPath, bookingId));
+                showToast(`Data ${ticketNum} berhasil dihapus.`);
+                window.renderRekapitulasi();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal menghapus data.', 'error');
+            }
+        };
+
+        window.deleteRekapSelected = async () => {
+            const checked = [...document.querySelectorAll('.rekap-cb:checked')];
+            if (!checked.length) return;
+            if (!confirm(`Hapus ${checked.length} data yang dipilih secara permanen?\nData yang statusnya "Dipinjam" tidak akan mengembalikan stok otomatis.`)) return;
+            try {
+                await Promise.all(checked.map(cb => deleteDoc(doc(db, bookingsPath, cb.dataset.id))));
+                showToast(`${checked.length} data berhasil dihapus.`);
+                window.renderRekapitulasi();
+            } catch (err) {
+                console.error(err);
+                showToast('Sebagian data gagal dihapus.', 'error');
+            }
         };
 
         window.downloadRekapPDF = () => {
