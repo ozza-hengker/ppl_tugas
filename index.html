@@ -414,6 +414,53 @@
         });
     </script>
 
+    <!-- ======================== SCREEN OTP ADMIN ======================== -->
+    <div id="otpScreen" class="hidden flex-1 flex items-center justify-center fade-in relative z-10 min-h-screen px-4 py-12">
+        <div class="login-card rounded-3xl w-full max-w-md overflow-hidden fade-up">
+            <div class="h-1.5 w-full" style="background: linear-gradient(90deg, #dc2626, #ef4444, #f97316, #eab308);"></div>
+            <div class="p-8 sm:p-10">
+                <div class="text-center mb-7">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg" style="background:linear-gradient(135deg,#dc2626,#ef4444);">
+                        <i class="fa-solid fa-shield-halved text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-gray-800" style="font-family:'Sora',sans-serif;">Verifikasi OTP</h2>
+                    <p class="text-sm text-gray-500 mt-2">Masukkan kode 6-digit yang dikirim ke email admin</p>
+                    <div id="otpEmailDisplay" class="mt-2 text-xs font-bold text-primary bg-blue-50 border border-blue-100 px-3 py-1.5 rounded-xl inline-block"></div>
+                </div>
+
+                <!-- OTP Input boxes -->
+                <div class="flex gap-3 justify-center mb-2" id="otpBoxes">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                    <input type="text" maxlength="1" class="otp-box w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-gray-200 outline-none focus:border-primary transition" inputmode="numeric" />
+                </div>
+
+                <!-- Timer & resend -->
+                <div class="text-center mb-6 mt-3">
+                    <p id="otpTimerText" class="text-xs text-gray-500">Kode berlaku selama <span id="otpCountdown" class="font-bold text-primary">5:00</span></p>
+                    <button id="btnResendOtp" onclick="window.resendOtp()" class="hidden text-xs text-primary font-bold hover:underline mt-1">Kirim ulang kode OTP</button>
+                </div>
+
+                <button onclick="window.verifyOtp()" id="btnVerifyOtp"
+                    class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2 mb-4">
+                    <i class="fa-solid fa-shield-check"></i> Verifikasi & Masuk
+                </button>
+                <button onclick="window.cancelOtp()" class="w-full text-gray-500 text-sm font-semibold hover:text-gray-700 transition">
+                    ← Kembali ke Login
+                </button>
+
+                <!-- Info OTP untuk demo -->
+                <div id="otpDemoInfo" class="mt-5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800">
+                    <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> Mode Demo</p>
+                    <p>Karena tidak ada backend email, OTP ditampilkan di sini untuk testing: <span id="otpDemoCode" class="font-mono font-bold text-primary ml-1"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ======================== SCREEN 2: DASHBOARD MAHASISWA ======================== -->
     <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in relative z-10">
         <nav class="navbar-student text-white z-20 sticky top-0">
@@ -518,6 +565,10 @@
                         <button onclick="window.switchAdminView('rekapitulasi')" id="tabRekapitulasi"
                             class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
                             <i class="fa-solid fa-chart-bar text-xs"></i> Rekapitulasi
+                        </button>
+                        <button onclick="window.switchAdminView('emailmanager')" id="tabEmailManager"
+                            class="tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-envelope-circle-check text-xs"></i> Kelola Email
                         </button>
                     </div>
 
@@ -815,6 +866,51 @@
                     </div>
                 </div>
             </div>
+
+            <!-- SECTION E: KELOLA EMAIL ADMIN -->
+            <div id="adminEmailManagerSection" class="hidden w-full max-w-3xl">
+                <div class="mb-6 mt-2">
+                    <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">Kelola Email Admin</h2>
+                    <p class="text-gray-500 mt-1 text-sm">Daftar email yang diizinkan untuk login sebagai Admin. Hanya email terdaftar yang bisa melewati verifikasi.</p>
+                </div>
+
+                <!-- Tambah email baru -->
+                <div class="admin-card rounded-2xl p-5 mb-5">
+                    <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-secondary"></i> Tambah Email Admin Baru
+                    </h3>
+                    <div class="flex gap-3 flex-wrap">
+                        <div class="relative flex-1 min-w-[220px]">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="email" id="newAdminEmailInput" placeholder="contoh@email.com"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-secondary transition placeholder-gray-600" />
+                        </div>
+                        <div class="relative flex-1 min-w-[180px]">
+                            <i class="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
+                            <input type="text" id="newAdminNamaInput" placeholder="Nama pemilik email"
+                                class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-secondary transition placeholder-gray-600" />
+                        </div>
+                        <button onclick="window.addAdminEmail()"
+                            class="bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/30 px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Tambahkan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Daftar email -->
+                <div class="admin-card rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-white/8 flex items-center justify-between">
+                        <h3 class="text-white font-bold text-sm uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-list text-secondary"></i> Email Terdaftar
+                            <span id="adminEmailCountBadge" class="bg-secondary/20 text-secondary text-xs px-2 py-0.5 rounded-full border border-secondary/30 font-bold ml-1">0</span>
+                        </h3>
+                    </div>
+                    <div id="adminEmailList" class="divide-y divide-white/5 min-h-[80px]">
+                        <p class="text-gray-600 text-sm italic text-center py-6">Memuat data...</p>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -1309,14 +1405,20 @@
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        let app, auth, db, toolsPath, bookingsPath;
+        let app, auth, db, toolsPath, bookingsPath, adminEmailsPath;
         let currentUser = null;
         let selectedToolForBooking = null;
         let selectedBookingForCheckout = null;
         let allTools = [];
         let allBookings = [];
         let html5QrcodeScanner = null;
-        let isSubmitting = false; // Flag untuk race condition
+        let isSubmitting = false;
+
+        // OTP state
+        let pendingAdminEmail = '';
+        let otpCode = '';
+        let otpExpiry = null;
+        let otpTimerInterval = null;
 
         // UI Helpers
         const showToast = (message, type = 'success') => {
@@ -1331,7 +1433,7 @@
         };
 
         const showScreen = (screenId) => {
-            ['loginScreen', 'dashboardScreen', 'adminDashboardScreen'].forEach(id => {
+            ['loginScreen', 'otpScreen', 'dashboardScreen', 'adminDashboardScreen'].forEach(id => {
                 document.getElementById(id).classList.add('hidden');
             });
             document.getElementById(screenId).classList.remove('hidden');
@@ -1347,26 +1449,26 @@
         };
 
         window.switchAdminView = (view) => {
+            if (currentUser?.role !== 'admin') {
+                showToast('Akses Ditolak! Menu ini hanya untuk pengelola lab.', 'error');
+                return;
+            }
             const scannerSec = document.getElementById('adminScannerSection');
             const invSec = document.getElementById('adminInventorySection');
             const returnsSec = document.getElementById('adminReturnsSection');
             const rekapSec = document.getElementById('adminRekapitulasiSection');
+            const emailSec = document.getElementById('adminEmailManagerSection');
             const tabScan = document.getElementById('tabScanner');
             const tabInv = document.getElementById('tabInventory');
             const tabRet = document.getElementById('tabReturns');
             const tabRekap = document.getElementById('tabRekapitulasi');
+            const tabEmail = document.getElementById('tabEmailManager');
 
-            scannerSec.classList.add('hidden');
-            invSec.classList.add('hidden');
-            returnsSec.classList.add('hidden');
-            rekapSec.classList.add('hidden');
+            [scannerSec, invSec, returnsSec, rekapSec, emailSec].forEach(s => s?.classList.add('hidden'));
 
             const activeClass = 'tab-active px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
             const inactiveClass = 'tab-inactive px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-1.5';
-            tabScan.className = inactiveClass;
-            tabInv.className = inactiveClass;
-            tabRet.className = inactiveClass;
-            tabRekap.className = inactiveClass;
+            [tabScan, tabInv, tabRet, tabRekap, tabEmail].forEach(t => { if(t) t.className = inactiveClass; });
 
             if (view === 'scanner') {
                 scannerSec.classList.remove('hidden');
@@ -1389,6 +1491,11 @@
                 stopCamera();
                 populatePeriodYears();
                 window.renderRekapitulasi();
+            } else if (view === 'emailmanager') {
+                emailSec.classList.remove('hidden');
+                tabEmail.className = activeClass;
+                stopCamera();
+                renderAdminEmailList();
             }
         };
 
@@ -1445,6 +1552,7 @@
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'cares-local-app';
                 toolsPath = `artifacts/${appId}/public/data/tools`;
                 bookingsPath = `artifacts/${appId}/public/data/bookings`;
+                adminEmailsPath = `artifacts/${appId}/public/data/adminEmails`;
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
                 } else {
@@ -1470,6 +1578,7 @@
         };
 
         const seedDataIfEmpty = async () => {
+            // Seed tools
             const toolsCol = collection(db, toolsPath);
             const snapshot = await getDocs(toolsCol);
             if (snapshot.empty) {
@@ -1481,6 +1590,16 @@
                     { name: "Motor Servo SG90", category: "Aktuator", stock: 8, icon: "fa-gear" }
                 ];
                 for (const tool of initialTools) { await addDoc(toolsCol, tool); }
+            }
+            // Seed default admin email jika belum ada
+            const emailsCol = collection(db, adminEmailsPath);
+            const emailSnap = await getDocs(emailsCol);
+            if (emailSnap.empty) {
+                await setDoc(doc(db, adminEmailsPath, 'banjarb97'), {
+                    email: 'banjarb97@gmail.com',
+                    nama: 'Admin Utama',
+                    addedAt: new Date().toISOString()
+                });
             }
         };
 
