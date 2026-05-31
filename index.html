@@ -308,7 +308,7 @@
                             <i class="fa-regular fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
                             <input type="text" id="nimInput" required
                                 class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
-                                placeholder="Masukkan NIM Anda">
+                                placeholder="Masukkan NIM / 'admin'">
                         </div>
                     </div>
                     <div>
@@ -319,6 +319,23 @@
                                 class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
                                 placeholder="••••••••">
                         </div>
+                    </div>
+                    <!-- Field email — hanya muncul saat NIM diisi 'admin' -->
+                    <div id="adminEmailWrap" class="hidden">
+                        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
+                            <i class="fa-solid fa-shield-halved text-primary mr-1"></i>
+                            Verifikasi Email Admin <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="email" id="adminEmailInput"
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-xl outline-none font-medium"
+                                placeholder="Email terdaftar admin">
+                        </div>
+                        <p class="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            Diperlukan verifikasi email untuk akses Admin Panel
+                        </p>
                     </div>
                     <div class="pt-2">
                         <button type="submit" id="btnLogin" class="btn-primary w-full text-white font-bold py-3.5 px-4 rounded-xl flex justify-center items-center gap-2">
@@ -381,6 +398,22 @@
         </div>
     </div>
 
+    <script>
+        // Tampilkan/sembunyikan field email admin saat NIM diketik
+        document.addEventListener('DOMContentLoaded', () => {
+            const nimInput = document.getElementById('nimInput');
+            const emailWrap = document.getElementById('adminEmailWrap');
+            const emailInput = document.getElementById('adminEmailInput');
+            if (nimInput && emailWrap) {
+                nimInput.addEventListener('input', () => {
+                    const isAdmin = nimInput.value.trim().toLowerCase() === 'admin';
+                    emailWrap.classList.toggle('hidden', !isAdmin);
+                    if (emailInput) emailInput.required = isAdmin;
+                });
+            }
+        });
+    </script>
+
     <!-- ======================== SCREEN 2: DASHBOARD MAHASISWA ======================== -->
     <div id="dashboardScreen" class="hidden flex-1 flex flex-col fade-in relative z-10">
         <nav class="navbar-student text-white z-20 sticky top-0">
@@ -438,6 +471,18 @@
             <p id="catalogSearchInfo" class="hidden text-xs text-gray-500 mb-4 -mt-2"></p>
             <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
             <p id="catalogEmpty" class="hidden text-center text-gray-400 py-12 text-sm italic">Tidak ada komponen yang cocok dengan pencarian Anda.</p>
+
+            <!-- PESANAN AKTIF MAHASISWA -->
+            <div id="myBookingsSection" class="mt-10 hidden">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2" style="font-family:'Sora',sans-serif;">
+                        <i class="fa-solid fa-ticket text-primary"></i> Pesanan Aktif Saya
+                        <span id="myBookingsBadge" class="bg-primary/10 text-primary text-xs px-2 py-0.5 rounded-full border border-primary/20 font-bold"></span>
+                    </h3>
+                    <span class="text-xs text-gray-400">Pesanan berstatus <span class="font-semibold text-yellow-600">Menunggu</span> dapat dibatalkan</span>
+                </div>
+                <div id="myBookingsList" class="flex flex-col gap-3"></div>
+            </div>
         </main>
     </div>
 
@@ -917,6 +962,39 @@
                 <button onclick="window.closeModal('ticketModal')" class="btn-primary w-full text-white font-bold py-3 px-4 rounded-xl text-sm">
                     Selesai & Kembali
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BATALKAN PESANAN MAHASISWA -->
+    <div id="cancelBookingModal" class="hidden fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50 fade-in">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+            <div class="p-5 text-white flex justify-between items-center" style="background: linear-gradient(135deg, #dc2626, #ef4444);">
+                <h3 class="font-bold text-lg flex items-center gap-2" style="font-family:'Sora',sans-serif;">
+                    <i class="fa-solid fa-ban"></i> Batalkan Pesanan
+                </h3>
+                <button onclick="window.closeModal('cancelBookingModal')" class="bg-white/15 hover:bg-white/25 w-9 h-9 rounded-full flex items-center justify-center transition">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="cancelBookingInfo" class="bg-red-50 border border-red-100 rounded-2xl p-4 mb-5 text-sm text-gray-700"></div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Alasan Pembatalan <span class="text-red-500">*</span></label>
+                <div class="flex flex-col gap-2 mb-3">
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="cancelReason" value="Salah pilih alat" class="accent-red-500"> Salah pilih alat</label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="cancelReason" value="Alat tidak jadi diperlukan" class="accent-red-500"> Alat tidak jadi diperlukan</label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="cancelReason" value="Tanggal atau sesi salah" class="accent-red-500"> Tanggal / sesi salah</label>
+                    <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer"><input type="radio" name="cancelReason" value="Lainnya" class="accent-red-500"> Lainnya</label>
+                </div>
+                <textarea id="cancelReasonText" rows="3" placeholder="Tulis alasan pembatalan lebih detail (wajib diisi)..."
+                    class="w-full p-3 border border-gray-200 rounded-xl text-sm text-gray-700 outline-none focus:border-red-400 resize-none transition mb-5"></textarea>
+                <div class="flex gap-3">
+                    <button onclick="window.closeModal('cancelBookingModal')" class="flex-1 border border-gray-200 text-gray-600 font-bold py-3 px-4 rounded-xl text-sm hover:bg-gray-50 transition">Kembali</button>
+                    <button onclick="window.confirmCancelBooking()" id="btnConfirmCancel"
+                        class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl text-sm transition flex justify-center items-center gap-2">
+                        <i class="fa-solid fa-ban"></i> Konfirmasi Batalkan
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1423,6 +1501,7 @@
                 }
                 if (currentUser?.role === 'student') {
                     checkReturnReminders();
+                    renderMyBookings();
                 }
             }, (error) => console.error(error));
         };
@@ -1765,14 +1844,39 @@
                     return;
                 }
 
-                // Cek admin
+                // Cek admin — butuh username + password + email yang terdaftar
                 if (nim === 'admin' && pass === '123') {
-                    currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-' };
+                    // Daftar email yang diizinkan sebagai admin
+                    const ALLOWED_ADMIN_EMAILS = [
+                        'banjarb97@gmail.com',
+                        // tambahkan email admin lain di sini jika perlu
+                    ];
+                    const emailInput = document.getElementById('adminEmailInput');
+                    const enteredEmail = (emailInput?.value || '').trim().toLowerCase();
+
+                    if (!enteredEmail) {
+                        showToast('Verifikasi email wajib diisi untuk login Admin!', 'error');
+                        return;
+                    }
+                    if (!ALLOWED_ADMIN_EMAILS.includes(enteredEmail)) {
+                        showToast('Email tidak terdaftar sebagai Admin yang sah. Akses ditolak!', 'error');
+                        // Log percobaan akses ilegal
+                        console.warn(`[SECURITY] Percobaan login admin dengan email tidak sah: ${enteredEmail}`);
+                        return;
+                    }
+
+                    currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-', email: enteredEmail };
                     document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
                     showScreen('adminDashboardScreen');
                     renderAdminPendingTickets();
                     renderAdminInventory();
                     showToast('Login berhasil sebagai Admin');
+                    return;
+                }
+
+                // Jika username admin tapi password salah — tetap tolak tanpa info detail
+                if (nim === 'admin') {
+                    showToast('Kredensial admin tidak valid!', 'error');
                     return;
                 }
 
@@ -1803,6 +1907,7 @@
                 document.getElementById('userNameDisplay').innerText = `${userData.nama} (${nim})`;
                 showScreen('dashboardScreen');
                 renderCatalog();
+                renderMyBookings();
                 checkReturnReminders();
                 startReminderScheduler();
                 showToast(`Selamat datang, ${userData.nama}!`);
@@ -2221,7 +2326,7 @@
             tbody.innerHTML = '';
 
             let bookings = [...allBookings]
-                .filter(b => ['checked-out','returned','rejected','pending'].includes(b.status))
+                .filter(b => ['checked-out','returned','rejected','pending','cancelled'].includes(b.status))
                 .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
 
             if (filter !== 'all') {
@@ -2241,6 +2346,7 @@
                     'checked-out': { label: 'Dipinjam', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
                     'returned': { label: 'Dikembalikan', cls: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
                     'rejected': { label: 'Ditolak', cls: 'bg-red-500/15 text-red-400 border-red-500/30' },
+                    'cancelled': { label: 'Dibatalkan', cls: 'bg-orange-500/15 text-orange-400 border-orange-500/30' },
                 };
                 const s = statusMap[booking.status] || { label: booking.status, cls: 'bg-gray-500/15 text-gray-400 border-gray-500/30' };
                 const canReturn = booking.status === 'checked-out';
@@ -2742,6 +2848,150 @@
                 else canvas.remove();
             };
             animate();
+        };
+
+        // =============================================
+        // 🎫 PESANAN AKTIF MAHASISWA & PEMBATALAN
+        // =============================================
+        let bookingToCancel = null;
+
+        const renderMyBookings = () => {
+            if (!currentUser || currentUser.role !== 'student') return;
+            const section = document.getElementById('myBookingsSection');
+            const list = document.getElementById('myBookingsList');
+            const badge = document.getElementById('myBookingsBadge');
+            if (!section || !list) return;
+
+            // Tampilkan semua booking milik mahasiswa ini (pending & checked-out)
+            const myBookings = allBookings
+                .filter(b => b.studentId === currentUser.id && ['pending', 'checked-out'].includes(b.status))
+                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            if (myBookings.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            section.classList.remove('hidden');
+            if (badge) badge.innerText = myBookings.length;
+            list.innerHTML = '';
+
+            myBookings.forEach(b => {
+                const isPending = b.status === 'pending';
+                const item = document.createElement('div');
+                item.className = 'bg-white border rounded-2xl p-4 flex items-center justify-between gap-4 shadow-sm';
+                item.style.borderColor = isPending ? 'rgba(234,179,8,0.3)' : 'rgba(23,107,158,0.2)';
+                item.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span class="font-mono font-bold text-sm text-primary">${b.ticketNum}</span>
+                            <span class="text-xs font-bold px-2 py-0.5 rounded-full border ${isPending
+                                ? 'bg-yellow-50 text-yellow-700 border-yellow-300'
+                                : 'bg-blue-50 text-blue-700 border-blue-200'}">
+                                ${isPending ? '⏳ Menunggu Verifikasi' : '✅ Sedang Dipinjam'}
+                            </span>
+                        </div>
+                        <p class="font-semibold text-gray-800 text-sm">${b.toolName}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            <i class="fa-regular fa-calendar mr-1"></i>${b.tanggal || '-'}
+                            &nbsp;|&nbsp;
+                            <i class="fa-regular fa-clock mr-1"></i>${b.sesi || '-'}
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        ${isPending ? `
+                        <button onclick="window.openCancelModal('${b.id}')"
+                            class="bg-red-50 hover:bg-red-500 text-red-500 hover:text-white border border-red-200 hover:border-red-500 text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-ban"></i> Batalkan
+                        </button>` : `
+                        <span class="text-xs text-gray-400 italic">Tidak bisa dibatalkan</span>`}
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        };
+
+        window.openCancelModal = (bookingId) => {
+            const booking = allBookings.find(b => b.id === bookingId);
+            if (!booking || booking.status !== 'pending') {
+                showToast('Pesanan ini tidak bisa dibatalkan.', 'error');
+                return;
+            }
+            bookingToCancel = booking;
+            document.getElementById('cancelBookingInfo').innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-red-100 text-red-500 flex-shrink-0">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-gray-800">${booking.toolName}</p>
+                        <p class="text-xs text-gray-500 font-mono">${booking.ticketNum} &nbsp;|&nbsp; ${booking.tanggal || '-'} ${booking.sesi ? '| ' + booking.sesi : ''}</p>
+                    </div>
+                </div>`;
+            // Reset form
+            document.querySelectorAll('input[name="cancelReason"]').forEach(r => r.checked = false);
+            document.getElementById('cancelReasonText').value = '';
+            document.getElementById('cancelBookingModal').classList.remove('hidden');
+
+            // Saat pilih radio, auto-isi textarea sebagai awal
+            document.querySelectorAll('input[name="cancelReason"]').forEach(r => {
+                r.addEventListener('change', () => {
+                    const txt = document.getElementById('cancelReasonText');
+                    if (!txt.value || txt.value === r.previousValue) {
+                        txt.value = r.value !== 'Lainnya' ? r.value : '';
+                    }
+                    r.previousValue = r.value;
+                });
+            });
+        };
+
+        window.confirmCancelBooking = async () => {
+            if (!bookingToCancel || isSubmitting) return;
+
+            const selectedRadio = document.querySelector('input[name="cancelReason"]:checked');
+            const reasonText = document.getElementById('cancelReasonText').value.trim();
+
+            if (!reasonText) {
+                showToast('Wajib mengisi alasan pembatalan!', 'error');
+                document.getElementById('cancelReasonText').focus();
+                return;
+            }
+
+            const fullReason = selectedRadio
+                ? `[${selectedRadio.value}] ${reasonText}`
+                : reasonText;
+
+            const btn = document.getElementById('btnConfirmCancel');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membatalkan...';
+            btn.disabled = true;
+            isSubmitting = true;
+
+            try {
+                // Double-check dari Firestore — hanya bisa cancel jika masih pending
+                const bookingSnap = await getDoc(doc(db, bookingsPath, bookingToCancel.id));
+                if (!bookingSnap.exists() || bookingSnap.data().status !== 'pending') {
+                    showToast('Pesanan sudah diproses, tidak bisa dibatalkan!', 'error');
+                    window.closeModal('cancelBookingModal');
+                    return;
+                }
+
+                await updateDoc(doc(db, bookingsPath, bookingToCancel.id), {
+                    status: 'cancelled',
+                    cancelledAt: new Date().toISOString(),
+                    cancelledBy: currentUser.id,
+                    cancelReason: fullReason
+                });
+
+                window.closeModal('cancelBookingModal');
+                showToast(`Pesanan ${bookingToCancel.ticketNum} berhasil dibatalkan.`, 'error');
+                bookingToCancel = null;
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal membatalkan pesanan.', 'error');
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-ban"></i> Konfirmasi Batalkan';
+                btn.disabled = false;
+                isSubmitting = false;
+            }
         };
 
         // =============================================
