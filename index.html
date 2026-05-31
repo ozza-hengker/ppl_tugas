@@ -1963,13 +1963,8 @@
                     return;
                 }
 
-                // Cek admin — butuh username + password + email yang terdaftar
+                // Cek admin — butuh username + password + email yang terdaftar di Firebase
                 if (nim === 'admin' && pass === '123') {
-                    // Daftar email yang diizinkan sebagai admin
-                    const ALLOWED_ADMIN_EMAILS = [
-                        'banjarb97@gmail.com',
-                        // tambahkan email admin lain di sini jika perlu
-                    ];
                     const emailInput = document.getElementById('adminEmailInput');
                     const enteredEmail = (emailInput?.value || '').trim().toLowerCase();
 
@@ -1977,19 +1972,35 @@
                         showToast('Verifikasi email wajib diisi untuk login Admin!', 'error');
                         return;
                     }
-                    if (!ALLOWED_ADMIN_EMAILS.includes(enteredEmail)) {
-                        showToast('Email tidak terdaftar sebagai Admin yang sah. Akses ditolak!', 'error');
-                        // Log percobaan akses ilegal
-                        console.warn(`[SECURITY] Percobaan login admin dengan email tidak sah: ${enteredEmail}`);
-                        return;
-                    }
 
-                    currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-', email: enteredEmail };
-                    document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
-                    showScreen('adminDashboardScreen');
-                    renderAdminPendingTickets();
-                    renderAdminInventory();
-                    showToast('Login berhasil sebagai Admin');
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memverifikasi...';
+                    btn.disabled = true;
+
+                    try {
+                        // Cek email dari Firebase Firestore
+                        const emailsCol = collection(db, adminEmailsPath);
+                        const emailSnap = await getDocs(emailsCol);
+                        const allowedEmails = emailSnap.docs.map(d => (d.data().email || '').trim().toLowerCase());
+
+                        if (!allowedEmails.includes(enteredEmail)) {
+                            showToast('Email tidak terdaftar sebagai Admin yang sah. Akses ditolak!', 'error');
+                            console.warn(`[SECURITY] Percobaan login admin dengan email tidak sah: ${enteredEmail}`);
+                            return;
+                        }
+
+                        currentUser = { role: 'admin', id: 'Admin Lab RES', nama: 'Admin Lab RES', telepon: '-', email: enteredEmail };
+                        document.getElementById('adminUserNameDisplay').innerText = currentUser.id;
+                        showScreen('adminDashboardScreen');
+                        renderAdminPendingTickets();
+                        renderAdminInventory();
+                        showToast('Login berhasil sebagai Admin');
+                    } catch (err) {
+                        console.error(err);
+                        showToast('Gagal memverifikasi email admin: ' + err.message, 'error');
+                    } finally {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
                     return;
                 }
 
@@ -4446,6 +4457,95 @@
             pokerPlayers = [];
             pokerVsAI = false;
             pokerInit();
+        };
+
+        // ============================================
+        // Admin Email Manager Functions
+        // ============================================
+
+        const renderAdminEmailList = async () => {
+            const listEl = document.getElementById('adminEmailList');
+            const badge = document.getElementById('adminEmailCountBadge');
+            if (!listEl) return;
+            listEl.innerHTML = '<p class="text-gray-600 text-sm italic text-center py-6"><i class="fa-solid fa-spinner fa-spin mr-2"></i>Memuat data...</p>';
+            try {
+                const emailsCol = collection(db, adminEmailsPath);
+                const snap = await getDocs(emailsCol);
+                const emails = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (badge) badge.textContent = emails.length;
+                if (emails.length === 0) {
+                    listEl.innerHTML = '<p class="text-gray-600 text-sm italic text-center py-8">Belum ada email admin terdaftar.</p>';
+                    return;
+                }
+                listEl.innerHTML = emails.map(e => `
+                    <div class="flex items-center justify-between px-6 py-4 gap-4">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-9 h-9 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary flex-shrink-0">
+                                <i class="fa-solid fa-user-shield text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-white font-semibold text-sm truncate">${e.nama || '-'}</p>
+                                <p class="text-gray-400 text-xs truncate">${e.email || '-'}</p>
+                            </div>
+                        </div>
+                        <button onclick="window.deleteAdminEmail('${e.id}', '${e.email}')"
+                            class="flex-shrink-0 text-red-400 hover:text-white hover:bg-red-500 border border-red-500/30 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-trash-can"></i> Hapus
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = `<p class="text-red-400 text-sm text-center py-6">Gagal memuat data: ${err.message}</p>`;
+            }
+        };
+
+        window.addAdminEmail = async () => {
+            const emailInput = document.getElementById('newAdminEmailInput');
+            const namaInput = document.getElementById('newAdminNamaInput');
+            const email = (emailInput?.value || '').trim().toLowerCase();
+            const nama = (namaInput?.value || '').trim();
+
+            if (!email) { showToast('Email tidak boleh kosong!', 'error'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Format email tidak valid!', 'error'); return; }
+            if (!nama) { showToast('Nama pemilik email tidak boleh kosong!', 'error'); return; }
+
+            try {
+                // Cek duplikat
+                const emailsCol = collection(db, adminEmailsPath);
+                const snap = await getDocs(emailsCol);
+                const existing = snap.docs.map(d => (d.data().email || '').toLowerCase());
+                if (existing.includes(email)) {
+                    showToast('Email ini sudah terdaftar!', 'error');
+                    return;
+                }
+                // Buat doc ID dari email (ganti karakter invalid)
+                const docId = email.replace(/[@.]/g, '_');
+                await setDoc(doc(db, adminEmailsPath, docId), {
+                    email,
+                    nama,
+                    addedAt: new Date().toISOString()
+                });
+                emailInput.value = '';
+                namaInput.value = '';
+                showToast(`Email ${email} berhasil ditambahkan!`);
+                renderAdminEmailList();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal menambahkan email: ' + err.message, 'error');
+            }
+        };
+
+        window.deleteAdminEmail = async (docId, email) => {
+            if (!confirm(`Hapus email ${email} dari daftar admin?`)) return;
+            try {
+                await deleteDoc(doc(db, adminEmailsPath, docId));
+                showToast(`Email ${email} berhasil dihapus.`);
+                renderAdminEmailList();
+            } catch (err) {
+                console.error(err);
+                showToast('Gagal menghapus email: ' + err.message, 'error');
+            }
         };
 
         // ============================================
