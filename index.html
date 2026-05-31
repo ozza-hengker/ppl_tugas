@@ -632,7 +632,7 @@
 
             <!-- SECTION D: REKAPITULASI -->
             <div id="adminRekapitulasiSection" class="hidden w-full max-w-5xl">
-                <div class="flex justify-between items-center mb-6 mt-2 flex-wrap gap-4">
+                <div class="flex justify-between items-start mb-4 mt-2 flex-wrap gap-4">
                     <div>
                         <h2 class="text-3xl font-bold text-white tracking-tight" style="font-family:'Sora',sans-serif;">Rekapitulasi Peminjaman</h2>
                         <p class="text-gray-500 mt-1 text-sm">Ringkasan statistik dan data seluruh aktivitas peminjaman alat lab.</p>
@@ -641,6 +641,66 @@
                         class="flex items-center gap-2 bg-red-500/15 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 px-5 py-2.5 rounded-xl font-bold text-sm transition shadow-lg">
                         <i class="fa-solid fa-file-pdf"></i> Download PDF
                     </button>
+                </div>
+
+                <!-- FILTER PERIODE DOWNLOAD -->
+                <div class="admin-card rounded-2xl p-4 mb-6 flex flex-wrap gap-3 items-end">
+                    <div class="flex items-center gap-2 mr-2">
+                        <i class="fa-solid fa-filter text-secondary text-sm"></i>
+                        <span class="text-white text-xs font-bold uppercase tracking-wider">Filter Periode</span>
+                    </div>
+                    <!-- Tipe filter -->
+                    <div class="flex flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Tipe</label>
+                        <select id="pdfPeriodType" onchange="window.onPeriodTypeChange()"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition min-w-[130px]">
+                            <option value="all">Semua Data</option>
+                            <option value="month">Per Bulan</option>
+                            <option value="semester">Per Semester</option>
+                            <option value="custom">Rentang Tanggal</option>
+                        </select>
+                    </div>
+                    <!-- Pilihan Bulan -->
+                    <div id="periodMonthWrap" class="hidden flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Bulan</label>
+                        <input type="month" id="pdfPeriodMonth"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition"
+                            oninput="window.updatePeriodLabel()" />
+                    </div>
+                    <!-- Pilihan Semester -->
+                    <div id="periodSemesterWrap" class="hidden flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Tahun Ajaran</label>
+                        <select id="pdfPeriodYear" onchange="window.updatePeriodLabel()"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition">
+                        </select>
+                    </div>
+                    <div id="periodSemesterPickWrap" class="hidden flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Semester</label>
+                        <select id="pdfPeriodSemester" onchange="window.updatePeriodLabel()"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition">
+                            <option value="ganjil">Ganjil (Jul–Des)</option>
+                            <option value="genap">Genap (Jan–Jun)</option>
+                        </select>
+                    </div>
+                    <!-- Custom range -->
+                    <div id="periodCustomWrap" class="hidden flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Dari</label>
+                        <input type="date" id="pdfDateFrom"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition"
+                            oninput="window.updatePeriodLabel()" />
+                    </div>
+                    <div id="periodCustomWrap2" class="hidden flex-col gap-1">
+                        <label class="text-gray-500 text-xs font-semibold">Sampai</label>
+                        <input type="date" id="pdfDateTo"
+                            class="bg-white/6 border border-white/10 text-gray-200 text-xs font-semibold px-3 py-2 rounded-xl outline-none focus:border-secondary transition"
+                            oninput="window.updatePeriodLabel()" />
+                    </div>
+                    <!-- Label hasil filter -->
+                    <div class="ml-auto flex flex-col justify-end">
+                        <span id="periodFilterLabel" class="text-xs font-semibold px-3 py-2 rounded-xl border border-secondary/30 bg-secondary/10 text-secondary whitespace-nowrap">
+                            📋 Semua Data
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Stat Cards -->
@@ -1249,6 +1309,7 @@
                 rekapSec.classList.remove('hidden');
                 tabRekap.className = activeClass;
                 stopCamera();
+                populatePeriodYears();
                 window.renderRekapitulasi();
             }
         };
@@ -2388,6 +2449,106 @@
             }
         };
 
+        // =============================================
+        // 📅 FILTER PERIODE REKAPITULASI / DOWNLOAD
+        // =============================================
+
+        window.onPeriodTypeChange = () => {
+            const type = document.getElementById('pdfPeriodType').value;
+            document.getElementById('periodMonthWrap').classList.toggle('hidden', type !== 'month');
+            document.getElementById('periodMonthWrap').classList.toggle('flex', type === 'month');
+            document.getElementById('periodSemesterWrap').classList.toggle('hidden', type !== 'semester');
+            document.getElementById('periodSemesterWrap').classList.toggle('flex', type === 'semester');
+            document.getElementById('periodSemesterPickWrap').classList.toggle('hidden', type !== 'semester');
+            document.getElementById('periodSemesterPickWrap').classList.toggle('flex', type === 'semester');
+            document.getElementById('periodCustomWrap').classList.toggle('hidden', type !== 'custom');
+            document.getElementById('periodCustomWrap').classList.toggle('flex', type === 'custom');
+            document.getElementById('periodCustomWrap2').classList.toggle('hidden', type !== 'custom');
+            document.getElementById('periodCustomWrap2').classList.toggle('flex', type === 'custom');
+            window.updatePeriodLabel();
+        };
+
+        window.updatePeriodLabel = () => {
+            const type = document.getElementById('pdfPeriodType').value;
+            const labelEl = document.getElementById('periodFilterLabel');
+            if (type === 'all') {
+                labelEl.innerText = '📋 Semua Data';
+            } else if (type === 'month') {
+                const val = document.getElementById('pdfPeriodMonth').value;
+                if (val) {
+                    const [y, m] = val.split('-');
+                    const names = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agt','Sep','Okt','Nov','Des'];
+                    labelEl.innerText = `📅 ${names[parseInt(m)-1]} ${y}`;
+                } else {
+                    labelEl.innerText = '📅 Pilih bulan';
+                }
+            } else if (type === 'semester') {
+                const yr = document.getElementById('pdfPeriodYear').value;
+                const sem = document.getElementById('pdfPeriodSemester').value;
+                labelEl.innerText = `🎓 Sem. ${sem === 'ganjil' ? 'Ganjil' : 'Genap'} ${yr || ''}`;
+            } else if (type === 'custom') {
+                const from = document.getElementById('pdfDateFrom').value;
+                const to = document.getElementById('pdfDateTo').value;
+                labelEl.innerText = from && to ? `📆 ${from} → ${to}` : '📆 Pilih rentang';
+            }
+        };
+
+        // Fungsi untuk mendapatkan data yang sudah difilter periode
+        const getFilteredByPeriod = (data) => {
+            const type = document.getElementById('pdfPeriodType')?.value || 'all';
+            if (type === 'all') return data;
+
+            return data.filter(b => {
+                // Gunakan tanggal booking atau createdAt
+                const rawDate = b.tanggal || (b.createdAt ? b.createdAt.split('T')[0] : null);
+                if (!rawDate) return false;
+                const d = new Date(rawDate);
+
+                if (type === 'month') {
+                    const val = document.getElementById('pdfPeriodMonth').value;
+                    if (!val) return true;
+                    const [y, m] = val.split('-').map(Number);
+                    return d.getFullYear() === y && (d.getMonth() + 1) === m;
+                }
+                if (type === 'semester') {
+                    const yr = parseInt(document.getElementById('pdfPeriodYear').value);
+                    const sem = document.getElementById('pdfPeriodSemester').value;
+                    const year = d.getFullYear();
+                    const month = d.getMonth() + 1;
+                    if (sem === 'ganjil') {
+                        // Jul–Des tahun yr
+                        return year === yr && month >= 7 && month <= 12;
+                    } else {
+                        // Jan–Jun tahun yr
+                        return year === yr && month >= 1 && month <= 6;
+                    }
+                }
+                if (type === 'custom') {
+                    const from = document.getElementById('pdfDateFrom').value;
+                    const to = document.getElementById('pdfDateTo').value;
+                    if (!from || !to) return true;
+                    return rawDate >= from && rawDate <= to;
+                }
+                return true;
+            });
+        };
+
+        // Isi dropdown tahun dinamis berdasarkan data yang ada
+        const populatePeriodYears = () => {
+            const sel = document.getElementById('pdfPeriodYear');
+            if (!sel) return;
+            const years = new Set();
+            allBookings.forEach(b => {
+                const rawDate = b.tanggal || (b.createdAt ? b.createdAt.split('T')[0] : null);
+                if (rawDate) years.add(new Date(rawDate).getFullYear());
+            });
+            const now = new Date().getFullYear();
+            years.add(now);
+            const sorted = [...years].sort((a, b) => b - a);
+            sel.innerHTML = sorted.map(y => `<option value="${y}" ${y === now ? 'selected' : ''}>${y}/${y+1}</option>`).join('');
+            window.updatePeriodLabel();
+        };
+
         window.downloadRekapPDF = () => {
             const { jsPDF } = window.jspdf;
             if (!jsPDF) { showToast("Library PDF belum siap, coba lagi.", "error"); return; }
@@ -2397,6 +2558,9 @@
             const now = new Date();
             const dateStr = now.toLocaleDateString('id-ID', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
             const timeStr = now.toLocaleTimeString('id-ID');
+
+            // Ambil label periode untuk judul PDF
+            const periodLabel = document.getElementById('periodFilterLabel')?.innerText || 'Semua Data';
 
             // Header
             doc.setFillColor(8, 15, 30);
@@ -2408,17 +2572,18 @@
             doc.setTextColor(180, 200, 220);
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
-            doc.text('Rekapitulasi Data Peminjaman Alat', 14, 20);
+            doc.text(`Rekapitulasi Data Peminjaman Alat  |  Periode: ${periodLabel}`, 14, 20);
             doc.setTextColor(120, 140, 160);
             doc.setFontSize(8);
             doc.text(`Dicetak: ${dateStr}, ${timeStr}`, pageW - 14, 20, { align: 'right' });
 
-            // Stat summary
-            const total = allBookings.filter(b => b.status !== 'pending').length;
-            const co = allBookings.filter(b => b.status === 'checked-out').length;
-            const ret = allBookings.filter(b => b.status === 'returned').length;
-            const rej = allBookings.filter(b => b.status === 'rejected').length;
-            const pend = allBookings.filter(b => b.status === 'pending').length;
+            // Stat summary — berbasis data yang sudah difilter periode
+            const periodData = getFilteredByPeriod([...allBookings]);
+            const total = periodData.filter(b => b.status !== 'pending').length;
+            const co = periodData.filter(b => b.status === 'checked-out').length;
+            const ret = periodData.filter(b => b.status === 'returned').length;
+            const rej = periodData.filter(b => b.status === 'rejected').length;
+            const pend = periodData.filter(b => b.status === 'pending').length;
 
             const stats = [
                 { label: 'Total', val: total, color: [44, 163, 209] },
@@ -2443,10 +2608,10 @@
                 sx += 52;
             });
 
-            // Table
+            // Table — gabungkan filter status/search tabel + filter periode
             const filterStatus = document.getElementById('rekapFilterStatus')?.value || 'all';
             const searchVal = (document.getElementById('rekapSearchInput')?.value || '').toLowerCase();
-            let data = [...allBookings].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+            let data = getFilteredByPeriod([...allBookings]).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
             if (filterStatus !== 'all') data = data.filter(b => b.status === filterStatus);
             if (searchVal) {
                 data = data.filter(b =>
@@ -2455,6 +2620,11 @@
                     (b.toolName || '').toLowerCase().includes(searchVal) ||
                     (b.ticketNum || '').toLowerCase().includes(searchVal)
                 );
+            }
+
+            if (data.length === 0) {
+                showToast('Tidak ada data untuk periode yang dipilih.', 'error');
+                return;
             }
 
             const statusLabel = { 'checked-out': 'Dipinjam', 'returned': 'Dikembalikan', 'rejected': 'Ditolak', 'pending': 'Pending' };
@@ -2516,7 +2686,14 @@
                 doc.text(`Halaman ${p} dari ${pageCount}`, pageW - 14, doc.internal.pageSize.getHeight() - 5, { align: 'right' });
             }
 
-            const filename = `Rekapitulasi_CARES_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`;
+            const periodSuffix = (() => {
+                const type = document.getElementById('pdfPeriodType')?.value || 'all';
+                if (type === 'month') return `_${(document.getElementById('pdfPeriodMonth')?.value || '').replace('-','_')}`;
+                if (type === 'semester') return `_Sem${document.getElementById('pdfPeriodSemester')?.value || ''}_${document.getElementById('pdfPeriodYear')?.value || ''}`;
+                if (type === 'custom') return `_${document.getElementById('pdfDateFrom')?.value || ''}_sd_${document.getElementById('pdfDateTo')?.value || ''}`;
+                return '';
+            })();
+            const filename = `Rekapitulasi_CARES${periodSuffix}_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.pdf`;
             doc.save(filename);
             showToast(`PDF berhasil diunduh: ${filename}`);
         };
