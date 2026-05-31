@@ -420,7 +420,24 @@
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Live Database
                 </div>
             </div>
+            <!-- SEARCH BAR MAHASISWA -->
+            <div class="mb-6 flex gap-2">
+                <div class="relative flex-1 max-w-md">
+                    <i class="fa-solid fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                    <input type="text" id="catalogSearchInput"
+                        oninput="window.filterCatalog()"
+                        placeholder="Cari komponen atau kategori..."
+                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm outline-none focus:border-blue-400 shadow-sm transition" />
+                </div>
+                <button onclick="window.clearCatalogSearch()"
+                    id="btnClearSearch"
+                    class="hidden px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-gray-500 hover:text-red-500 text-sm font-semibold transition">
+                    <i class="fa-solid fa-xmark mr-1"></i> Reset
+                </button>
+            </div>
+            <p id="catalogSearchInfo" class="hidden text-xs text-gray-500 mb-4 -mt-2"></p>
             <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+            <p id="catalogEmpty" class="hidden text-center text-gray-400 py-12 text-sm italic">Tidak ada komponen yang cocok dengan pencarian Anda.</p>
         </main>
     </div>
 
@@ -1343,6 +1360,9 @@
                         renderAdminReturns(window.currentReturnFilter || 'all');
                     }
                 }
+                if (currentUser?.role === 'student') {
+                    checkReturnReminders();
+                }
             }, (error) => console.error(error));
         };
 
@@ -1382,6 +1402,10 @@
                 `;
                 grid.appendChild(card);
             });
+            // Re-apply active search filter after re-render
+            if (document.getElementById('catalogSearchInput')?.value) {
+                window.filterCatalog();
+            }
         };
 
         // RENDER ADMIN INVENTORY
@@ -1718,6 +1742,8 @@
                 document.getElementById('userNameDisplay').innerText = `${userData.nama} (${nim})`;
                 showScreen('dashboardScreen');
                 renderCatalog();
+                checkReturnReminders();
+                startReminderScheduler();
                 showToast(`Selamat datang, ${userData.nama}!`);
 
             } catch (err) {
@@ -1731,6 +1757,9 @@
 
         window.handleLogout = () => {
             currentUser = null;
+            if (reminderIntervalId) { clearInterval(reminderIntervalId); reminderIntervalId = null; }
+            const banner = document.getElementById('returnReminderBanner');
+            if (banner) banner.remove();
             document.getElementById('nimInput').value = '';
             document.getElementById('passwordInput').value = '';
             document.getElementById('namaInput').value = '';
@@ -2536,6 +2565,185 @@
                 else canvas.remove();
             };
             animate();
+        };
+
+        // =============================================
+        // 🔍 FILTER KATALOG MAHASISWA
+        // =============================================
+        window.filterCatalog = () => {
+            const keyword = (document.getElementById('catalogSearchInput')?.value || '').toLowerCase().trim();
+            const grid = document.getElementById('catalogGrid');
+            const emptyMsg = document.getElementById('catalogEmpty');
+            const infoEl = document.getElementById('catalogSearchInfo');
+            const clearBtn = document.getElementById('btnClearSearch');
+            if (!grid) return;
+
+            const cards = grid.querySelectorAll('.tool-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = (card.querySelector('h3')?.innerText || '').toLowerCase();
+                const category = (card.querySelector('p')?.innerText || '').toLowerCase();
+                const matches = !keyword || name.includes(keyword) || category.includes(keyword);
+                card.style.display = matches ? '' : 'none';
+                if (matches) visibleCount++;
+            });
+
+            if (clearBtn) clearBtn.classList.toggle('hidden', !keyword);
+            if (emptyMsg) emptyMsg.classList.toggle('hidden', visibleCount > 0);
+            if (infoEl) {
+                if (keyword) {
+                    infoEl.classList.remove('hidden');
+                    infoEl.innerText = `Menampilkan ${visibleCount} dari ${cards.length} komponen untuk kata kunci "${keyword}"`;
+                } else {
+                    infoEl.classList.add('hidden');
+                }
+            }
+        };
+
+        window.clearCatalogSearch = () => {
+            const input = document.getElementById('catalogSearchInput');
+            if (input) { input.value = ''; window.filterCatalog(); }
+        };
+
+        // =============================================
+        // 🛡️ ACCESS CONTROL GUARD
+        // =============================================
+        // Dipanggil setiap kali ada pergantian screen / tab.
+        // Mahasiswa yang mencoba mengakses layar admin akan diblokir.
+        const guardAccess = (targetScreen) => {
+            if (targetScreen === 'adminDashboardScreen' && currentUser?.role !== 'admin') {
+                showToast('Akses Ditolak! Anda tidak memiliki hak akses ke panel admin.', 'error');
+                return false;
+            }
+            if (targetScreen === 'dashboardScreen' && currentUser?.role !== 'student') {
+                showToast('Akses Ditolak! Silakan login sebagai mahasiswa.', 'error');
+                return false;
+            }
+            return true;
+        };
+
+        // Patch showScreen agar selalu melalui guard
+        const _originalShowScreen = showScreen;
+        const showScreenSafe = (screenId) => {
+            if (!guardAccess(screenId)) return;
+            _originalShowScreen(screenId);
+        };
+        // Override global references
+        window.showScreenSafe = showScreenSafe;
+
+        // Guard untuk switchAdminView — blokir jika bukan admin
+        const _originalSwitchAdminView = window.switchAdminView;
+        window.switchAdminView = (view) => {
+            if (currentUser?.role !== 'admin') {
+                showToast('Akses Ditolak! Menu ini hanya untuk pengelola lab.', 'error');
+                return;
+            }
+            _originalSwitchAdminView(view);
+        };
+
+        // =============================================
+        // 🔔 NOTIFIKASI PENGINGAT PENGEMBALIAN
+        // =============================================
+        // Sistem secara otomatis mengecek booking yang hampir/melewati batas waktu
+        // dan menampilkan notifikasi pengingat kepada mahasiswa yang sedang login.
+
+        const checkReturnReminders = () => {
+            if (!currentUser || currentUser.role !== 'student') return;
+
+            const myBookings = allBookings.filter(
+                b => b.studentId === currentUser.id && b.status === 'checked-out'
+            );
+
+            if (myBookings.length === 0) return;
+
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+
+            // Sesi akhir jam (format: 'HH.MM - HH.MM')
+            const sesiEndMap = {
+                '08.40 - 10.35': { h: 10, m: 35 },
+                '10.35 - 12.30': { h: 12, m: 30 },
+                '13.35 - 15.30': { h: 15, m: 30 },
+                '15.30 - 17.25': { h: 17, m: 25 },
+            };
+
+            let overdueTools = [];
+            let soonDueTools = [];
+
+            myBookings.forEach(b => {
+                if (!b.tanggal) return;
+                const bookingDate = new Date(b.tanggal);
+                const bookingDateStr = b.tanggal;
+
+                // Tentukan jam berakhir sesi
+                let endTime = null;
+                if (b.sesi && sesiEndMap[b.sesi]) {
+                    const { h, m } = sesiEndMap[b.sesi];
+                    endTime = new Date(`${bookingDateStr}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
+                } else {
+                    // Default: akhir hari
+                    endTime = new Date(`${bookingDateStr}T17:30:00`);
+                }
+
+                const diffMs = endTime - now;
+                const diffMin = diffMs / 60000;
+
+                if (diffMs < 0) {
+                    // Sudah lewat batas waktu
+                    overdueTools.push(b.toolName);
+                } else if (diffMin <= 30) {
+                    // Kurang dari 30 menit lagi
+                    soonDueTools.push({ name: b.toolName, menit: Math.ceil(diffMin) });
+                }
+            });
+
+            // Tampilkan notifikasi
+            if (overdueTools.length > 0) {
+                showReminderBanner(
+                    `⚠️ TERLAMBAT! Segera kembalikan: ${overdueTools.join(', ')}`,
+                    'overdue'
+                );
+            } else if (soonDueTools.length > 0) {
+                const detail = soonDueTools.map(t => `${t.name} (${t.menit} mnt lagi)`).join(', ');
+                showReminderBanner(
+                    `🔔 Pengingat: Masa pinjam hampir habis — ${detail}`,
+                    'warning'
+                );
+            }
+        };
+
+        const showReminderBanner = (message, type) => {
+            let banner = document.getElementById('returnReminderBanner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = 'returnReminderBanner';
+                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:200;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:0.85rem;font-weight:600;font-family:Space Grotesk,sans-serif;box-shadow:0 4px 20px rgba(0,0,0,0.2);';
+                document.body.prepend(banner);
+            }
+            if (type === 'overdue') {
+                banner.style.background = '#ef4444';
+                banner.style.color = '#fff';
+            } else {
+                banner.style.background = '#f59e0b';
+                banner.style.color = '#1c1917';
+            }
+            banner.innerHTML = `
+                <span>${message}</span>
+                <button onclick="document.getElementById('returnReminderBanner').remove()"
+                    style="background:rgba(255,255,255,0.2);border:none;color:inherit;padding:4px 10px;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.75rem;">
+                    Tutup
+                </button>`;
+        };
+
+        // Jalankan pengecekan setiap 5 menit + saat data booking berubah
+        let reminderIntervalId = null;
+
+        const startReminderScheduler = () => {
+            if (reminderIntervalId) clearInterval(reminderIntervalId);
+            reminderIntervalId = setInterval(() => {
+                checkReturnReminders();
+            }, 5 * 60 * 1000); // setiap 5 menit
         };
 
         window.onload = initFirebase;
